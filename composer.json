@@ -1,0 +1,25 @@
+{
+    "name": "placetopay/placetopaypayment",
+    "description": "Plugin for integration Placeto to Apy gateway with PrestaShop",
+    "type": "plugin",
+    "require": {
+        "dnetix/redirection": "^0.2.2"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+	       "name": "PlacetoPay",
+	       "email": "dev@placetopay.com"
+	    },
+        {
+            "name": "Fredy Mendivelso",
+            "email": "fredy.mendivelso@placetopay.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "PlacetoPay\\": "src/"
+	    }
+    }
+}

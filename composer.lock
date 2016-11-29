@@ -1,0 +1,59 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
+    ],
+    "hash": "578f35625e822926de5a69a5462c5f63",
+    "content-hash": "05fde3191f9948a288470c4d84d589cc",
+    "packages": [
+        {
+            "name": "dnetix/redirection",
+            "version": "0.2.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/dnetix/redirection.git",
+                "reference": "d67a9598c371b1bb320ad4d8e423cbea8ec31efe"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/dnetix/redirection/zipball/d67a9598c371b1bb320ad4d8e423cbea8ec31efe",
+                "reference": "d67a9598c371b1bb320ad4d8e423cbea8ec31efe",
+                "shasum": ""
+            },
+            "require": {
+                "ext-soap": "*",
+                "php": ">=5.4"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^4.8"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Dnetix\\Redirection\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Diego Calle",
+                    "email": "dnetix@gmail.com"
+                }
+            ],
+            "description": "Library to connect with PlacetoPay Redirection service",
+            "time": "2016-11-25 17:51:14"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "dev",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": []
+}
