@@ -10,7 +10,7 @@ require $path . '/../../init.php';
 require $path . '/placetopaypayment.php';
 
 // si se ha cerrado la sesion retorna a la pagina de autenticacion
-if (!Context::getContext()->customer->isLogged() && !Context::getContext()->customer->is_guest && empty(file_get_contents("php://input"))){
+if (!Context::getContext()->customer->isLogged() && !Context::getContext()->customer->is_guest && empty(file_get_contents("php://input"))) {
     Tools::redirect('authentication.php?back=order.php');
 }
 

@@ -12,7 +12,7 @@ require_once __DIR__ . '/libs/RemoteAddress.class.php';
 
 class PlacetoPayPayment extends PaymentModule
 {
-    
+
     public function __construct()
     {
         $this->name = 'placetopaypayment';
@@ -21,22 +21,22 @@ class PlacetoPayPayment extends PaymentModule
         $this->tab = 'payments_gateways';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.6');
-        
+
         parent::__construct();
-        
-        if(isset($this->context->controller)) {
-            $this->context->controller->addCSS($this->_path.'views/css/style.css', 'all');
+
+        if (isset($this->context->controller)) {
+            $this->context->controller->addCSS($this->_path . 'views/css/style.css', 'all');
         }
-        
+
         $this->displayName = $this->l('Place to Pay');
         $this->description = $this->l('Accept payments by credit cards and debits account');
-        
+
         $this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
     }
-    
+
     public function install()
     {
-        
+
         // genera la tabla con datos adicionales de la operacion
         // permite acceder al modulo desde la factura
         // hace al modulo disponible en el proceso de pago
@@ -69,7 +69,7 @@ class PlacetoPayPayment extends PaymentModule
 
         return true;
     }
-    
+
     /**
      * Desinstala el modulo, eliminando las variables de configuracion
      * generadas, NO se elimina la tabla con el historico y el nuevo estado creado
@@ -95,7 +95,7 @@ class PlacetoPayPayment extends PaymentModule
 
         return true;
     }
-    
+
     /**
      * Crea la tabla en la cual se almacena informacion adicional de la transaccion,
      * es generada en el proceso de instalacion
@@ -104,7 +104,7 @@ class PlacetoPayPayment extends PaymentModule
     private function createPlacetoPayTable()
     {
         $db = Db::getInstance();
-        $sql = "CREATE TABLE IF NOT EXISTS `". _DB_PREFIX_ . "payment_placetopay` (
+        $sql = "CREATE TABLE IF NOT EXISTS `" . _DB_PREFIX_ . "payment_placetopay` (
                 `id_payment` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
                 `id_order` INT UNSIGNED NOT NULL,
                 `id_currency` INT UNSIGNED NOT NULL,
@@ -127,7 +127,7 @@ class PlacetoPayPayment extends PaymentModule
             return true;
         }
     }
-    
+
     /**
      * Crea un estado para las ordenes procesadas con PlacetoPay en espera de respuesta
      * @return bool
@@ -138,18 +138,17 @@ class PlacetoPayPayment extends PaymentModule
         if (!Configuration::get('PS_OS_PLACETOPAY')) {
             $orderState = new OrderState();
             $orderState->name = array();
-            foreach (Language::getLanguages() AS $language)
-            {
-                switch(strtolower($language['iso_code'])) {
+            foreach (Language::getLanguages() AS $language) {
+                switch (strtolower($language['iso_code'])) {
                     case 'en':
                         $orderState->name[$language['id_lang']] = 'Awaiting ' . $this->displayName . ' payment confirmation';
                         break;
                     case 'fr':
-                        $orderState->name[$language['id_lang']] = 'En attente du paiement par '.$this->displayName;
+                        $orderState->name[$language['id_lang']] = 'En attente du paiement par ' . $this->displayName;
                         break;
                     case 'es':
                     default:
-                        $orderState->name[$language['id_lang']] = 'En espera de confirmación de pago por '.$this->displayName;
+                        $orderState->name[$language['id_lang']] = 'En espera de confirmación de pago por ' . $this->displayName;
                         break;
                 }
             }
@@ -163,7 +162,7 @@ class PlacetoPayPayment extends PaymentModule
 
             if ($orderState->save()) {
                 Configuration::updateValue('PS_OS_PLACETOPAY', $orderState->id);
-                copy(_PS_MODULE_DIR_.$this->name.'/views/img/logo.png', _PS_IMG_DIR_.'os/'.$orderState->id.'.gif');
+                copy(_PS_MODULE_DIR_ . $this->name . '/views/img/logo.png', _PS_IMG_DIR_ . 'os/' . $orderState->id . '.gif');
             } else {
                 return false;
             }
@@ -171,21 +170,23 @@ class PlacetoPayPayment extends PaymentModule
 
         return true;
     }
-    
-    private function addPlacetoPayColumnEmail(){
+
+    private function addPlacetoPayColumnEmail()
+    {
         $db = Db::getInstance();
-        $sql = "ALTER TABLE `"._DB_PREFIX_."payment_placetopay` ADD `payer_email` VARCHAR(80) NULL;";
+        $sql = "ALTER TABLE `" . _DB_PREFIX_ . "payment_placetopay` ADD `payer_email` VARCHAR(80) NULL;";
         $db->Execute($sql);
         return true;
     }
-    
-    private function addPlacetoPayColumnRequestId(){
+
+    private function addPlacetoPayColumnRequestId()
+    {
         $db = Db::getInstance();
-        $sql = "ALTER TABLE `"._DB_PREFIX_."payment_placetopay` ADD `id_request` INT NULL;";
+        $sql = "ALTER TABLE `" . _DB_PREFIX_ . "payment_placetopay` ADD `id_request` INT NULL;";
         $db->Execute($sql);
         return true;
     }
-    
+
     /**
      * Muestra la página de configuración del módulo
      */
@@ -199,7 +200,7 @@ class PlacetoPayPayment extends PaymentModule
 
         return $html;
     }
-    
+
     /**
      * Valida y almacena la información de configuración de PlacetoPay
      */
@@ -221,11 +222,11 @@ class PlacetoPayPayment extends PaymentModule
         Configuration::updateValue('PLACETOPAY_LOGIN', Tools::getValue('login'));
         Configuration::updateValue('PLACETOPAY_TRANKEY', Tools::getValue('trankey'));
         Configuration::updateValue('PLACETOPAY_ENVIRONMENT', Tools::getValue('environment'));
-        
+
         // el comportamiento del inventario ante una transacción fallida o declinada
-        Configuration::updateValue('PLACETOPAY_STOCKREINJECT', (Tools::getValue('stockreinject') == '1' ? '1': '0'));
+        Configuration::updateValue('PLACETOPAY_STOCKREINJECT', (Tools::getValue('stockreinject') == '1' ? '1' : '0'));
         // habilitar el mensaje de cifin
-        Configuration::updateValue('PLACETOPAY_CIFINMESSAGE', (Tools::getValue('cifinmessage') == '1' ? '1': '0'));
+        Configuration::updateValue('PLACETOPAY_CIFINMESSAGE', (Tools::getValue('cifinmessage') == '1' ? '1' : '0'));
 
         // genera el volcado de errores
         if (!empty($errors)) {
@@ -237,7 +238,7 @@ class PlacetoPayPayment extends PaymentModule
             return $this->displayConfirmation($this->l('Place to Pay settings updated'));
         }
     }
-    
+
     /**
      * Genera el formulario para la configuración de PlacetoPay
      * @return string
@@ -249,7 +250,7 @@ class PlacetoPayPayment extends PaymentModule
         $smarty->assign(
             array(
                 'actionURL' => Tools::safeOutput($_SERVER['REQUEST_URI']),
-                'actionBack' => AdminController::$currentIndex.'&token='.Tools::getAdminTokenLite('AdminModules'),
+                'actionBack' => AdminController::$currentIndex . '&token=' . Tools::getAdminTokenLite('AdminModules'),
 
                 'companydocument' => Configuration::get('PLACETOPAY_COMPANYDOCUMENT'),
                 'companyname' => Configuration::get('PLACETOPAY_COMPANYNAME'),
@@ -265,7 +266,7 @@ class PlacetoPayPayment extends PaymentModule
 
         return $this->display(__DIR__, '/views/templates/setting.tpl');
     }
-    
+
     /**
      * Muestra a PlacetoPay como uno de los medios de pagos disponibles en el checkout
      *
@@ -303,7 +304,7 @@ class PlacetoPayPayment extends PaymentModule
         } else {
             $smarty->assign('hasPending', false);
         }
-        
+
         // Asigna variable del modelo para el link
         $smarty->assign('module', $this->name);
         // asigne la variable para el mensaje cifin
@@ -316,7 +317,7 @@ class PlacetoPayPayment extends PaymentModule
         // muestra la opción de medio de pago
         return $this->display(__DIR__, '/views/templates/payment.tpl');
     }
-    
+
     /**
      * Obtiene la última transacción pendiente de pago utilizando el medio
      * @return array
@@ -325,8 +326,8 @@ class PlacetoPayPayment extends PaymentModule
     {
         $result = Db::getInstance()->ExecuteS(
             'SELECT p.* 
-            FROM `'._DB_PREFIX_.'payment_placetopay` p
-                INNER JOIN `'._DB_PREFIX_.'orders` o ON o.id_cart = p.id_order
+            FROM `' . _DB_PREFIX_ . 'payment_placetopay` p
+                INNER JOIN `' . _DB_PREFIX_ . 'orders` o ON o.id_cart = p.id_order
             WHERE o.`id_customer` = ' . $customerID . ' 
                 AND p.`status` = ' . PlacetoPay::P2P_PENDING . ' 
             LIMIT 1'
@@ -338,7 +339,7 @@ class PlacetoPayPayment extends PaymentModule
 
         return $result;
     }
-    
+
     public function getUri()
     {
         switch (Configuration::get('PLACETOPAY_ENVIRONMENT')) {
@@ -353,10 +354,10 @@ class PlacetoPayPayment extends PaymentModule
                 $uri = PlacetoPay::P2P_DEVELOPMENT;
                 break;
         }
-        
+
         return $uri;
     }
-    
+
     /**
      * Obtiene el ID y redirecciona al Flujo
      *
@@ -390,7 +391,7 @@ class PlacetoPayPayment extends PaymentModule
         if ($invoiceAddress->id_state) {
             $invoiceState = new State((int)($invoiceAddress->id_state));
         }
-        
+
         $deliveryCountry = new Country((int)($deliveryAddress->id_country));
         $deliveryState = null;
         if ($deliveryAddress->id_state) {
@@ -402,7 +403,7 @@ class PlacetoPayPayment extends PaymentModule
         if (!$returnURL) {
             $returnURL = Tools::getHttpHost();
         }
-        
+
         $returnURL = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://')
             . $returnURL
             . __PS_BASE_URI__
@@ -413,31 +414,31 @@ class PlacetoPayPayment extends PaymentModule
             Configuration::get('PLACETOPAY_LOGIN'),
             Configuration::get('PLACETOPAY_TRANKEY'),
             $this->getUri()
-         );
-        
-         $req = [
+        );
+
+        $req = [
             'returnUrl' => $returnURL,
-            'expiration'=> date( 'c', strtotime( '+2 days' ) ),
-            'ipAddress' => ( new RemoteAddress() )->getIpAddress(),
-            'userAgent' => $_SERVER[ 'HTTP_USER_AGENT' ],
-            'buyer'     => [
-                'name'      => utf8_decode($deliveryAddress->firstname),
-                'surname'   => utf8_decode($deliveryAddress->lastname),
-                'email'     => $customer->email,
-                'mobile'    => $deliveryAddress->phone_mobile,
-                'address'   => [
-                    'street'    => utf8_decode($deliveryAddress->address1 . "\n" . $deliveryAddress->address2),
-                    'city'      => utf8_decode($deliveryAddress->city),
-                    'state'     => (empty($deliveryState) ? null: utf8_decode($deliveryState->name)),
-                    'country'   => $deliveryCountry->iso_code,
+            'expiration' => date('c', strtotime('+2 days')),
+            'ipAddress' => (new RemoteAddress())->getIpAddress(),
+            'userAgent' => $_SERVER['HTTP_USER_AGENT'],
+            'buyer' => [
+                'name' => utf8_decode($deliveryAddress->firstname),
+                'surname' => utf8_decode($deliveryAddress->lastname),
+                'email' => $customer->email,
+                'mobile' => $deliveryAddress->phone_mobile,
+                'address' => [
+                    'street' => utf8_decode($deliveryAddress->address1 . "\n" . $deliveryAddress->address2),
+                    'city' => utf8_decode($deliveryAddress->city),
+                    'state' => (empty($deliveryState) ? null : utf8_decode($deliveryState->name)),
+                    'country' => $deliveryCountry->iso_code,
                 ]
             ],
             'payment' => [
-                'reference'     => $cart->id . ' - ' . time(),
-                'description'   => 'Prestashop',
-                'amount'        => [
+                'reference' => $cart->id . ' - ' . time(),
+                'description' => 'Prestashop',
+                'amount' => [
                     'currency' => $currency->iso_code,
-                    'total'    => floatval( $totalAmount )
+                    'total' => floatval($totalAmount)
                 ]
             ]
         ];
@@ -447,7 +448,7 @@ class PlacetoPayPayment extends PaymentModule
         try {
             $response = $placetopay->redirection->request($req);
 
-            if($response->isSuccessful()) {
+            if ($response->isSuccessful()) {
                 $requestId = $response->requestId();
                 $_SESSION['requestId'] = $requestId;
                 $paymentURL = $response->processUrl();
@@ -463,7 +464,7 @@ class PlacetoPayPayment extends PaymentModule
                 $status = PlacetoPay::P2P_FAILED;
                 $totalAmount = 0;
             }
-            
+
             // genera la orden en prestashop, si no se generó la URL
             // crea la orden con el error, al menos para que quede asentada
             $this->validateOrder(
@@ -484,11 +485,11 @@ class PlacetoPayPayment extends PaymentModule
             // genera la redirección al estado de la orden si no se pudo hacer la redireccion
             if (empty($paymentURL)) {
                 $order = new Order($this->currentOrder);
-                $paymentURL = __PS_BASE_URI__.'order-confirmation.php'
-                    .'?id_cart='.$cart->id
-                    .'&id_module='.$this->id
-                    .'&id_order='.$this->currentOrder
-                    .'&key='.$order->secure_key;
+                $paymentURL = __PS_BASE_URI__ . 'order-confirmation.php'
+                    . '?id_cart=' . $cart->id
+                    . '&id_module=' . $this->id
+                    . '&id_order=' . $this->currentOrder
+                    . '&key=' . $order->secure_key;
             }
 
             Tools::redirectLink($paymentURL);
@@ -497,22 +498,22 @@ class PlacetoPayPayment extends PaymentModule
             die($response->status()->message());
         }
     }
-    
+
     private function insertTransaction($requestId, $orderID, $currencyID, $amount, $status, $message)
     {
         $reason = '';
         Db::getInstance()->Execute('
-            INSERT INTO `'._DB_PREFIX_.'payment_placetopay` (`id_order`, `id_currency`, `date`, `amount`, `status`, `reason`, `reason_description`, `conversion`, `ipaddress`, `id_request`)
-            VALUES ('.$orderID.','.$currencyID.',\''.date('Y-m-d H:i:s').'\','.$amount.','.$status.',\''.$reason.'\',\''.pSQL($message).'\',1,\'' . pSQL($_SERVER['REMOTE_ADDR']) . '\', ' . $requestId . ')');
+            INSERT INTO `' . _DB_PREFIX_ . 'payment_placetopay` (`id_order`, `id_currency`, `date`, `amount`, `status`, `reason`, `reason_description`, `conversion`, `ipaddress`, `id_request`)
+            VALUES (' . $orderID . ',' . $currencyID . ',\'' . date('Y-m-d H:i:s') . '\',' . $amount . ',' . $status . ',\'' . $reason . '\',\'' . pSQL($message) . '\',1,\'' . pSQL($_SERVER['REMOTE_ADDR']) . '\', ' . $requestId . ')');
     }
-    
+
     /**
      * Procesa la respuesta de pago dada por la plataforma
      * @param array $cart_id
      */
     public function process($cart_id = null)
     {
-        
+
         if (!is_null($cart_id)) {
             $requestId = $_SESSION['requestId'];
         } else {
@@ -533,24 +534,24 @@ class PlacetoPayPayment extends PaymentModule
         if (!Validate::isLoadedObject($order)) {
             die(Tools::displayError());
         }
-        
+
         // Consulta el estado de la transaccion
         $placetopay = new PlacetoPay(
             Configuration::get('PLACETOPAY_LOGIN'),
             Configuration::get('PLACETOPAY_TRANKEY'),
             $this->getUri()
-         );
+        );
 
         $response = $placetopay->redirection->query($requestId);
-        
+
         $status = $this->getStatus($response);
 
         // asienta la operacion
         $this->settleTransaction($status, $cart_id, $order, $response);
 
-        if(!isset($json)) {
+        if (!isset($json)) {
             // redirige el flujo a la pagina de confirmación de orden
-            Tools::redirectLink($paymentURL = __PS_BASE_URI__.'order-confirmation.php'
+            Tools::redirectLink($paymentURL = __PS_BASE_URI__ . 'order-confirmation.php'
                 . '?id_cart=' . $cart_id
                 . '&id_module=' . $this->id
                 . '&id_order=' . $order->id
@@ -560,19 +561,19 @@ class PlacetoPayPayment extends PaymentModule
             echo 'Success status: ' . $status;
         }
     }
-    
+
     private function getCartByRequestId($id_request = null)
     {
         $requestId = (!empty($id_request)) ? $id_request : 0;
-        $rows = Db::getInstance()->ExecuteS('SELECT id_order FROM  `'._DB_PREFIX_.'payment_placetopay` WHERE id_request = ' . $requestId);
+        $rows = Db::getInstance()->ExecuteS('SELECT id_order FROM  `' . _DB_PREFIX_ . 'payment_placetopay` WHERE id_request = ' . $requestId);
         return (!empty($rows[0]['id_order'])) ? $rows[0]['id_order'] : false;
     }
-    
+
     public function getStatus($response)
     {
         // By default ss pending so make a query for it later (see information.php example)
         $status = PlacetoPay::P2P_PENDING;
-        
+
         if ($response->isSuccessful()) {
             // In order to use the functions please refer to the RedirectInformation class
             if ($response->status()->isApproved()) {
@@ -588,17 +589,17 @@ class PlacetoPayPayment extends PaymentModule
                 }
             }
         }
-        
+
         return $status;
     }
-    
+
     private function settleTransaction($status, $cart_id, Order $order, $transactionInfo)
     {
         // echo "Cart: {$cart_id}, Status: {$status}<br />";
         // si ya habia sido aprobada no vuelva a reprocesar
         if ($order->getCurrentState() != (int)Configuration::get('PS_OS_PAYMENT')) {
             // procese la respuesta y dependiendo del tipo de respuesta
-            switch($status) {
+            switch ($status) {
                 case PlacetoPay::P2P_FAILED:
                 case PlacetoPay::P2P_DECLINED:
                     if ($order->getCurrentState() == (int)Configuration::get('PS_OS_ERROR')) {
@@ -616,7 +617,7 @@ class PlacetoPayPayment extends PaymentModule
                     // en el inventario
                     if (Configuration::get('PLACETOPAY_STOCKREINJECT') == '1') {
                         $products = $order->getProducts();
-                        foreach($products as $product) {
+                        foreach ($products as $product) {
                             $orderDetail = new OrderDetail((int)($product['id_order_detail']));
                             Product::reinjectQuantities($orderDetail, $product['product_quantity']);
                         }
@@ -638,7 +639,7 @@ class PlacetoPayPayment extends PaymentModule
         // actualiza la tabla de PlacetoPay con la información de la transacción
         $r = $this->updateTransaction($cart_id, $status, $transactionInfo);
     }
-    
+
     private function updateTransaction($cart_id, $status, $transactionInfo)
     {
         $date = pSQL($transactionInfo->payment[0]->status()->date());
@@ -654,7 +655,7 @@ class PlacetoPayPayment extends PaymentModule
         $payer_email = pSQL($transactionInfo->request()->payer()->email());
 
         return Db::getInstance()->Execute('
-            UPDATE `'._DB_PREFIX_.'payment_placetopay` SET
+            UPDATE `' . _DB_PREFIX_ . 'payment_placetopay` SET
                 `date` = \'' . $date . '\',
                 `status` = ' . $status . ',
                 `reason` = \'' . $reason . '\',
@@ -668,7 +669,7 @@ class PlacetoPayPayment extends PaymentModule
                 `payer_email` = \'' . $payer_email . '\'
             WHERE `id_order` = ' . $cart_id);
     }
-    
+
     /**
      * Bloque a visualizar cuando se retorna con el pago
      * @array $params
@@ -679,7 +680,7 @@ class PlacetoPayPayment extends PaymentModule
         global $smarty;
 
         if ((!$this->active) || ($params['objOrder']->module != $this->name)) {
-            return ;
+            return;
         }
 
         // provee a la plantilla de la informacion
@@ -693,7 +694,7 @@ class PlacetoPayPayment extends PaymentModule
         $transaction['tax'] = $taxAmount;
 
         $smarty->assign('transaction', $transaction);
-        switch($transaction['status']) {
+        switch ($transaction['status']) {
             case PlacetoPay::P2P_APPROVED:
             case PlacetoPay::P2P_DUPLICATE:
                 $smarty->assign('status', 'ok');
@@ -722,47 +723,47 @@ class PlacetoPayPayment extends PaymentModule
         // obtiene los datos del cliente
         $customer = new Customer((int)($params['objOrder']->id_customer));
         if (Validate::isLoadedObject($customer)) {
-            if(empty($invoiceAddress)){
+            if (empty($invoiceAddress)) {
                 $smarty->assign('payerName', $customer->firstname . ' ' . $customer->lastname);
                 $smarty->assign('payerEmail', $customer->email);
-            }else{
+            } else {
                 $smarty->assign('payerName', $invoiceAddress->firstname . ' ' . $invoiceAddress->lastname);
                 $smarty->assign('payerEmail', (isset($payerEmail) ? $payerEmail : $customer->email));
             }
         }
-            
+
         // asocia la ruta base donde encuentra las imagenes
-        $smarty->assign('placetopayImgUrl', _MODULE_DIR_.$this->name.'/views/img/');
+        $smarty->assign('placetopayImgUrl', _MODULE_DIR_ . $this->name . '/views/img/');
         // asocia la moneda
         $currency = new CurrencyCore($cart->id_currency);
         $currency_iso = $currency->iso_code;
         $smarty->assign('currency_iso', $currency_iso);
         $smarty->assign('customer_id', $cart->id_customer);
-        $smarty->assign('logged', (Context::getContext()->customer->isLogged()? true : false));
+        $smarty->assign('logged', (Context::getContext()->customer->isLogged() ? true : false));
         $context = Context::getContext();
-        $context->cookie->__set('customer_id',$cart->id_customer);
+        $context->cookie->__set('customer_id', $cart->id_customer);
 
         return $this->display(__DIR__, '/views/templates/response.tpl');
     }
-    
+
     private function getTransactionInformation($cartID, $orderID = null)
     {
-        $result = Db::getInstance()->ExecuteS('SELECT * FROM `'._DB_PREFIX_.'payment_placetopay`
+        $result = Db::getInstance()->ExecuteS('SELECT * FROM `' . _DB_PREFIX_ . 'payment_placetopay`
             WHERE `id_order` = ' . (empty($cartID)
-            ? '(SELECT `id_cart` FROM `'._DB_PREFIX_.'orders` WHERE `id_order` = ' . $orderID . ')'
-            : $cartID));
+                ? '(SELECT `id_cart` FROM `' . _DB_PREFIX_ . 'orders` WHERE `id_order` = ' . $orderID . ')'
+                : $cartID));
         if (!empty($result)) {
             $result = $result[0];
             if (empty($result['reason_description'])) {
-                $result['reason_description'] = ($result['reason'] == '?-') ? $this->l('Processing transaction'): $this->l('No information');
+                $result['reason_description'] = ($result['reason'] == '?-') ? $this->l('Processing transaction') : $this->l('No information');
             }
             if (empty($result['status'])) {
-                $result['status_description'] = ($result['status'] == '') ? $this->l('Processing transaction'): $this->l('No information');
+                $result['status_description'] = ($result['status'] == '') ? $this->l('Processing transaction') : $this->l('No information');
             }
         }
         return $result;
     }
-    
+
     /**
      * Busca las transacciones que estan pendientes de ser resueltas
      * @param int $minutes
@@ -772,17 +773,17 @@ class PlacetoPayPayment extends PaymentModule
         // echo 'Init<br />';
         // busca las operaciones que estan pendientes de resolver
         // que tienen una antiguedad superior a n minutos
-        $result = Db::getInstance()->ExecuteS('SELECT * FROM `'._DB_PREFIX_.'payment_placetopay`
+        $result = Db::getInstance()->ExecuteS('SELECT * FROM `' . _DB_PREFIX_ . 'payment_placetopay`
             WHERE `date` < \'' . date('Y-m-d H:i:s', time() - $minutes * 60) . '\' AND `status` = ' . PlacetoPay::P2P_PENDING);
-        
+
         if (!empty($result)) {
             $placetopay = new PlacetoPay(
                 Configuration::get('PLACETOPAY_LOGIN'),
                 Configuration::get('PLACETOPAY_TRANKEY'),
                 $this->getUri()
-             );
-            
-            foreach($result as $row) {
+            );
+
+            foreach ($result as $row) {
                 $currency = new Currency((int)$row['id_currency']);
                 $requestId = (int)$row['id_request'];
                 $cart_id = (int)$row['id_order'];
@@ -793,7 +794,7 @@ class PlacetoPayPayment extends PaymentModule
                 $orderID = Order::getOrderByCartId($cart_id);
                 if ($orderID) {
                     $order = new Order($orderID);
-                    if (Validate::isLoadedObject($order)){
+                    if (Validate::isLoadedObject($order)) {
                         $this->settleTransaction($status, $cart_id, $order, $response);
                     }
                 }
