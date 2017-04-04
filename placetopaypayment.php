@@ -460,7 +460,7 @@ class PlaceToPayPayment extends PaymentModule
         $invoiceAddress = new Address((int)($cart->id_address_invoice));
         $deliveryAddress = new Address((int)($cart->id_address_delivery));
         $totalAmount = floatval($cart->getOrderTotal(true, Cart::BOTH));
-//        $taxAmount = $totalAmount - floatval($cart->getOrderTotal(false, Cart::BOTH));
+        $taxAmount = $totalAmount - floatval($cart->getOrderTotal(false, Cart::BOTH));
 
         // Verifica que los objetos se hayan cargado correctamente
         if (!Validate::isLoadedObject($customer)
@@ -510,6 +510,7 @@ class PlaceToPayPayment extends PaymentModule
                 'amount' => [
                     'currency' => $currency->iso_code,
                     'total' => $totalAmount,
+                    'taxAmount:' => $taxAmount,
                 ]
             ]
         ];
@@ -674,7 +675,7 @@ class PlaceToPayPayment extends PaymentModule
                 . '&key=' . $order->secure_key
             );
         } else {
-            echo 'Success status: ' . $status;
+            die($response->status()->message());
         }
     }
 
@@ -709,14 +710,9 @@ class PlaceToPayPayment extends PaymentModule
             if ($response->status()->isApproved()) {
                 // Approved status
                 $status = PlaceToPay::P2P_APPROVED;
-            } else {
-                if ($response->status()->isRejected()) {
-                    // This is why it has been rejected
-                    $status = PlaceToPay::P2P_DECLINED;
-                } else {
-                    // Todos las demás quedan pendientes
-                    $status = PlaceToPay::P2P_PENDING;
-                }
+            } elseif ($response->status()->isRejected()) {
+                // This is why it has been rejected
+                $status = PlaceToPay::P2P_DECLINED;
             }
         }
 
@@ -735,7 +731,7 @@ class PlaceToPayPayment extends PaymentModule
                         break;
                     }
 
-                    // genera un nuevo estado en la orden de declinación
+                    // Genera un nuevo estado en la orden de declinación
                     $history = new OrderHistory();
                     $history->id_order = (int)($order->id);
                     $history->changeIdOrderState(Configuration::get('PS_OS_ERROR'), $history->id_order);
@@ -765,8 +761,8 @@ class PlaceToPayPayment extends PaymentModule
                     break;
             }
         }
-        // actualiza la tabla de PlacetoPay con la información de la transacción
-        $r = $this->updateTransaction($cart_id, $status, $transactionInfo);
+        // Actualiza la tabla de PlacetoPay con la información de la transacción
+        $this->updateTransaction($cart_id, $status, $transactionInfo);
     }
 
     /**
@@ -777,20 +773,35 @@ class PlaceToPayPayment extends PaymentModule
      */
     private function updateTransaction($id_order, $status, $transactionInfo)
     {
-        $date = pSQL($transactionInfo->payment[0]->status()->date());
-        $reason = pSQL($transactionInfo->payment[0]->status()->reason());
-        $reason_description = pSQL($transactionInfo->payment[0]->status()->message());
+        $date = date('Y-m-d H:i:s');
+        $reason = '';
+        $reason_description = pSQL($transactionInfo->status()->message());
 
-        $bank = pSQL($transactionInfo->payment[0]->issuerName());
-        $franchise = pSQL($transactionInfo->payment[0]->paymentMethod());
-        $franchise_name = pSQL($transactionInfo->payment[0]->paymentMethodName());
-        $authcode = pSQL($transactionInfo->payment[0]->authorization());
-        $receipt = pSQL($transactionInfo->payment[0]->receipt());
-        $conversion = pSQL($transactionInfo->payment[0]->amount()->factor());
+        $bank = '';
+        $franchise = '';
+        $franchise_name = '';
+        $authcode = '';
+        $receipt = '';
+        $conversion = '';
 
-        $payer_email = pSQL($transactionInfo->request()->payer()->email());
+        $payer_email = '';
 
-        return Db::getInstance()->Execute("
+        if ($status != PlaceToPay::P2P_PENDING) {
+            $date = pSQL($transactionInfo->payment[0]->status()->date());
+            $reason = pSQL($transactionInfo->payment[0]->status()->reason());
+            $reason_description = pSQL($transactionInfo->payment[0]->status()->message());
+
+            $bank = pSQL($transactionInfo->payment[0]->issuerName());
+            $franchise = pSQL($transactionInfo->payment[0]->paymentMethod());
+            $franchise_name = pSQL($transactionInfo->payment[0]->paymentMethodName());
+            $authcode = pSQL($transactionInfo->payment[0]->authorization());
+            $receipt = pSQL($transactionInfo->payment[0]->receipt());
+            $conversion = pSQL($transactionInfo->payment[0]->amount()->factor());
+
+            $payer_email = pSQL($transactionInfo->request()->payer()->email());
+        }
+
+        $sql = "
             UPDATE `{$this->tablePayment}` SET
                 `date` = '{$date}',
                 `status` = {$status},
@@ -804,7 +815,13 @@ class PlaceToPayPayment extends PaymentModule
                 `conversion` = '{$conversion}',
                 `payer_email` = '{$payer_email}'
             WHERE `id_order` = {$id_order}
-        ");
+        ";
+
+        if (!Db::getInstance()->Execute($sql)) {
+            throw new PlaceToPayPaymentException('Cannot update transaction ' . $sql, 112);
+        }
+
+        return true;
     }
 
     /**
