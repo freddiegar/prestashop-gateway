@@ -269,6 +269,8 @@ class PlaceToPayPayment extends PaymentModule
 
                 'login' => $this->getLogin(),
                 'trankey' => $this->getTrankey(),
+                'urlnotification' => $this->getReturnURL(),
+                'schudeletask' => realpath(__DIR__) . '/sonda.php',
                 'environment' => $this->getEnvironment(),
                 'stockreinject' => $this->getStockReinject(),
                 'cifinmessage' => $this->getCifinMessage(),
@@ -480,10 +482,7 @@ class PlaceToPayPayment extends PaymentModule
 
         // Construye la URL de retorno, aqu'se redireccion desde el proceso de pago
         $ipAddress = (new RemoteAddress())->getIpAddress();
-        $protocol = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://');
-        $domain = (Configuration::get('PS_SHOP_DOMAIN_SSL')) ? Configuration::get('PS_SHOP_DOMAIN_SSL') : Tools::getHttpHost();
-
-        $returnURL = $protocol . $domain . __PS_BASE_URI__ . 'modules/' . $this->name . '/process.php?cart_id=' . $cart->id;
+        $returnURL = $this->getReturnURL('?cart_id=' . $cart->id);
 
         // Crea solicitud de pago en Redirección
         $request = [
@@ -675,8 +674,16 @@ class PlaceToPayPayment extends PaymentModule
                 . '&key=' . $order->secure_key
             );
         } else {
-            die($response->status()->message());
+            echo $response->status()->message() . PHP_EOL;
         }
+    }
+
+    public function getReturnURL($params = ''){
+
+        $protocol = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://');
+        $domain = (Configuration::get('PS_SHOP_DOMAIN_SSL')) ? Configuration::get('PS_SHOP_DOMAIN_SSL') : Tools::getHttpHost();
+
+        return $protocol . $domain . __PS_BASE_URI__ . 'modules/' . $this->name . '/process.php' . $params;
     }
 
     /**
@@ -943,14 +950,14 @@ class PlaceToPayPayment extends PaymentModule
         // que tienen una antiguedad superior a n minutos
         $date = date('Y-m-d H:i:s', time() - $minutes * 60);
 
-        $result = Db::getInstance()->ExecuteS("
-            SELECT * 
+        $sql = "SELECT * 
             FROM `{$this->tablePayment}`
             WHERE `date` < '{$date}' 
-              AND `status` = {PlacetoPay::P2P_PENDING}
-        ");
+              AND `status` = " .PlacetoPay::P2P_PENDING;
 
-        if (!empty($result)) {
+        ;
+
+        if ($result = Db::getInstance()->ExecuteS($sql)) {
 
             $placetopay = new PlaceToPay($this->getLogin(), $this->getTrankey(), $this->getUri());
 
@@ -971,6 +978,7 @@ class PlaceToPayPayment extends PaymentModule
                 }
             }
         }
+        echo 'Finished';
     }
 }
 

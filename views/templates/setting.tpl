@@ -48,6 +48,18 @@
                      alt="{l s='Configuration' mod='placetopaypayment'}"/>{l s='Configuration' mod='placetopaypayment'}
             </legend>
 
+            <label class="control-label">{l s='URL Notification' mod='placetopaypayment'}</label>
+            <div class="margin-form">
+                <span style="font-size: 16px;">{$urlnotification}</span><br/>
+                {l s='Return URL where PlacetoPay will send status payment\'s  to Prestashop' mod='placetopaypayment'}
+            </div>
+
+            <label class="control-label">{l s='Path schudele task' mod='placetopaypayment'}</label>
+            <div class="margin-form">
+                <span style="font-size: 16px;">{$schudeletask}</span><br/>
+                {l s='Set this task to validate payments with pending status in your site' mod='placetopaypayment'}
+            </div>
+
             <label class="control-label" for="login">{l s='Login Place to Pay' mod='placetopaypayment'}</label>
             <div class="margin-form">
                 <input class="form-control" type="text" id="login" name="login" value="{$login}" width="40"

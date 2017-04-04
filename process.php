@@ -3,7 +3,7 @@
  * Modulo para el procesamiento de pagos a traves de PlacetoPay.
  */
 
-// carga la configuracion de prestashop, 
+// Carga la configuracion de prestashop,
 $path = dirname(__FILE__);
 require $path . '/../../config/config.inc.php';
 require $path . '/../../init.php';
@@ -17,5 +17,4 @@ if (!Context::getContext()->customer->isLogged() && !Context::getContext()->cust
 $cart_id = (isset($_GET['cart_id'])) ? $_GET['cart_id'] : null;
 
 // instancia el componente de PlacetoPay y redirige al cliente a la plataforma
-$placetopay = new PlaceToPayPayment();
-$placetopay->process($cart_id);
+(new PlaceToPayPayment())->process($cart_id);
