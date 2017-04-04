@@ -11,5 +11,5 @@ if (empty(Context::getContext()->link)) {
 }
 
 // instancia el componente de PlacetoPay y redirige al cliente a la plataforma
-$placetopay = new PlacetoPayPayment();
+$placetopay = new PlaceToPayPayment();
 $placetopay->sonda();

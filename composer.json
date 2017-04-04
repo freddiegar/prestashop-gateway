@@ -3,7 +3,7 @@
     "description": "Plugin for integration Placeto to Apy gateway with PrestaShop",
     "type": "plugin",
     "require": {
-        "dnetix/redirection": "^0.2.2"
+        "dnetix/redirection": "^0.3"
     },
     "license": "MIT",
     "authors": [

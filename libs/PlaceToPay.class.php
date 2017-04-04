@@ -1,24 +1,11 @@
 <?php
 
-/**
- * Incluye las librerias
- */
-// require
-
 use Dnetix\Redirection\PlacetoPay as Redirection;
-use Dnetix\Redirection\Validators\Currency;
-
-/**
- * Clase para la definición de excepciones
- */
-class PlacetoPayException extends Exception
-{
-}
 
 /**
  * Clase para el procesamiento de pagos a traves de PlacetoPay.
  */
-class PlacetoPay
+class PlaceToPay extends Redirection
 {
 
     /**
@@ -62,29 +49,12 @@ class PlacetoPay
     const P2P_DUPLICATE = 4;
 
     /**
-     * [$redirection description]
-     * @var null
-     */
-    public $redirection = NULL;
-
-    /**
      * Instantiates a PlacetoPay object providing the login and tranKey,
      * also the url that will be used for the service
-     *
-     * @return \PlacetoPay
      */
     function __construct($login, $trankey, $uri_service = '')
     {
-
-        if (empty($login)) {
-            new PlacetoPayException('Login Place to Pay is required.');
-        }
-
-        if (empty($trankey)) {
-            new PlacetoPayException('TranKey Place to Pay is required.');
-        }
-
-        $this->redirection = new Redirection([
+        parent::__construct([
             'login' => $login,
             'tranKey' => $trankey,
             'url' => $uri_service,

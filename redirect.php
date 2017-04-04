@@ -15,5 +15,5 @@ if (!Context::getContext()->customer->isLogged() && !Context::getContext()->cust
 }
 
 // instancia el componente de PlacetoPay y redirige al cliente a la plataforma
-$placetopay = new PlacetoPayPayment();
+$placetopay = new PlaceToPayPayment();
 $placetopay->redirect($cart);

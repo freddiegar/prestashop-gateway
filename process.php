@@ -17,5 +17,5 @@ if (!Context::getContext()->customer->isLogged() && !Context::getContext()->cust
 $cart_id = (isset($_GET['cart_id'])) ? $_GET['cart_id'] : null;
 
 // instancia el componente de PlacetoPay y redirige al cliente a la plataforma
-$placetopay = new PlacetoPayPayment();
+$placetopay = new PlaceToPayPayment();
 $placetopay->process($cart_id);

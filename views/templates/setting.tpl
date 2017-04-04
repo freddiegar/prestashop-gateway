@@ -56,7 +56,7 @@
 
             <label class="control-label" for="trankey">{l s='Trankey Place to Pay' mod='placetopaypayment'}</label>
             <div class="margin-form">
-                <input class="form-control" type="text" id="trankey" name="trankey" value="{$trankey}" width="40"
+                <input class="form-control" type="password" id="trankey" name="trankey" value="{$trankey}" width="40"
                        autocomplete="off"/>
             </div>
 
