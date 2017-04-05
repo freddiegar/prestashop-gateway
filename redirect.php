@@ -4,10 +4,10 @@
  */
 
 // Carga la configuracion de prestashop,
-$path = dirname(__FILE__);
-require $path . '/../../config/config.inc.php';
-require $path . '/../../init.php';
-require $path . '/placetopaypayment.php';
+$pathPrestaShop = dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])));
+require $pathPrestaShop . '/config/config.inc.php';
+require $pathPrestaShop . '/init.php';
+require _PS_MODULE_DIR_ . "/placetopaypayment/placetopaypayment.php";
 
 // si se ha cerrado la sesion retorna a la pagina de autenticacion
 if (!Context::getContext()->customer->isLogged() && !Context::getContext()->customer->is_guest) {

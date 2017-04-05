@@ -20,6 +20,10 @@ class PlaceToPayPayment extends PaymentModule
      * Tabla de pagos
      */
     private $tablePayment = _DB_PREFIX_ . 'payment_placetopay';
+    /**
+     * Tabla de ordenes
+     */
+    private $tableOrder = _DB_PREFIX_ . 'orders';
 
     /**
      * Variables de configuracion del módulo
@@ -74,7 +78,11 @@ class PlaceToPayPayment extends PaymentModule
             case !$this->createPaymentTable():
                 throw new PlaceToPayPaymentException('error on install', 102);
             case !$this->createOrderState();
-                throw new PlaceToPayPaymentException('error on install', 103);
+                throw new PlaceToPayPaymentException('error on install', 104);
+            case !$this->addColumnEmail();
+                throw new PlaceToPayPaymentException('error on install', 113);
+            case !$this->addColumnRequestId();
+                throw new PlaceToPayPaymentException('error on install', 114);
             case !$this->registerHook('payment'):
                 throw new PlaceToPayPaymentException('error on install', 104);
             case !$this->registerHook('paymentReturn');
@@ -146,8 +154,6 @@ class PlaceToPayPayment extends PaymentModule
                 `receipt` VARCHAR(12) NULL,
                 `conversion` DOUBLE,
                 `ip_address` VARCHAR(30) NULL,
-                `payer_email` VARCHAR(80) NULL,
-                `id_request` INT NULL,
                 INDEX `id_orderIX` (`id_order`)
             ) ENGINE = " . _MYSQL_ENGINE_;
 
@@ -156,6 +162,26 @@ class PlaceToPayPayment extends PaymentModule
         }
 
         return false;
+    }
+
+    /**
+     * @return bool
+     */
+    private function addColumnEmail()
+    {
+        $sql = "ALTER TABLE `{$this->tablePayment}` ADD `payer_email` VARCHAR(80) NULL;";
+        Db::getInstance()->Execute($sql);
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    private function addColumnRequestId()
+    {
+        $sql = "ALTER TABLE `{$this->tablePayment}` ADD `id_request` INT NULL;";
+        Db::getInstance()->Execute($sql);
+        return true;
     }
 
     /**
@@ -270,7 +296,7 @@ class PlaceToPayPayment extends PaymentModule
                 'login' => $this->getLogin(),
                 'trankey' => $this->getTrankey(),
                 'urlnotification' => $this->getReturnURL(),
-                'schudeletask' => realpath(__DIR__) . '/sonda.php',
+                'schudeletask' => $this->getPathSchudeleTask(),
                 'environment' => $this->getEnvironment(),
                 'stockreinject' => $this->getStockReinject(),
                 'cifinmessage' => $this->getCifinMessage(),
@@ -337,12 +363,14 @@ class PlaceToPayPayment extends PaymentModule
      */
     private function getLastPendingTransaction($customerID)
     {
+        $status = PlacetoPay::P2P_PENDING;
+
         $result = Db::getInstance()->ExecuteS("
             SELECT p.* 
             FROM `{$this->tablePayment}` p
-                INNER JOIN `' . _DB_PREFIX_ . 'orders` o ON o.id_cart = p.id_order
+                INNER JOIN `{$this->tableOrder}` o ON o.id_cart = p.id_order
             WHERE o.`id_customer` = {$customerID} 
-                AND p.`status` = {PlacetoPay::P2P_PENDING} 
+                AND p.`status` = {$status} 
             LIMIT 1
         ");
 
@@ -678,13 +706,27 @@ class PlaceToPayPayment extends PaymentModule
         }
     }
 
-    public function getReturnURL($params = ''){
+    /**
+     * @param string $params Query string to add in URL, please include symbol (?), eg: ?var=foo
+     * @return string
+     */
+    public function getReturnURL($params = '')
+    {
 
         $protocol = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://');
         $domain = (Configuration::get('PS_SHOP_DOMAIN_SSL')) ? Configuration::get('PS_SHOP_DOMAIN_SSL') : Tools::getHttpHost();
 
         return $protocol . $domain . __PS_BASE_URI__ . 'modules/' . $this->name . '/process.php' . $params;
     }
+
+    /**
+     * @return string
+     */
+    private function getPathSchudeleTask()
+    {
+        return _PS_MODULE_DIR_ . "{$this->name}/sonda.php";
+    }
+
 
     /**
      * @param null $id_request
@@ -920,7 +962,7 @@ class PlaceToPayPayment extends PaymentModule
     {
 
         $id_order = (empty($cartID)
-            ? '(SELECT `id_cart` FROM `' . _DB_PREFIX_ . 'orders` WHERE `id_order` = ' . $orderID . ')'
+            ? "(SELECT `id_cart` FROM `{$this->tableOrder}` WHERE `id_order` = {$orderID})"
             : $cartID);
 
         $result = Db::getInstance()->ExecuteS("SELECT * FROM `{$this->tablePayment}` WHERE `id_order` = {$id_order}");
@@ -953,11 +995,11 @@ class PlaceToPayPayment extends PaymentModule
         $sql = "SELECT * 
             FROM `{$this->tablePayment}`
             WHERE `date` < '{$date}' 
-              AND `status` = " .PlacetoPay::P2P_PENDING;
-
-        ;
+              AND `status` = " . PlacetoPay::P2P_PENDING;;
 
         if ($result = Db::getInstance()->ExecuteS($sql)) {
+
+            echo "Found (" . count($result) . ") payments pending." . PHP_EOL;
 
             $placetopay = new PlaceToPay($this->getLogin(), $this->getTrankey(), $this->getUri());
 

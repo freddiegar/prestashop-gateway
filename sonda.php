@@ -4,14 +4,9 @@
  */
 
 // Carga la configuracion de prestashop,
-$path = dirname(__FILE__);
-require $path . '/../../config/config.inc.php';
-require $path . '/placetopaypayment.php';
-
-// instancia el objeto link en el contexto si no viene inicializado
-//if (empty(Context::getContext()->link)) {
-//    Context::getContext()->link = new Link();
-//}
+$pathPrestaShop = dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])));
+require $pathPrestaShop . '/config/config.inc.php';
+require _PS_MODULE_DIR_ . "/placetopaypayment/placetopaypayment.php";
 
 if(php_sapi_name() == 'cli') {
     // instancia el componente de PlacetoPay y redirige al cliente a la plataforma
