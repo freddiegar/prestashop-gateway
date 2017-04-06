@@ -4,7 +4,12 @@
  */
 
 // Carga la configuracion de prestashop,
-$pathPrestaShop = dirname(dirname(dirname($_SERVER['SCRIPT_FILENAME'])));
+if (isset($_SERVER['PWD']) && is_link($_SERVER['PWD'])) {
+    $pathPrestaShop = dirname(dirname($_SERVER['PWD']));
+} else {
+    $pathPrestaShop = dirname(dirname(getcwd()));
+}
+
 require $pathPrestaShop . '/config/config.inc.php';
 require $pathPrestaShop . '/init.php';
 require _PS_MODULE_DIR_ . "/placetopaypayment/placetopaypayment.php";

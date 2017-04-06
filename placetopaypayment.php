@@ -1020,7 +1020,7 @@ class PlaceToPayPayment extends PaymentModule
                 }
             }
         }
-        echo 'Finished';
+        echo 'Finished' . PHP_EOL;
     }
 }
 
