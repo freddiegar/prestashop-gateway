@@ -85,6 +85,8 @@ class PlaceToPayPayment extends PaymentModule
                 throw new PlaceToPayPaymentException('error on install', 102);
             case !$this->createOrderState();
                 throw new PlaceToPayPaymentException('error on install', 104);
+            case !$this->alterColumnIpAddress();
+                throw new PlaceToPayPaymentException('error on install', 104);
             case !$this->addColumnEmail();
                 throw new PlaceToPayPaymentException('error on install', 113);
             case !$this->addColumnRequestId();
@@ -186,6 +188,17 @@ class PlaceToPayPayment extends PaymentModule
     private function addColumnRequestId()
     {
         $sql = "ALTER TABLE `{$this->tablePayment}` ADD `id_request` INT NULL;";
+        Db::getInstance()->Execute($sql);
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    private function alterColumnIpAddress()
+    {
+        // In all version < 2.0 this columns is bad name ipaddress => ip_address
+        $sql = "ALTER TABLE `{$this->tablePayment}` CHANGE COLUMN `ipaddress` `ip_address` VARCHAR(30) NULL;";
         Db::getInstance()->Execute($sql);
         return true;
     }
