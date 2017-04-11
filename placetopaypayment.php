@@ -19,11 +19,11 @@ class PlaceToPayPayment extends PaymentModule
     /**
      * Tabla de pagos
      */
-    private $tablePayment = _DB_PREFIX_ . 'payment_placetopay';
+    private $tablePayment = null;
     /**
      * Tabla de ordenes
      */
-    private $tableOrder = _DB_PREFIX_ . 'orders';
+    private $tableOrder = null;
 
     /**
      * Variables de configuracion del módulo
@@ -44,6 +44,12 @@ class PlaceToPayPayment extends PaymentModule
      */
     public function __construct()
     {
+        /**
+         * PHP < 5.6 no allowed this definitions in constructor
+         */
+        $this->tablePayment = _DB_PREFIX_ . 'payment_placetopay';
+        $this->tableOrder = _DB_PREFIX_ . 'orders';
+
         $this->name = 'placetopaypayment';
         $this->version = '2.1';
         $this->author = 'EGM Ingeniería sin Fronteras S.A.S';
