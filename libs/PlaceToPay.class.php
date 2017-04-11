@@ -21,7 +21,7 @@ class PlaceToPay extends Redirection
     /**
      * URI para el caso de desarrollo
      */
-    const P2P_DEVELOPMENT = 'http://redirection.dnetix.co/';
+    const P2P_DEVELOPMENT = 'https://dev.placetopay.com/redirection';
 
     /**
      * Indicador de transaccion fallida

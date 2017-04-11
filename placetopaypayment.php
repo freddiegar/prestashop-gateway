@@ -841,8 +841,8 @@ class PlaceToPayPayment extends PaymentModule
      */
     private function updateTransaction($id_order, $status, $transactionInfo)
     {
-        $date = date('Y-m-d H:i:s');
-        $reason = '';
+        $date = pSQL($transactionInfo->status()->date());
+        $reason = pSQL($transactionInfo->status()->reason());
         $reason_description = pSQL($transactionInfo->status()->message());
 
         $bank = '';
@@ -854,11 +854,7 @@ class PlaceToPayPayment extends PaymentModule
 
         $payer_email = '';
 
-        if ($status != PlaceToPay::P2P_PENDING) {
-            $date = pSQL($transactionInfo->payment[0]->status()->date());
-            $reason = pSQL($transactionInfo->payment[0]->status()->reason());
-            $reason_description = pSQL($transactionInfo->payment[0]->status()->message());
-
+        if ($status == PlaceToPay::P2P_APPROVED) {
             $bank = pSQL($transactionInfo->payment[0]->issuerName());
             $franchise = pSQL($transactionInfo->payment[0]->paymentMethod());
             $franchise_name = pSQL($transactionInfo->payment[0]->paymentMethodName());
