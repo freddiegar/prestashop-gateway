@@ -30,6 +30,23 @@ use \Exception;
  */
 class PaymentMethod extends PaymentModule
 {
+    /**
+     * Variables de configuracion del módulo
+     */
+    const COMPANY_DOCUMENT = 'PLACETOPAY_COMPANYDOCUMENT';
+    const COMPANY_NAME = 'PLACETOPAY_COMPANYNAME';
+    const DESCRIPTION = 'PLACETOPAY_DESCRIPTION';
+
+    const EMAIL_CONTACT = 'PLACETOPAY_EMAILCONTACT';
+    const TELEPHONE_CONTACT = 'PLACETOPAY_TELEPHONECONTACT';
+
+    const LOGIN = 'PLACETOPAY_LOGIN';
+    const TRAN_KEY = 'PLACETOPAY_TRANKEY';
+    const ENVIRONMENT = 'PLACETOPAY_ENVIRONMENT';
+    const STOCK_REINJECT = 'PLACETOPAY_STOCKREINJECT';
+    const CIFIN_MESSAGE = 'PLACETOPAY_CIFINMESSAGE';
+
+    const ORDER_STATE = 'PS_OS_PLACETOPAY';
 
     /**
      * Tabla de pagos
@@ -39,19 +56,6 @@ class PaymentMethod extends PaymentModule
      * Tabla de ordenes
      */
     private $tableOrder = null;
-
-    /**
-     * Variables de configuracion del módulo
-     */
-    const COMPANY_DOCUMENT = 'PLACETOPAY_COMPANYDOCUMENT';
-    const COMPANY_NAME = 'PLACETOPAY_COMPANYNAME';
-    const DESCRIPTION = 'PLACETOPAY_DESCRIPTION';
-    const LOGIN = 'PLACETOPAY_LOGIN';
-    const TRAN_KEY = 'PLACETOPAY_TRANKEY';
-    const ENVIRONMENT = 'PLACETOPAY_ENVIRONMENT';
-    const STOCK_REINJECT = 'PLACETOPAY_STOCKREINJECT';
-    const CIFIN_MESSAGE = 'PLACETOPAY_CIFINMESSAGE';
-    const ORDER_STATE = 'PS_OS_PLACETOPAY';
 
 
     /**
@@ -118,7 +122,10 @@ class PaymentMethod extends PaymentModule
         // Variables de configuración del  módulo
         Configuration::updateValue(self::COMPANY_DOCUMENT, '');
         Configuration::updateValue(self::COMPANY_NAME, '');
-        Configuration::updateValue(self::DESCRIPTION, 'Pago en PlacetoPay - %s');
+        Configuration::updateValue(self::DESCRIPTION, 'Pago en PlacetoPay No: %s');
+
+        Configuration::updateValue(self::EMAIL_CONTACT, '');
+        Configuration::updateValue(self::TELEPHONE_CONTACT, '');
 
         Configuration::updateValue(self::LOGIN, '');
         Configuration::updateValue(self::TRAN_KEY, '');
@@ -142,6 +149,9 @@ class PaymentMethod extends PaymentModule
             !Configuration::deleteByName(self::COMPANY_DOCUMENT)
             || !Configuration::deleteByName(self::COMPANY_NAME)
             || !Configuration::deleteByName(self::DESCRIPTION)
+
+            || !Configuration::deleteByName(self::EMAIL_CONTACT)
+            || !Configuration::deleteByName(self::TELEPHONE_CONTACT)
 
             || !Configuration::deleteByName(self::LOGIN)
             || !Configuration::deleteByName(self::TRAN_KEY)
@@ -301,6 +311,9 @@ class PaymentMethod extends PaymentModule
         Configuration::updateValue(self::COMPANY_DOCUMENT, Tools::getValue('companydocument'));
         Configuration::updateValue(self::COMPANY_NAME, Tools::getValue('companyname'));
         Configuration::updateValue(self::DESCRIPTION, Tools::getValue('description'));
+        // Almacena los datos de contacto
+        Configuration::updateValue(self::EMAIL_CONTACT, Tools::getValue('email'));
+        Configuration::updateValue(self::TELEPHONE_CONTACT, Tools::getValue('telephone'));
         // Configura cuenta PaymentRedirection
         Configuration::updateValue(self::LOGIN, Tools::getValue('login'));
         Configuration::updateValue(self::TRAN_KEY, Tools::getValue('trankey'));
@@ -338,6 +351,8 @@ class PaymentMethod extends PaymentModule
                 'companydocument' => $this->getCompanyDocument(),
                 'companyname' => $this->getCompanyName(),
                 'description' => $this->getDescription(),
+                'email' => $this->getEmailContact(),
+                'telephone' => $this->getTelephoneContact(),
 
                 'login' => $this->getLogin(),
                 'trankey' => $this->getTrankey(),
@@ -501,6 +516,23 @@ class PaymentMethod extends PaymentModule
     /**
      * @return mixed
      */
+    public function getEmailContact()
+    {
+        return Configuration::get(self::EMAIL_CONTACT);
+    }
+
+
+    /**
+     * @return mixed
+     */
+    public function getTelephoneContact()
+    {
+        return Configuration::get(self::TELEPHONE_CONTACT);
+    }
+
+    /**
+     * @return mixed
+     */
     public function getStockReinject()
     {
         return Configuration::get(self::STOCK_REINJECT);
@@ -606,7 +638,7 @@ class PaymentMethod extends PaymentModule
         }
 
         // Construye la URL de retorno, al que se redirecciona desde el proceso de pago
-        $reference = $cart->id . ' - ' . time();
+        $reference = $cart->id . '::' . time();
         $ipAddress = (new RemoteAddress())->getIpAddress();
         $returnURL = $this->getReturnURL('?cart_id=' . $cart->id);
 

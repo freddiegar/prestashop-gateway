@@ -40,6 +40,18 @@
                 <input class="form-control" type="text" id="description" name="description" value="{$description}"
                        width="120" autocomplete="off"/>
             </div>
+
+            <label class="control-label" for="email">{l s='Email contact' mod='placetopaypayment'}</label>
+            <div class="margin-form">
+                <input class="form-control" type="email" id="email" name="email" value="{$email}"
+                       width="120" autocomplete="off"/>
+            </div>
+
+            <label class="control-label" for="telephone">{l s='Telephone contact' mod='placetopaypayment'}</label>
+            <div class="margin-form">
+                <input class="form-control" type="text" id="telephone" name="telephone" value="{$telephone}"
+                       width="120" autocomplete="off"/>
+            </div>
         </fieldset>
 
         <fieldset>
