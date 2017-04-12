@@ -396,7 +396,7 @@ class PaymentMethod extends PaymentModule
         if (!empty($pending)) {
             $smarty->assign(array(
                 'hasPending' => true,
-                'lastOrder' => $pending['id_order'],
+                'lastOrder' => $pending['reference'],
                 'lastAuthorization' => $pending['authcode'],
                 'storeEmail' => $this->getEmailContact(),
                 'storePhone' => $this->getTelephoneContact()
@@ -928,6 +928,7 @@ class PaymentMethod extends PaymentModule
                     break;
             }
         }
+
         // Actualiza la tabla de PlacetoPay con la información de la transacción
         $this->updateTransaction($cart_id, $status, $response);
     }
@@ -952,7 +953,14 @@ class PaymentMethod extends PaymentModule
         $conversion = '';
         $payer_email = '';
 
-        if ($status == PaymentRedirection::P2P_APPROVED) {
+        if (in_array($status, [
+            PaymentRedirection::P2P_APPROVED,
+            PaymentRedirection::P2P_DECLINED
+        ])) {
+            $date = pSQL($payment->payment[0]->status()->date());
+            $reason = pSQL($payment->payment[0]->status()->reason());
+            $reason_description = pSQL($payment->payment[0]->status()->message());
+
             $bank = pSQL($payment->payment[0]->issuerName());
             $franchise = pSQL($payment->payment[0]->paymentMethod());
             $franchise_name = pSQL($payment->payment[0]->paymentMethodName());
@@ -1129,9 +1137,7 @@ class PaymentMethod extends PaymentModule
                 $order = $this->getRelatedOrder($cart_id);
 
                 if ($order) {
-                    if (Validate::isLoadedObject($order)) {
-                        $this->settleTransaction($status, $cart_id, $order, $response);
-                    }
+                    $this->settleTransaction($status, $cart_id, $order, $response);
                 }
             }
         }

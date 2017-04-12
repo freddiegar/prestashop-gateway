@@ -13,20 +13,20 @@
             <br/>
             <br/>
 
-            <p style="color: red">
+            <span style="color: red">
                 <b>&gt;&gt; {l s='Warning' mod='placetopaypayment'}</b>
-            </p>
+            </span>
 
             <span class="main">
 				<br/>
-                {l s='At this time your order' mod='placetopaypayment'}
-                <b>#{$lastOrder}</b>
-                {l s='presents a checkout transaction which is pending to receive confirmation from your bank, please wait a few minutes and check back later to see if your payment was successfully confirmed.' mod='placetopaypayment'}
+                {l s='At this time your invoice' mod='placetopaypayment'}
+                <b># {$lastOrder}</b>
+                {l s='presents a checkout transaction which is PENDING to receive confirmation from your bank, please wait a few minutes and check back later to see if your payment was successfully confirmed.' mod='placetopaypayment'}
                 <br/>
 				<br/>
                 {l s='For more information on the current state of your operation can contact our customer service line in' mod='placetopaypayment'}
                 <b>{$storePhone}</b>
-                {l s='or send your questions to' mod='placetopaypayment'}
+                {l s='or send a email to' mod='placetopaypayment'}
                 <b>{$storeEmail}</b>
                 {l s='and ask for the status of the transaction:' mod='placetopaypayment'}
                 <b>{$lastAuthorization|default:"N/D"}</b>
