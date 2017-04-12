@@ -25,10 +25,10 @@
         <td>{l s='Order No.' mod='placetopay'}</td>
         <td><b>{$objOrder->id}</b></td>
     </tr>
-    {if $objOrder->id != $transaction['id_order']}
+    {if !empty($transaction['reference'])}
         <tr valign="top">
             <td>{l s='Reference' mod='placetopay'}</td>
-            <td><b>{$transaction['id_order']}</b></td>
+            <td><b>{$transaction['reference']}</b></td>
         </tr>
     {/if}
     <tr valign="top">
@@ -43,10 +43,10 @@
         <td>{l s='Payer email' mod='placetopay'}</td>
         <td><b>{$payerEmail|default:""}</b></td>
     </tr>
-    {if !empty($transaction['ipaddress'])}
+    {if !empty($transaction['ip_address'])}
         <tr valign="top">
             <td>{l s='IP Address' mod='placetopay'}</td>
-            <td><b>{$transaction['ipaddress']}</b></td>
+            <td><b>{$transaction['ip_address']}</b></td>
         </tr>
     {/if}
     <tr valign="top">

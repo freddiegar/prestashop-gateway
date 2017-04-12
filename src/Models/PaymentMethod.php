@@ -106,6 +106,8 @@ class PaymentMethod extends PaymentModule
                 throw new PaymentException('error on install', 113);
             case !$this->addColumnRequestId();
                 throw new PaymentException('error on install', 114);
+            case !$this->addColumnReference();
+                throw new PaymentException('error on install', 114);
             case !$this->registerHook('payment'):
                 throw new PaymentException('error on install', 104);
             case !$this->registerHook('paymentReturn');
@@ -203,6 +205,16 @@ class PaymentMethod extends PaymentModule
     private function addColumnRequestId()
     {
         $sql = "ALTER TABLE `{$this->tablePayment}` ADD `id_request` INT NULL;";
+        Db::getInstance()->Execute($sql);
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    private function addColumnReference()
+    {
+        $sql = "ALTER TABLE `{$this->tablePayment}` ADD `reference` VARCHAR(60) NULL;";
         Db::getInstance()->Execute($sql);
         return true;
     }
@@ -540,6 +552,28 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
+     * @param null $cart_id
+     * @return Order
+     * @throws PaymentException
+     */
+    private function getRelatedOrder($cart_id = null)
+    {
+        $order_id = Order::getOrderByCartId($cart_id);
+
+        if (!$order_id) {
+            throw new PaymentException(Tools::displayError(), 109);
+        }
+
+        $order = new Order($order_id);
+
+        if (!Validate::isLoadedObject($order)) {
+            throw new PaymentException(Tools::displayError(), 110);
+        }
+
+        return $order;
+    }
+
+    /**
      * Obtiene el ID y redirecciona al Flujo
      *
      * @param Cart $cart
@@ -571,7 +605,8 @@ class PaymentMethod extends PaymentModule
             $deliveryState = new State((int)($deliveryAddress->id_state));
         }
 
-        // Construye la URL de retorno, aqu'se redireccion desde el proceso de pago
+        // Construye la URL de retorno, al que se redirecciona desde el proceso de pago
+        $reference = $cart->id . ' - ' . time();
         $ipAddress = (new RemoteAddress())->getIpAddress();
         $returnURL = $this->getReturnURL('?cart_id=' . $cart->id);
 
@@ -595,7 +630,7 @@ class PaymentMethod extends PaymentModule
                 ]
             ],
             'payment' => [
-                'reference' => $cart->id . ' - ' . time(),
+                'reference' => $reference,
                 'description' => 'Prestashop',
                 'amount' => [
                     'currency' => $currency->iso_code,
@@ -651,7 +686,7 @@ class PaymentMethod extends PaymentModule
             );
 
             // Inserta la transacción en la tabla de PlacetoPay
-            $this->insertPaymentPlaceToPay($requestId, $cart->id, $cart->id_currency, $totalAmount, $status, $orderMessage, $ipAddress);
+            $this->insertPaymentPlaceToPay($requestId, $cart->id, $cart->id_currency, $totalAmount, $status, $orderMessage, $ipAddress, $reference);
 
             // Envia flujo a redireccion para realizar el pago
             Tools::redirectLink($paymentURL);
@@ -663,17 +698,18 @@ class PaymentMethod extends PaymentModule
 
     /**
      * Registra orden en los pagos de PaymentRedirection
-     *
-     * @param $requestId
-     * @param $orderID
-     * @param $currencyID
+     * @param $request_id
+     * @param $order_id
+     * @param $currency_id
      * @param $amount
      * @param $status
      * @param $message
-     * @param $ipAddress
+     * @param $ip_address
+     * @param $reference
      * @return bool
+     * @throws PaymentException
      */
-    private function insertPaymentPlaceToPay($requestId, $orderID, $currencyID, $amount, $status, $message, $ipAddress)
+    private function insertPaymentPlaceToPay($request_id, $order_id, $currency_id, $amount, $status, $message, $ip_address, $reference)
     {
         $reason = '';
         $date = date('Y-m-d H:i:s');
@@ -691,18 +727,20 @@ class PaymentMethod extends PaymentModule
                 reason_description,
                 conversion,
                 ip_address,
-                id_request
+                id_request,
+                reference
             ) VALUES (
-                '$orderID',
-                '$currencyID',
+                '$order_id',
+                '$currency_id',
                 '$date',
                 '$amount',
                 '$status',
                 '$reason',
                 '$reason_description',
                 '$conversion',
-                '$ipAddress',
-                '$requestId'
+                '$ip_address',
+                '$request_id',
+                '$reference'
             )
         ";
 
@@ -734,17 +772,7 @@ class PaymentMethod extends PaymentModule
             throw new PaymentException('option not valid in process', 108);
         }
 
-        $orderID = Order::getOrderByCartId((int)$cart_id);
-
-        // si no se halla la orden aborta
-        if (!$orderID) {
-            throw new PaymentException(Tools::displayError(), 109);
-        }
-
-        $order = new Order($orderID);
-        if (!Validate::isLoadedObject($order)) {
-            throw new PaymentException(Tools::displayError(), 110);
-        }
+        $order = $this->getRelatedOrder($cart_id);
 
         // Consulta el estado de la transaccion
         $placetopay = new PaymentRedirection($this->getLogin(), $this->getTrankey(), $this->getUri());
@@ -787,7 +815,7 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * @param PaymentRedirection $response
+     * @param mixed $response
      * @return int
      */
     public function getStatusPayment($response)
@@ -949,6 +977,7 @@ class PaymentMethod extends PaymentModule
         $transaction['tax'] = $taxAmount;
 
         $smarty->assign('transaction', $transaction);
+
         switch ($transaction['status']) {
             case PaymentRedirection::P2P_APPROVED:
             case PaymentRedirection::P2P_DUPLICATE:
@@ -972,7 +1001,7 @@ class PaymentMethod extends PaymentModule
 
         $smarty->assign('companyDocument', $this->getCompanyDocument());
         $smarty->assign('companyName', $this->getCompanyName());
-        $smarty->assign('paymentDescription', sprintf($this->getDescription(), $transaction['id_order']));
+        $smarty->assign('paymentDescription', sprintf($this->getDescription(), $transaction['reference']));
 
         $smarty->assign('storePhone', Configuration::get('PS_SHOP_PHONE'));
         $smarty->assign('storeEmail', Configuration::get('PS_SHOP_EMAIL'));
@@ -1062,10 +1091,9 @@ class PaymentMethod extends PaymentModule
                 // Consta estado de la transaccion en PaymentRedirection
                 $response = $placetopay->query($requestId);
                 $status = $this->getStatusPayment($response);
-                $orderID = Order::getOrderByCartId($cart_id);
+                $order = $this->getRelatedOrder($cart_id);
 
-                if ($orderID) {
-                    $order = new Order($orderID);
+                if ($order) {
                     if (Validate::isLoadedObject($order)) {
                         $this->settleTransaction($status, $cart_id, $order, $response);
                     }
