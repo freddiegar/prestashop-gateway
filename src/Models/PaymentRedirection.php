@@ -1,11 +1,13 @@
 <?php
 
-use Dnetix\Redirection\PlacetoPay as Redirection;
+namespace PlacetoPay\Models;
+
+use Dnetix\Redirection\PlacetoPay;
 
 /**
  * Clase para el procesamiento de pagos a traves de PlacetoPay.
  */
-class PlaceToPay extends Redirection
+class PaymentRedirection extends PlacetoPay
 {
 
     /**
