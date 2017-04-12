@@ -2,6 +2,7 @@
 
 namespace PlacetoPay\Models;
 
+use Dnetix\Redirection\Message\RedirectInformation;
 use PlacetoPay\Exception\PaymentException;
 use \PaymentModule;
 use \Configuration;
@@ -850,10 +851,10 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * @param mixed $response
+     * @param RedirectInformation $response
      * @return int
      */
-    public function getStatusPayment($response)
+    public function getStatusPayment(RedirectInformation $response)
     {
         // By default ss pending so make a query for it later (see information.php example)
         $status = PaymentRedirection::P2P_PENDING;
@@ -956,7 +957,7 @@ class PaymentMethod extends PaymentModule
         if (in_array($status, [
             PaymentRedirection::P2P_APPROVED,
             PaymentRedirection::P2P_DECLINED
-        ])) {
+        ]) && isset($payment->payment)) {
             $date = pSQL($payment->payment[0]->status()->date());
             $reason = pSQL($payment->payment[0]->status()->reason());
             $reason_description = pSQL($payment->payment[0]->status()->message());
