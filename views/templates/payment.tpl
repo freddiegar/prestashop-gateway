@@ -13,9 +13,9 @@
             <br/>
             <br/>
 
-            <font color="red">
+            <p style="color: red">
                 <b>&gt;&gt; {l s='Warning' mod='placetopaypayment'}</b>
-            </font>
+            </p>
 
             <span class="main">
 				<br/>

@@ -398,8 +398,8 @@ class PaymentMethod extends PaymentModule
                 'hasPending' => true,
                 'lastOrder' => $pending['id_order'],
                 'lastAuthorization' => $pending['authcode'],
-                'storePhone' => Configuration::get('PS_SHOP_PHONE'),
-                'storeEmail' => Configuration::get('PS_SHOP_EMAIL')
+                'storeEmail' => $this->getEmailContact(),
+                'storePhone' => $this->getTelephoneContact()
             ));
         } else {
             $smarty->assign('hasPending', false);
@@ -420,9 +420,10 @@ class PaymentMethod extends PaymentModule
 
     /**
      * Obtiene la última transacción pendiente de pago utilizando el medio
-     * @return array
+     * @param $customer_id
+     * @return mixed
      */
-    private function getLastPendingTransaction($customerID)
+    private function getLastPendingTransaction($customer_id)
     {
         $status = PaymentRedirection::P2P_PENDING;
 
@@ -430,7 +431,7 @@ class PaymentMethod extends PaymentModule
             SELECT p.* 
             FROM `{$this->tablePayment}` p
                 INNER JOIN `{$this->tableOrder}` o ON o.id_cart = p.id_order
-            WHERE o.`id_customer` = {$customerID} 
+            WHERE o.`id_customer` = {$customer_id} 
                 AND p.`status` = {$status} 
             LIMIT 1
         ");
@@ -518,7 +519,8 @@ class PaymentMethod extends PaymentModule
      */
     public function getEmailContact()
     {
-        return Configuration::get(self::EMAIL_CONTACT);
+        $emailContact = Configuration::get(self::EMAIL_CONTACT);
+        return (empty($emailContact) ? Configuration::get('PS_SHOP_EMAIL') : $emailContact);
     }
 
 
@@ -527,7 +529,8 @@ class PaymentMethod extends PaymentModule
      */
     public function getTelephoneContact()
     {
-        return Configuration::get(self::TELEPHONE_CONTACT);
+        $telephoneContact = Configuration::get(self::TELEPHONE_CONTACT);
+        return (empty($telephoneContact) ? Configuration::get('PS_SHOP_PHONE') : $telephoneContact);
     }
 
     /**
@@ -616,49 +619,49 @@ class PaymentMethod extends PaymentModule
         $language = Language::getIsoById((int)($cart->id_lang));
         $customer = new Customer((int)($cart->id_customer));
         $currency = new Currency((int)($cart->id_currency));
-        $invoiceAddress = new Address((int)($cart->id_address_invoice));
-        $deliveryAddress = new Address((int)($cart->id_address_delivery));
-        $totalAmount = floatval($cart->getOrderTotal(true, Cart::BOTH));
-        $taxAmount = $totalAmount - floatval($cart->getOrderTotal(false, Cart::BOTH));
+        $invoice_address = new Address((int)($cart->id_address_invoice));
+        $delivery_address = new Address((int)($cart->id_address_delivery));
+        $total_amount = floatval($cart->getOrderTotal(true, Cart::BOTH));
+        $tax_amount = $total_amount - floatval($cart->getOrderTotal(false, Cart::BOTH));
 
         // Verifica que los objetos se hayan cargado correctamente
         if (!Validate::isLoadedObject($customer)
-            || !Validate::isLoadedObject($invoiceAddress)
-            || !Validate::isLoadedObject($deliveryAddress)
+            || !Validate::isLoadedObject($invoice_address)
+            || !Validate::isLoadedObject($delivery_address)
             || !Validate::isLoadedObject($currency)
         ) {
             throw new PaymentException('invalid address or customer', 106);
         }
 
         // Recupera otra informacion relacionada con la orden
-        $deliveryCountry = new Country((int)($deliveryAddress->id_country));
-        $deliveryState = null;
-        if ($deliveryAddress->id_state) {
-            $deliveryState = new State((int)($deliveryAddress->id_state));
+        $delivery_country = new Country((int)($delivery_address->id_country));
+        $delivery_state = null;
+        if ($delivery_address->id_state) {
+            $delivery_state = new State((int)($delivery_address->id_state));
         }
 
         // Construye la URL de retorno, al que se redirecciona desde el proceso de pago
         $reference = $cart->id . '::' . time();
-        $ipAddress = (new RemoteAddress())->getIpAddress();
-        $returnURL = $this->getReturnURL('?cart_id=' . $cart->id);
+        $ip_address = (new RemoteAddress())->getIpAddress();
+        $return_url = $this->getReturnURL('?cart_id=' . $cart->id);
 
         // Crea solicitud de pago en Redirección
         $request = [
             'locale' => ($language == 'en') ? 'en_US' : 'es_CO',
-            'returnUrl' => $returnURL,
-            'ipAddress' => $ipAddress,
+            'returnUrl' => $return_url,
+            'ip_address' => $ip_address,
             'expiration' => date('c', strtotime('+2 days')),
             'userAgent' => $_SERVER['HTTP_USER_AGENT'],
             'buyer' => [
-                'name' => $deliveryAddress->firstname,
-                'surname' => $deliveryAddress->lastname,
+                'name' => $delivery_address->firstname,
+                'surname' => $delivery_address->lastname,
                 'email' => $customer->email,
-                'mobile' => $deliveryAddress->phone_mobile,
+                'mobile' => $delivery_address->phone_mobile,
                 'address' => [
-                    'country' => $deliveryCountry->iso_code,
-                    'state' => (empty($deliveryState) ? null : $deliveryState->name),
-                    'city' => $deliveryAddress->city,
-                    'street' => $deliveryAddress->address1 . " " . $deliveryAddress->address2,
+                    'country' => $delivery_country->iso_code,
+                    'state' => (empty($delivery_state) ? null : $delivery_state->name),
+                    'city' => $delivery_address->city,
+                    'street' => $delivery_address->address1 . " " . $delivery_address->address2,
                 ]
             ],
             'payment' => [
@@ -666,8 +669,8 @@ class PaymentMethod extends PaymentModule
                 'description' => 'Prestashop',
                 'amount' => [
                     'currency' => $currency->iso_code,
-                    'total' => $totalAmount,
-                    'taxAmount:' => $taxAmount,
+                    'total' => $total_amount,
+                    'tax_amount:' => $tax_amount,
                 ]
             ]
         ];
@@ -679,23 +682,23 @@ class PaymentMethod extends PaymentModule
         try {
 
             if ($response->isSuccessful()) {
-                $requestId = $response->requestId();
-                $_SESSION['requestId'] = $requestId;
-                $orderMessage = 'Success';
-                $orderStatus = $this->getOrderState();
+                $request_id = $response->requestId();
+                $_SESSION['request_id'] = $request_id;
+                $order_message = 'Success';
+                $order_status = $this->getOrderState();
                 $status = PaymentRedirection::P2P_PENDING;
-                $paymentURL = $response->processUrl();
+                $payment_url = $response->processUrl();
 
             } else {
-                $requestId = 0;
-                $orderMessage = $response->status()->message();
-                $orderStatus = Configuration::get('PS_OS_ERROR');
+                $request_id = 0;
+                $order_message = $response->status()->message();
+                $order_status = Configuration::get('PS_OS_ERROR');
                 $status = PaymentRedirection::P2P_FAILED;
-                $totalAmount = 0;
+                $total_amount = 0;
 
                 // Genera la redirección al estado de la orden si no se pudo hacer la redireccion
                 $order = new Order($this->currentOrder);
-                $paymentURL = __PS_BASE_URI__ . 'order-confirmation.php'
+                $payment_url = __PS_BASE_URI__ . 'order-confirmation.php'
                     . '?id_cart=' . $cart->id
                     . '&id_module=' . $this->id
                     . '&id_order=' . $this->currentOrder
@@ -707,10 +710,10 @@ class PaymentMethod extends PaymentModule
 
             $this->validateOrder(
                 $cart->id,
-                $orderStatus,
-                $totalAmount,
+                $order_status,
+                $total_amount,
                 $this->displayName,
-                $orderMessage,
+                $order_message,
                 null,
                 null,
                 false,
@@ -718,10 +721,10 @@ class PaymentMethod extends PaymentModule
             );
 
             // Inserta la transacción en la tabla de PlacetoPay
-            $this->insertPaymentPlaceToPay($requestId, $cart->id, $cart->id_currency, $totalAmount, $status, $orderMessage, $ipAddress, $reference);
+            $this->insertPaymentPlaceToPay($request_id, $cart->id, $cart->id_currency, $total_amount, $status, $order_message, $ip_address, $reference);
 
             // Envia flujo a redireccion para realizar el pago
-            Tools::redirectLink($paymentURL);
+            Tools::redirectLink($payment_url);
 
         } catch (Exception $e) {
             throw new PaymentException($response->status()->message() . "\n" . $e->getMessage(), 107);
@@ -790,15 +793,15 @@ class PaymentMethod extends PaymentModule
     public function process($cart_id = null)
     {
 
-        if (!is_null($cart_id) && !empty($_SESSION['requestId'])) {
+        if (!is_null($cart_id) && !empty($_SESSION['request_id'])) {
             // Redireccion desde el proceso de pagos
-            $requestId = $_SESSION['requestId'];
+            $request_id = $_SESSION['request_id'];
         } elseif (!empty(file_get_contents("php://input"))) {
             // Respuesta por norificationURL enviado desde PaymentRedirection
             $json = file_get_contents("php://input");
             $obj = json_decode($json);
-            $requestId = $obj->requestId;
-            $cart_id = $this->getCartByRequestId((int)$requestId);
+            $request_id = $obj->requestId;
+            $cart_id = $this->getCartByRequestId((int)$request_id);
         } else {
             // Opción no válida, se cancela
             throw new PaymentException('option not valid in process', 108);
@@ -809,7 +812,7 @@ class PaymentMethod extends PaymentModule
         // Consulta el estado de la transaccion
         $placetopay = new PaymentRedirection($this->getLogin(), $this->getTrankey(), $this->getUri());
 
-        $response = $placetopay->query($requestId);
+        $response = $placetopay->query($request_id);
 
         $status = $this->getStatusPayment($response);
 
@@ -835,12 +838,12 @@ class PaymentMethod extends PaymentModule
      */
     private function getCartByRequestId($id_request = 0)
     {
-        $requestId = (!empty($id_request)) ? $id_request : 0;
+        $request_id = (!empty($id_request)) ? $id_request : 0;
 
         $rows = Db::getInstance()->ExecuteS("
             SELECT id_order 
             FROM  `{$this->tablePayment}` 
-            WHERE id_request = {$requestId}
+            WHERE id_request = {$request_id}
         ");
 
         return (!empty($rows[0]['id_order'])) ? $rows[0]['id_order'] : false;
@@ -869,7 +872,7 @@ class PaymentMethod extends PaymentModule
         return $status;
     }
 
-    private function settleTransaction($status, $cart_id, Order $order, $transactionInfo)
+    private function settleTransaction($status, $cart_id, Order $order, $response)
     {
         // Si ya habia sido aprobada no vuelva a reprocesar
         if ($order->getCurrentState() != (int)Configuration::get('PS_OS_PAYMENT')) {
@@ -907,8 +910,8 @@ class PaymentMethod extends PaymentModule
                     if ($this->getStockReinject() == '1') {
                         $products = $order->getProducts();
                         foreach ($products as $product) {
-                            $orderDetail = new OrderDetail((int)($product['id_order_detail']));
-                            Product::reinjectQuantities($orderDetail, $product['product_quantity']);
+                            $order_detail = new OrderDetail((int)($product['id_order_detail']));
+                            Product::reinjectQuantities($order_detail, $product['product_quantity']);
                         }
                     }
                     break;
@@ -926,20 +929,20 @@ class PaymentMethod extends PaymentModule
             }
         }
         // Actualiza la tabla de PlacetoPay con la información de la transacción
-        $this->updateTransaction($cart_id, $status, $transactionInfo);
+        $this->updateTransaction($cart_id, $status, $response);
     }
 
     /**
      * @param $id_order
      * @param $status
-     * @param $transactionInfo
+     * @param $payment
      * @return mixed
      */
-    private function updateTransaction($id_order, $status, $transactionInfo)
+    private function updateTransaction($id_order, $status, $payment)
     {
-        $date = pSQL($transactionInfo->status()->date());
-        $reason = pSQL($transactionInfo->status()->reason());
-        $reason_description = pSQL($transactionInfo->status()->message());
+        $date = pSQL($payment->status()->date());
+        $reason = pSQL($payment->status()->reason());
+        $reason_description = pSQL($payment->status()->message());
 
         $bank = '';
         $franchise = '';
@@ -950,16 +953,16 @@ class PaymentMethod extends PaymentModule
         $payer_email = '';
 
         if ($status == PaymentRedirection::P2P_APPROVED) {
-            $bank = pSQL($transactionInfo->payment[0]->issuerName());
-            $franchise = pSQL($transactionInfo->payment[0]->paymentMethod());
-            $franchise_name = pSQL($transactionInfo->payment[0]->paymentMethodName());
-            $auth_code = pSQL($transactionInfo->payment[0]->authorization());
-            $receipt = pSQL($transactionInfo->payment[0]->receipt());
-            $conversion = pSQL($transactionInfo->payment[0]->amount()->factor());
+            $bank = pSQL($payment->payment[0]->issuerName());
+            $franchise = pSQL($payment->payment[0]->paymentMethod());
+            $franchise_name = pSQL($payment->payment[0]->paymentMethodName());
+            $auth_code = pSQL($payment->payment[0]->authorization());
+            $receipt = pSQL($payment->payment[0]->receipt());
+            $conversion = pSQL($payment->payment[0]->amount()->factor());
         }
 
-        if (!empty($transactionInfo->request()->buyer()->email())) {
-            $payer_email = pSQL($transactionInfo->request()->buyer()->email());
+        if (!empty($payment->request()->buyer()->email())) {
+            $payer_email = pSQL($payment->request()->buyer()->email());
         }
 
         $sql = "
@@ -1001,12 +1004,12 @@ class PaymentMethod extends PaymentModule
         // provee a la plantilla de la informacion
         $transaction = $this->getTransactionInformation($params['objOrder']->id_cart);
         $cart = new Cart((int)$params['objOrder']->id_cart);
-        $invoiceAddress = new Address((int)($cart->id_address_invoice));
-        $deliveryAddress = new Address((int)($cart->id_address_delivery));
-        $totalAmount = (float)($cart->getOrderTotal(true, Cart::BOTH));
-        $taxAmount = $totalAmount - (float)($cart->getOrderTotal(false, Cart::BOTH));
-        $payerEmail = $transaction['payer_email'];
-        $transaction['tax'] = $taxAmount;
+        $invoice_address = new Address((int)($cart->id_address_invoice));
+        $delivery_address = new Address((int)($cart->id_address_delivery));
+        $total_amount = (float)($cart->getOrderTotal(true, Cart::BOTH));
+        $tax_amount = $total_amount - (float)($cart->getOrderTotal(false, Cart::BOTH));
+        $payer_email = $transaction['payer_email'];
+        $transaction['tax'] = $tax_amount;
 
         $smarty->assign('transaction', $transaction);
 
@@ -1035,19 +1038,19 @@ class PaymentMethod extends PaymentModule
         $smarty->assign('companyName', $this->getCompanyName());
         $smarty->assign('paymentDescription', sprintf($this->getDescription(), $transaction['reference']));
 
-        $smarty->assign('storePhone', Configuration::get('PS_SHOP_PHONE'));
-        $smarty->assign('storeEmail', Configuration::get('PS_SHOP_EMAIL'));
+        $smarty->assign('storeEmail', $this->getEmailContact());
+        $smarty->assign('storePhone', $this->getTelephoneContact());
 
         // Obtiene los datos del cliente
         $customer = new Customer((int)($params['objOrder']->id_customer));
 
         if (Validate::isLoadedObject($customer)) {
-            if (empty($invoiceAddress)) {
+            if (empty($invoice_address)) {
                 $smarty->assign('payerName', $customer->firstname . ' ' . $customer->lastname);
                 $smarty->assign('payerEmail', $customer->email);
             } else {
-                $smarty->assign('payerName', $invoiceAddress->firstname . ' ' . $invoiceAddress->lastname);
-                $smarty->assign('payerEmail', (isset($payerEmail) ? $payerEmail : $customer->email));
+                $smarty->assign('payerName', $invoice_address->firstname . ' ' . $invoice_address->lastname);
+                $smarty->assign('payerEmail', (isset($payer_email) ? $payer_email : $customer->email));
             }
         }
 
@@ -1067,16 +1070,16 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * @param $cartID
-     * @param null $orderID
+     * @param $cart_id
+     * @param null $order_id
      * @return mixed
      */
-    private function getTransactionInformation($cartID, $orderID = null)
+    private function getTransactionInformation($cart_id, $order_id = null)
     {
 
-        $id_order = (empty($cartID)
-            ? "(SELECT `id_cart` FROM `{$this->tableOrder}` WHERE `id_order` = {$orderID})"
-            : $cartID);
+        $id_order = (empty($cart_id)
+            ? "(SELECT `id_cart` FROM `{$this->tableOrder}` WHERE `id_order` = {$order_id})"
+            : $cart_id);
 
         $result = Db::getInstance()->ExecuteS("SELECT * FROM `{$this->tablePayment}` WHERE `id_order` = {$id_order}");
 
@@ -1117,11 +1120,11 @@ class PaymentMethod extends PaymentModule
             $placetopay = new PaymentRedirection($this->getLogin(), $this->getTrankey(), $this->getUri());
 
             foreach ($result as $row) {
-                $requestId = (int)$row['id_request'];
+                $request_id = (int)$row['id_request'];
                 $cart_id = (int)$row['id_order'];
 
                 // Consta estado de la transaccion en PaymentRedirection
-                $response = $placetopay->query($requestId);
+                $response = $placetopay->query($request_id);
                 $status = $this->getStatusPayment($response);
                 $order = $this->getRelatedOrder($cart_id);
 
