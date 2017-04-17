@@ -398,7 +398,7 @@ class PaymentMethod extends PaymentModule
             $smarty->assign(array(
                 'hasPending' => true,
                 'lastOrder' => $pending['reference'],
-                'lastAuthorization' => $pending['authcode'],
+                'lastAuthorization' => (string) $pending['authcode'],
                 'storeEmail' => $this->getEmailContact(),
                 'storePhone' => $this->getTelephoneContact()
             ));
@@ -642,7 +642,7 @@ class PaymentMethod extends PaymentModule
         }
 
         // Construye la URL de retorno, al que se redirecciona desde el proceso de pago
-        $reference = $cart->id . '::' . time();
+        $reference = date('YmdHi') . $cart->id;
         $ip_address = (new RemoteAddress())->getIpAddress();
         $return_url = $this->getReturnURL('?cart_id=' . $cart->id);
 
@@ -667,11 +667,17 @@ class PaymentMethod extends PaymentModule
             ],
             'payment' => [
                 'reference' => $reference,
-                'description' => 'Prestashop',
+                'description' => sprintf($this->getDescription(), $reference),
                 'amount' => [
                     'currency' => $currency->iso_code,
                     'total' => $total_amount,
-                    'tax_amount:' => $tax_amount,
+                    'taxes' => [
+                        [
+                            'kind' => 'valueAddedTax',
+                            'amount' => $tax_amount,
+                            'base' => $total_amount - $tax_amount,
+                        ]
+                    ]
                 ]
             ]
         ];
@@ -954,10 +960,7 @@ class PaymentMethod extends PaymentModule
         $conversion = '';
         $payer_email = '';
 
-        if (in_array($status, [
-            PaymentRedirection::P2P_APPROVED,
-            PaymentRedirection::P2P_DECLINED
-        ]) && isset($payment->payment)) {
+        if (isset($payment->payment)) {
             $date = pSQL($payment->payment[0]->status()->date());
             $reason = pSQL($payment->payment[0]->status()->reason());
             $reason_description = pSQL($payment->payment[0]->status()->message());
