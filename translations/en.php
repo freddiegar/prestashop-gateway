@@ -2,6 +2,7 @@
 
 global $_MODULE;
 $_MODULE = array();
+
 $_MODULE['<{placetopaypayment}prestashop>paymentmethod_c92ed2ff094e750adaa0baa69ee295cc'] = 'Place to Pay';
 $_MODULE['<{placetopaypayment}prestashop>paymentmethod_96b1f8b105303b62fa80db89c6f97327'] = 'Accept payments by credit cards and debits account';
 $_MODULE['<{placetopaypayment}prestashop>paymentmethod_876f23178c29dc2552c0b48bf23cd9bd'] = 'Are you sure you want to uninstall?';
@@ -77,9 +78,12 @@ $_MODULE['<{placetopaypayment}prestashop>setting_0ba29c6a1afacf586b03a26162c7227
 $_MODULE['<{placetopaypayment}prestashop>setting_756d97bb256b8580d4d71ee0c547804e'] = 'Production';
 $_MODULE['<{placetopaypayment}prestashop>setting_0cbc6611f5540bd0809a388dc95a615b'] = 'Test';
 $_MODULE['<{placetopaypayment}prestashop>setting_330f49df8243756a8a4dc7f7f7ee6dfe'] = 'Development';
-$_MODULE['<{placetopaypayment}prestashop>setting_35abc32460de744081596c5c71a6bc6b'] = 'Enable CIFIN message';
+$_MODULE['<{placetopaypayment}prestashop>setting_28144e0941a5751b8b78a718ef942cb3'] = 'Enable order history customized?';
 $_MODULE['<{placetopaypayment}prestashop>setting_93cba07454f06a4a960172bbd6e2a435'] = 'Yes';
 $_MODULE['<{placetopaypayment}prestashop>setting_bafd7322c6e97d25b6299b5d6fe8920b'] = 'No';
+$_MODULE['<{placetopaypayment}prestashop>setting_35abc32460de744081596c5c71a6bc6b'] = 'Enable TransUnion message?';
 $_MODULE['<{placetopaypayment}prestashop>setting_312db9e3e6cc39b55db7e1b845c93ed6'] = 'Reinject stock on declination?';
 $_MODULE['<{placetopaypayment}prestashop>setting_c80a51a60c5ee43553c3881459b8f431'] = 'Update configuration';
 $_MODULE['<{placetopaypayment}prestashop>setting_630f6dc397fe74e52d5189e2c80f282b'] = 'Back to list';
+
+return $_MODULE;

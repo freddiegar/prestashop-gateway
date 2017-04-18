@@ -24,6 +24,7 @@ use \Product;
 use \Context;
 use \Country;
 use \State;
+use \Shop;
 use \Exception;
 
 /**
@@ -46,6 +47,7 @@ class PaymentMethod extends PaymentModule
     const ENVIRONMENT = 'PLACETOPAY_ENVIRONMENT';
     const STOCK_REINJECT = 'PLACETOPAY_STOCKREINJECT';
     const CIFIN_MESSAGE = 'PLACETOPAY_CIFINMESSAGE';
+    const HISTORY_CUSTOMIZED = 'PLACETOPAY_HISTORYCUSTOMIZED';
 
     const ORDER_STATE = 'PS_OS_PLACETOPAY';
 
@@ -75,7 +77,7 @@ class PaymentMethod extends PaymentModule
         $this->author = 'EGM Ingeniería sin Fronteras S.A.S';
         $this->tab = 'payments_gateways';
         $this->need_instance = 0;
-        $this->ps_versions_compliancy = array('min' => '1.5', 'max' => _PS_VERSION_);
+        $this->ps_versions_compliancy = array('min' => '1.5', 'max' => '1.6');
 
         parent::__construct();
 
@@ -133,6 +135,7 @@ class PaymentMethod extends PaymentModule
         Configuration::updateValue(self::ENVIRONMENT, 'TEST');
         Configuration::updateValue(self::STOCK_REINJECT, '1');
         Configuration::updateValue(self::CIFIN_MESSAGE, '0');
+        Configuration::updateValue(self::HISTORY_CUSTOMIZED, '1');
 
         return true;
     }
@@ -159,6 +162,7 @@ class PaymentMethod extends PaymentModule
             || !Configuration::deleteByName(self::ENVIRONMENT)
             || !Configuration::deleteByName(self::STOCK_REINJECT)
             || !Configuration::deleteByName(self::CIFIN_MESSAGE)
+            || !Configuration::deleteByName(self::HISTORY_CUSTOMIZED)
             || !parent::uninstall()
         ) {
             return false;
@@ -324,6 +328,7 @@ class PaymentMethod extends PaymentModule
         Configuration::updateValue(self::STOCK_REINJECT, (Tools::getValue('stockreinject') == '1' ? '1' : '0'));
         // habilitar el mensaje de CIFIN
         Configuration::updateValue(self::CIFIN_MESSAGE, (Tools::getValue('cifinmessage') == '1' ? '1' : '0'));
+        Configuration::updateValue(self::HISTORY_CUSTOMIZED, (Tools::getValue('historycustomized') == '1' ? '1' : '0'));
 
         // genera el volcado de errores
         if (!empty($errors)) {
@@ -357,11 +362,12 @@ class PaymentMethod extends PaymentModule
 
                 'login' => $this->getLogin(),
                 'trankey' => $this->getTrankey(),
-                'urlnotification' => $this->getReturnURL(),
+                'urlnotification' => $this->getReturnURL('process.php'),
                 'schudeletask' => $this->getPathSchudeleTask(),
                 'environment' => $this->getEnvironment(),
                 'stockreinject' => $this->getStockReinject(),
                 'cifinmessage' => $this->getCifinMessage(),
+                'historycustomized' => $this->getHistoryCustomized(),
             )
         );
 
@@ -398,7 +404,7 @@ class PaymentMethod extends PaymentModule
             $smarty->assign(array(
                 'hasPending' => true,
                 'lastOrder' => $pending['reference'],
-                'lastAuthorization' => (string) $pending['authcode'],
+                'lastAuthorization' => (string)$pending['authcode'],
                 'storeEmail' => $this->getEmailContact(),
                 'storePhone' => $this->getTelephoneContact()
             ));
@@ -553,22 +559,31 @@ class PaymentMethod extends PaymentModule
     /**
      * @return mixed
      */
+    public function getHistoryCustomized()
+    {
+        return Configuration::get(self::HISTORY_CUSTOMIZED);
+    }
+
+    /**
+     * @return mixed
+     */
     public function getOrderState()
     {
         return Configuration::get(self::ORDER_STATE);
     }
 
     /**
+     * @param string $page process.php
      * @param string $params Query string to add in URL, please include symbol (?), eg: ?var=foo
      * @return string
      */
-    public function getReturnURL($params = '')
+    public function getReturnURL($page, $params = '')
     {
 
         $protocol = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://');
         $domain = (Configuration::get('PS_SHOP_DOMAIN_SSL')) ? Configuration::get('PS_SHOP_DOMAIN_SSL') : Tools::getHttpHost();
 
-        return $protocol . $domain . __PS_BASE_URI__ . 'modules/' . $this->name . '/process.php' . $params;
+        return $protocol . $domain . __PS_BASE_URI__ . 'modules/' . $this->name . '/' . $page . $params;
     }
 
     /**
@@ -611,8 +626,8 @@ class PaymentMethod extends PaymentModule
 
     /**
      * Obtiene el ID y redirecciona al Flujo
-     *
      * @param Cart $cart
+     * @throws PaymentException
      */
     public function redirect(Cart $cart)
     {
@@ -642,9 +657,9 @@ class PaymentMethod extends PaymentModule
         }
 
         // Construye la URL de retorno, al que se redirecciona desde el proceso de pago
-        $reference = date('YmdHi') . $cart->id;
+        $reference = date('YmdH') . $cart->id;
         $ip_address = (new RemoteAddress())->getIpAddress();
-        $return_url = $this->getReturnURL('?cart_id=' . $cart->id);
+        $return_url = $this->getReturnURL('process.php', '?cart_id=' . $cart->id);
 
         // Crea solicitud de pago en Redirección
         $request = [
@@ -683,8 +698,12 @@ class PaymentMethod extends PaymentModule
         ];
 
         // Crea Instancia Placetopay
-        $placetopay = new PaymentRedirection($this->getLogin(), $this->getTrankey(), $this->getUri());
-        $response = $placetopay->request($request);
+        try {
+            $placetopay = new PaymentRedirection($this->getLogin(), $this->getTrankey(), $this->getUri());
+            $response = $placetopay->request($request);
+        } catch (Exception $e) {
+            throw new PaymentException($e->getMessage(), 107);
+        }
 
         try {
 
@@ -795,7 +814,8 @@ class PaymentMethod extends PaymentModule
 
     /**
      * Procesa la respuesta de pago dada por la plataforma
-     * @param array $cart_id
+     * @param null $cart_id
+     * @throws PaymentException
      */
     public function process($cart_id = null)
     {
@@ -944,7 +964,8 @@ class PaymentMethod extends PaymentModule
      * @param $id_order
      * @param $status
      * @param $payment
-     * @return mixed
+     * @return bool
+     * @throws PaymentException
      */
     private function updateTransaction($id_order, $status, $payment)
     {
@@ -1007,17 +1028,33 @@ class PaymentMethod extends PaymentModule
      */
     public function hookPaymentReturn($params)
     {
-        global $smarty;
 
         if ((!$this->active) || ($params['objOrder']->module != $this->name)) {
             return;
         }
 
+
+        if ($this->getHistoryCustomized() == '1') {
+            return $this->getPaymentHistory($params);
+        } else {
+            return $this->getPaymentDetails($params);
+        }
+
+    }
+
+    /**
+     * @param $params
+     * @return mixed
+     */
+    private function getPaymentDetails($params)
+    {
+        global $smarty;
+
+
         // provee a la plantilla de la informacion
         $transaction = $this->getTransactionInformation($params['objOrder']->id_cart);
         $cart = new Cart((int)$params['objOrder']->id_cart);
         $invoice_address = new Address((int)($cart->id_address_invoice));
-        $delivery_address = new Address((int)($cart->id_address_delivery));
         $total_amount = (float)($cart->getOrderTotal(true, Cart::BOTH));
         $tax_amount = $total_amount - (float)($cart->getOrderTotal(false, Cart::BOTH));
         $payer_email = $transaction['payer_email'];
@@ -1079,6 +1116,75 @@ class PaymentMethod extends PaymentModule
         $context->cookie->__set('customer_id', $cart->id_customer);
 
         return $this->display($this->getPathThisModule(), '/views/templates/response.tpl');
+    }
+
+    /**
+     * @return mixed
+     */
+    private function getPaymentHistory()
+    {
+
+        $orders = self::getCustomerOrders($this->context->customer->id);
+
+        if ($orders) {
+            foreach ($orders as &$order) {
+                $myOrder = new Order((int)$order['id_order']);
+                if (Validate::isLoadedObject($myOrder)) {
+                    $order['virtual'] = $myOrder->isVirtual(false);
+                }
+            }
+        }
+        $this->context->smarty->assign(array(
+            'orders' => $orders,
+            'invoiceAllowed' => (int)Configuration::get('PS_INVOICE'),
+            'reorderingAllowed' => !(bool)Configuration::get('PS_DISALLOW_HISTORY_REORDERING'),
+            'slowValidation' => Tools::isSubmit('slowvalidation')
+        ));
+
+        return $this->display($this->getPathThisModule(), '/views/templates/history.tpl');
+    }
+
+    /**
+     * Get customer orders
+     *
+     * @param int $id_customer Customer id
+     * @param bool $show_hidden_status Display or not hidden order statuses
+     * @return array Customer orders
+     */
+    public function getCustomerOrders($id_customer, $show_hidden_status = false, Context $context = null)
+    {
+        if (!$context) {
+            $context = Context::getContext();
+        }
+
+        $res = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS('
+        SELECT o.`id_order`, o.`id_currency`, o.`payment`, o.`invoice_number`, pp.`date` date_add, pp.`reference`, pp.`amount` total_paid, pp.`authcode` cus, (SELECT SUM(od.`product_quantity`) FROM `' . _DB_PREFIX_ . 'order_detail` od WHERE od.`id_order` = o.`id_order`) nb_products
+        FROM `' . $this->tableOrder . '` o
+            JOIN `' . $this->tablePayment . '` pp ON pp.id_order = o.id_cart
+        WHERE o.`id_customer` = ' . (int)$id_customer .
+            Shop::addSqlRestriction(Shop::SHARE_ORDER) . '
+        GROUP BY o.`id_order`
+        ORDER BY o.`date_add` DESC');
+        if (!$res) {
+            return array();
+        }
+
+        foreach ($res as $key => $val) {
+            $res2 = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS('
+                SELECT os.`id_order_state`, osl.`name` AS order_state, os.`invoice`, os.`color` as order_state_color
+                FROM `' . _DB_PREFIX_ . 'order_history` oh
+                LEFT JOIN `' . _DB_PREFIX_ . 'order_state` os ON (os.`id_order_state` = oh.`id_order_state`)
+                INNER JOIN `' . _DB_PREFIX_ . 'order_state_lang` osl ON (os.`id_order_state` = osl.`id_order_state` AND osl.`id_lang` = ' . (int)$context->language->id . ')
+            WHERE oh.`id_order` = ' . (int)$val['id_order'] . (!$show_hidden_status ? ' AND os.`hidden` != 1' : '') . '
+                ORDER BY oh.`date_add` DESC, oh.`id_order_history` DESC
+            LIMIT 1');
+
+            if ($res2) {
+                $res[$key] = array_merge($res[$key], $res2[0]);
+            }
+        }
+
+        return $res;
     }
 
     /**

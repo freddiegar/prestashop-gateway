@@ -78,9 +78,10 @@ $_MODULE['<{placetopaypayment}prestashop>setting_0ba29c6a1afacf586b03a26162c7227
 $_MODULE['<{placetopaypayment}prestashop>setting_756d97bb256b8580d4d71ee0c547804e'] = 'Produccción';
 $_MODULE['<{placetopaypayment}prestashop>setting_0cbc6611f5540bd0809a388dc95a615b'] = 'Pruebas';
 $_MODULE['<{placetopaypayment}prestashop>setting_330f49df8243756a8a4dc7f7f7ee6dfe'] = 'Desarrollo';
-$_MODULE['<{placetopaypayment}prestashop>setting_35abc32460de744081596c5c71a6bc6b'] = 'Habilitar mensaje de TransUnion';
+$_MODULE['<{placetopaypayment}prestashop>setting_28144e0941a5751b8b78a718ef942cb3'] = '¿Habilitar historial de ordenes personalizado?';
 $_MODULE['<{placetopaypayment}prestashop>setting_93cba07454f06a4a960172bbd6e2a435'] = 'Si';
 $_MODULE['<{placetopaypayment}prestashop>setting_bafd7322c6e97d25b6299b5d6fe8920b'] = 'No';
+$_MODULE['<{placetopaypayment}prestashop>setting_35abc32460de744081596c5c71a6bc6b'] = '¿Habilitar mensaje de TransUnion?';
 $_MODULE['<{placetopaypayment}prestashop>setting_312db9e3e6cc39b55db7e1b845c93ed6'] = '¿Reinyectar el stock en la declinación?';
 $_MODULE['<{placetopaypayment}prestashop>setting_c80a51a60c5ee43553c3881459b8f431'] = 'Actualizar la configuración';
 $_MODULE['<{placetopaypayment}prestashop>setting_630f6dc397fe74e52d5189e2c80f282b'] = 'Volver a la lista';

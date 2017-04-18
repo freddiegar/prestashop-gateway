@@ -114,22 +114,27 @@
     {if ($status neq 'ok') and ($status neq 'pending')}
         {if isset($opc) && $opc}
             <a href="{$link->getPageLink('order-opc', true, NULL, "submitReorder&id_order={$objOrder->id|intval}")|escape:'html':'UTF-8'}"><img
-                        src="{$placetopayImgUrl}retry.png" alt="{l s='Retry payment' mod='placetopaypayment'}" width="32"
+                        src="{$placetopayImgUrl}retry.png" alt="{l s='Retry payment' mod='placetopaypayment'}"
+                        width="32"
                         height="32" border="0"/>
                 {l s='Retry payment' mod='placetopaypayment'}
             </a>
         {else}
             <a href="{$link->getPageLink('order', true, NULL, "submitReorder&id_order={$objOrder->id|intval}")|escape:'html':'UTF-8'}"><img
-                        src="{$placetopayImgUrl}retry.png" alt="{l s='Retry payment' mod='placetopaypayment'}" width="32"
+                        src="{$placetopayImgUrl}retry.png" alt="{l s='Retry payment' mod='placetopaypayment'}"
+                        width="32"
                         height="32" border="0"/>
                 {l s='Retry payment' mod='placetopaypayment'}
             </a>
         {/if}
     {/if}
-    <a href="{$link->getPageLink('history', true)|escape:'html':'UTF-8'}"> <img src="{$placetopayImgUrl}history.png"
-                                                                                alt="{l s='Print' mod='placetopaypayment'}"
-                                                                                width="32" height="32"
-                                                                                border="0"/> {l s='Payment History' mod='placetopaypayment'}
+
+    <a href="{$link->getPageLink('history', true)|escape:'html':'UTF-8'}">
+        <img src="{$placetopayImgUrl}history.png"
+             alt="{l s='Payment History' mod='placetopaypayment'}"
+             width="32" height="32"
+             border="0"/>
+        {l s='Payment History' mod='placetopaypayment'}
     </a>
 </p>
 
