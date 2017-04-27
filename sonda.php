@@ -19,9 +19,5 @@ if (!file_exists($pathPrestaShop . '/config/config.inc.php')) {
 require $pathPrestaShop . '/config/config.inc.php';
 require _PS_MODULE_DIR_ . "/placetopaypayment/placetopaypayment.php";
 
-if (php_sapi_name() == 'cli') {
-    // instancia el componente de PlacetoPay y redirige al cliente a la plataforma
-    (new PlaceToPayPayment())->sonda();
-} else {
-    header('Location: ../../index.php');
-}
+// Ejecuta la sonda
+(new PlaceToPayPayment())->sonda();

@@ -994,7 +994,7 @@ class PaymentMethod extends PaymentModule
             $conversion = pSQL($payment->payment[0]->amount()->factor());
         }
 
-        if (!empty($payment->request()->buyer()->email())) {
+        if (isset($payment->request()->buyer) && !empty($payment->request()->buyer()->email())) {
             $payer_email = pSQL($payment->request()->buyer()->email());
         }
 
