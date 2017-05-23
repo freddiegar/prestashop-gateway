@@ -73,7 +73,7 @@ class PaymentMethod extends PaymentModule
         $this->tableOrder = _DB_PREFIX_ . 'orders';
 
         $this->name = 'placetopaypayment';
-        $this->version = '2.1';
+        $this->version = '2.3.1';
         $this->author = 'EGM Ingeniería sin Fronteras S.A.S';
         $this->tab = 'payments_gateways';
         $this->need_instance = 0;
@@ -637,8 +637,8 @@ class PaymentMethod extends PaymentModule
         $currency = new Currency((int)($cart->id_currency));
         $invoice_address = new Address((int)($cart->id_address_invoice));
         $delivery_address = new Address((int)($cart->id_address_delivery));
-        $total_amount = floatval($cart->getOrderTotal(true, Cart::BOTH));
-        $tax_amount = $total_amount - floatval($cart->getOrderTotal(false, Cart::BOTH));
+        $total_amount = floatval($cart->getOrderTotal(true));
+        $tax_amount = floatval($total_amount - floatval($cart->getOrderTotal(false)));
 
         // Verifica que los objetos se hayan cargado correctamente
         if (!Validate::isLoadedObject($customer)
@@ -686,16 +686,20 @@ class PaymentMethod extends PaymentModule
                 'amount' => [
                     'currency' => $currency->iso_code,
                     'total' => $total_amount,
-                    'taxes' => [
-                        [
-                            'kind' => 'valueAddedTax',
-                            'amount' => $tax_amount,
-                            'base' => $total_amount - $tax_amount,
-                        ]
-                    ]
                 ]
             ]
         ];
+
+        if ($tax_amount > 0) {
+            // Add taxes
+            $request['payment']['amount']['taxes'] = [
+                [
+                    'kind' => 'valueAddedTax',
+                    'amount' => $tax_amount,
+                    'base' => $total_amount - $tax_amount,
+                ]
+            ];
+        }
 
         // Crea Instancia Placetopay
         try {
