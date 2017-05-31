@@ -5,62 +5,27 @@ namespace PlacetoPay\Models;
 use Dnetix\Redirection\PlacetoPay;
 
 /**
- * Clase para el procesamiento de pagos a traves de PlacetoPay.
+ * Class PaymentRedirection
+ * @package PlacetoPay\Models
  */
 class PaymentRedirection extends PlacetoPay
 {
-
     /**
-     * URI para el caso de produccion
-     */
-    const P2P_PRODUCTION = 'https://secure.placetopay.com/redirection';
-
-    /**
-     * URI para el caso de pruebas
-     */
-    const P2P_TEST = 'https://test.placetopay.com/redirection';
-
-    /**
-     * URI para el caso de desarrollo
-     */
-    const P2P_DEVELOPMENT = 'https://dev.placetopay.com/redirection';
-
-    /**
-     * Indicador de transaccion fallida
-     */
-    const P2P_FAILED = 0;
-
-    /**
-     * Indicador de transaccion exitosa
-     */
-    const P2P_APPROVED = 1;
-
-    /**
-     * Indicador de transaccion declinada
-     */
-    const P2P_DECLINED = 2;
-
-    /**
-     * Indicador de transaccion pendiente
-     */
-    const P2P_PENDING = 3;
-
-    /**
-     * Indicador de transaccion duplicada (previamente aprobada)
-     */
-    const P2P_DUPLICATE = 4;
-
-    /**
-     * Instantiates a PlacetoPay object providing the login and tranKey,
+     * Instantiates a Place to Pay object providing the login and tranKey,
      * also the url that will be used for the service
+     *
+     * @param array $login
+     * @param $tranKey
+     * @param string $uri_service
+     * @param string $type soap|rest
      */
-    function __construct($login, $trankey, $uri_service = '')
+    public function __construct($login, $tranKey, $uri_service = '', $type = 'rest')
     {
         parent::__construct([
             'login' => $login,
-            'tranKey' => $trankey,
+            'tranKey' => $tranKey,
             'url' => $uri_service,
+            'type' => $type,
         ]);
     }
-
 }

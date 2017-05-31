@@ -2,13 +2,13 @@
 
     <h4>
         <img src="https://www.placetopay.com/images/providers/placetopay.full.png" alt="Place to Pay" height="48"/>
+        Version: {$version}
     </h4>
 
     <b>
         {l s='This module allows you to accept payments by Place to Pay.' mod='placetopaypayment'}
     </b>
 
-    <br/>
     <br/>
 
     {l s='You need to configure your Place to Pay account before using this module.' mod='placetopaypayment'}

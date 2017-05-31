@@ -1,12 +1,12 @@
 <?php
 
-namespace PlacetoPay\Logger;
+namespace PlacetoPay\Loggers;
 
 use \FileLogger;
 
 /**
  * Class PaymentLogger
- * @package PlacetoPay\Logger
+ * @package PlacetoPay\Loggers
  */
 class PaymentLogger
 {

@@ -3,7 +3,10 @@
 namespace PlacetoPay\Models;
 
 use Dnetix\Redirection\Message\RedirectInformation;
-use PlacetoPay\Exception\PaymentException;
+use PlacetoPay\Constants\Environment;
+use PlacetoPay\Constants\PaymentStatus;
+use PlacetoPay\Constants\PaymentUrl;
+use PlacetoPay\Exceptions\PaymentException;
 use \PaymentModule;
 use \Configuration;
 use \Db;
@@ -33,7 +36,7 @@ use \Exception;
 class PaymentMethod extends PaymentModule
 {
     /**
-     * Variables de configuracion del módulo
+     * Configuration module vars
      */
     const COMPANY_DOCUMENT = 'PLACETOPAY_COMPANYDOCUMENT';
     const COMPANY_NAME = 'PLACETOPAY_COMPANYNAME';
@@ -49,16 +52,20 @@ class PaymentMethod extends PaymentModule
     const CIFIN_MESSAGE = 'PLACETOPAY_CIFINMESSAGE';
     const HISTORY_CUSTOMIZED = 'PLACETOPAY_HISTORYCUSTOMIZED';
 
+    const OPTION_ENABLED = '1';
+    const OPTION_DISABLED = '0';
+
     const ORDER_STATE = 'PS_OS_PLACETOPAY';
 
     /**
-     * Tabla de pagos
+     * @var string
      */
-    private $tablePayment = null;
+    private $tablePayment = '';
+
     /**
-     * Tabla de ordenes
+     * @var string
      */
-    private $tableOrder = null;
+    private $tableOrder = '';
 
 
     /**
@@ -73,7 +80,7 @@ class PaymentMethod extends PaymentModule
         $this->tableOrder = _DB_PREFIX_ . 'orders';
 
         $this->name = 'placetopaypayment';
-        $this->version = '2.3.1';
+        $this->version = '2.4.1';
         $this->author = 'EGM Ingeniería sin Fronteras S.A.S';
         $this->tab = 'payments_gateways';
         $this->need_instance = 0;
@@ -91,12 +98,20 @@ class PaymentMethod extends PaymentModule
         $this->confirmUninstall = $this->l('Are you sure you want to uninstall?');
     }
 
+
     /**
-     * Crea la tabla de pagos y la tabla de estado de la orden.
-     * Además crea las variables de configuración para realizar la conexión con Redirección de Pagos.
-     * Registran.
+     * @return string
+     */
+    private function getVersion()
+    {
+        return $this->version;
+    }
+
+    /**
+     * Create payments table and status order
      *
      * @return bool
+     * @throws PaymentException
      */
     public function install()
     {
@@ -106,23 +121,23 @@ class PaymentMethod extends PaymentModule
             case !$this->createPaymentTable():
                 throw new PaymentException('error on install', 102);
             case !$this->createOrderState();
-                throw new PaymentException('error on install', 104);
+                throw new PaymentException('error on install', 103);
             case !$this->alterColumnIpAddress();
                 throw new PaymentException('error on install', 104);
             case !$this->addColumnEmail();
-                throw new PaymentException('error on install', 113);
-            case !$this->addColumnRequestId();
-                throw new PaymentException('error on install', 114);
-            case !$this->addColumnReference();
-                throw new PaymentException('error on install', 114);
-            case !$this->registerHook('payment'):
-                throw new PaymentException('error on install', 104);
-            case !$this->registerHook('paymentReturn');
                 throw new PaymentException('error on install', 105);
+            case !$this->addColumnRequestId();
+                throw new PaymentException('error on install', 106);
+            case !$this->addColumnReference();
+                throw new PaymentException('error on install', 107);
+            case !$this->registerHook('payment'):
+                throw new PaymentException('error on install', 108);
+            case !$this->registerHook('paymentReturn');
+                throw new PaymentException('error on install', 109);
                 break;
         }
 
-        // Variables de configuración del  módulo
+        // Default values
         Configuration::updateValue(self::COMPANY_DOCUMENT, '');
         Configuration::updateValue(self::COMPANY_NAME, '');
         Configuration::updateValue(self::DESCRIPTION, 'Pago en PlacetoPay No: %s');
@@ -132,20 +147,19 @@ class PaymentMethod extends PaymentModule
 
         Configuration::updateValue(self::LOGIN, '');
         Configuration::updateValue(self::TRAN_KEY, '');
-        Configuration::updateValue(self::ENVIRONMENT, 'TEST');
-        Configuration::updateValue(self::STOCK_REINJECT, '1');
-        Configuration::updateValue(self::CIFIN_MESSAGE, '0');
-        Configuration::updateValue(self::HISTORY_CUSTOMIZED, '1');
+        Configuration::updateValue(self::ENVIRONMENT, Environment::TEST);
+        Configuration::updateValue(self::STOCK_REINJECT, self::OPTION_ENABLED);
+        Configuration::updateValue(self::CIFIN_MESSAGE, self::OPTION_DISABLED);
+        Configuration::updateValue(self::HISTORY_CUSTOMIZED, self::OPTION_ENABLED);
 
         return true;
     }
 
     /**
-     * Desinstala el modulo, eliminando unicamente las variables de configuración
-     * generadas.
-     * NO se elimina la tabla con el historico y el nuevo estado creado
+     * Delete configuration vars
+     * This not delete tables and status order
      *
-     * @retun bool
+     * @return bool
      */
     public function uninstall()
     {
@@ -172,8 +186,8 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * Crea la tabla en la cúal se almacena información adicional de la transacción,
-     * es generada en el proceso de instalacion (self::install())
+     * Create payment table
+     *
      * @return bool
      */
     private function createPaymentTable()
@@ -246,7 +260,8 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * Crea un estado para las ordenes procesadas con PlacetoPay en espera de respuesta
+     * Create status order to Place To Pay
+     *
      * @return bool
      */
     private function createOrderState()
@@ -288,49 +303,48 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * Muestra la página de configuración del módulo
+     * Show and save configuration page
      */
     public function getContent()
     {
-        // Asienta la configuración y genera una salida estandar
         $html = $this->saveConfiguration();
-
-        // Muestra el formulario para la configuración de PlacetoPay
         $html .= $this->displayConfiguration();
 
         return $html;
     }
 
     /**
-     * Valida y almacena la información de configuración de PlacetoPay
+     * Update configuration vars
+     *
+     * @return bool
      */
     private function saveConfiguration()
     {
         if (!Tools::isSubmit('submitPlacetoPayConfiguraton')) {
-            return;
+            return false;
         }
 
         $errors = array();
 
-        // Almacena los datos de la compañía
+        // Company data
         Configuration::updateValue(self::COMPANY_DOCUMENT, Tools::getValue('companydocument'));
         Configuration::updateValue(self::COMPANY_NAME, Tools::getValue('companyname'));
         Configuration::updateValue(self::DESCRIPTION, Tools::getValue('description'));
-        // Almacena los datos de contacto
+        // Contact data
         Configuration::updateValue(self::EMAIL_CONTACT, Tools::getValue('email'));
         Configuration::updateValue(self::TELEPHONE_CONTACT, Tools::getValue('telephone'));
-        // Configura cuenta PaymentRedirection
+        // Redirection data
         Configuration::updateValue(self::LOGIN, Tools::getValue('login'));
         Configuration::updateValue(self::TRAN_KEY, Tools::getValue('trankey'));
         Configuration::updateValue(self::ENVIRONMENT, Tools::getValue('environment'));
 
-        // El comportamiento del inventario ante una transacción fallida o declinada
-        Configuration::updateValue(self::STOCK_REINJECT, (Tools::getValue('stockreinject') == '1' ? '1' : '0'));
-        // habilitar el mensaje de CIFIN
-        Configuration::updateValue(self::CIFIN_MESSAGE, (Tools::getValue('cifinmessage') == '1' ? '1' : '0'));
-        Configuration::updateValue(self::HISTORY_CUSTOMIZED, (Tools::getValue('historycustomized') == '1' ? '1' : '0'));
+        // Stock re-inject option
+        Configuration::updateValue(self::STOCK_REINJECT, (Tools::getValue('stockreinject') == '1' ? self::OPTION_ENABLED : self::OPTION_DISABLED));
+        // Cifin message option
+        Configuration::updateValue(self::CIFIN_MESSAGE, (Tools::getValue('cifinmessage') == '1' ? self::OPTION_ENABLED : self::OPTION_DISABLED));
+        // History option
+        Configuration::updateValue(self::HISTORY_CUSTOMIZED, (Tools::getValue('historycustomized') == '1' ? self::OPTION_ENABLED : self::OPTION_DISABLED));
 
-        // genera el volcado de errores
         if (!empty($errors)) {
             $error_msg = '';
             foreach ($errors as $error)
@@ -342,7 +356,8 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * Genera el formulario para la configuración de PlacetoPay
+     * Show configuration form
+     *
      * @return string
      */
     private function displayConfiguration()
@@ -354,6 +369,8 @@ class PaymentMethod extends PaymentModule
                 'actionURL' => Tools::safeOutput($_SERVER['REQUEST_URI']),
                 'actionBack' => AdminController::$currentIndex . '&token=' . Tools::getAdminTokenLite('AdminModules'),
 
+                'version' => $this->getVersion(),
+
                 'companydocument' => $this->getCompanyDocument(),
                 'companyname' => $this->getCompanyName(),
                 'description' => $this->getDescription(),
@@ -363,7 +380,7 @@ class PaymentMethod extends PaymentModule
                 'login' => $this->getLogin(),
                 'trankey' => $this->getTrankey(),
                 'urlnotification' => $this->getReturnURL('process.php'),
-                'schudeletask' => $this->getPathSchudeleTask(),
+                'schudeletask' => $this->getPathScheduleTask(),
                 'environment' => $this->getEnvironment(),
                 'stockreinject' => $this->getStockReinject(),
                 'cifinmessage' => $this->getCifinMessage(),
@@ -375,21 +392,18 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * Muestra a PlacetoPay como uno de los medios de pagos disponibles en el checkout
+     * Show payment method in checkout
      *
      * @param array $params
      * @return string
      */
     public function hookPayment($params)
     {
-
         global $smarty;
 
-        // aborta si el medio no esta activo
         if (!$this->active)
             return false;
 
-        // Si la cuenta de Place to Pay no esta correctamente configurado, aborta el proceso
         if (
             empty($this->getLogin())
             || empty($this->getTrankey())
@@ -398,13 +412,12 @@ class PaymentMethod extends PaymentModule
             return false;
         }
 
-        // Obtiene la última operación pendiente
-        $pending = $this->getLastPendingTransaction($params['cart']->id_customer);
-        if (!empty($pending)) {
+        $lastPendingTransaction = $this->getLastPendingTransaction($params['cart']->id_customer);
+        if (!empty($lastPendingTransaction)) {
             $smarty->assign(array(
                 'hasPending' => true,
-                'lastOrder' => $pending['reference'],
-                'lastAuthorization' => (string)$pending['authcode'],
+                'lastOrder' => $lastPendingTransaction['reference'],
+                'lastAuthorization' => (string)$lastPendingTransaction['authcode'],
                 'storeEmail' => $this->getEmailContact(),
                 'storePhone' => $this->getTelephoneContact()
             ));
@@ -412,27 +425,23 @@ class PaymentMethod extends PaymentModule
             $smarty->assign('hasPending', false);
         }
 
-        // Asigna variable del modelo para el link
         $smarty->assign('module', $this->name);
-        // Asigna el nombre del sitio
         $smarty->assign('sitename', Configuration::get('PS_SHOP_NAME'));
-        // Asigna la variable para el mensaje CIFIN
         $smarty->assign('cifinmessage', $this->getCifinMessage());
-        // Asigna el nombre de la compañía
         $smarty->assign('companyname', $this->getCompanyName());
 
-        // Muestra la opción de medio de pago
         return $this->display($this->getPathThisModule(), '/views/templates/payment.tpl');
     }
 
     /**
-     * Obtiene la última transacción pendiente de pago utilizando el medio
+     * Last transaction pending to current costumer
+     *
      * @param $customer_id
      * @return mixed
      */
     private function getLastPendingTransaction($customer_id)
     {
-        $status = PaymentRedirection::P2P_PENDING;
+        $status = PaymentStatus::PENDING;
 
         $result = Db::getInstance()->ExecuteS("
             SELECT p.* 
@@ -456,14 +465,14 @@ class PaymentMethod extends PaymentModule
     public function getUri()
     {
         switch ($this->getEnvironment()) {
-            case 'PRODUCTION':
-                $uri = PaymentRedirection::P2P_PRODUCTION;
+            case Environment::PRODUCTION:
+                $uri = PaymentUrl::PRODUCTION;
                 break;
-            case 'TEST':
-                $uri = PaymentRedirection::P2P_TEST;
+            case Environment::TEST:
+                $uri = PaymentUrl::TEST;
                 break;
-            case 'DEVELOPMENT':
-                $uri = PaymentRedirection::P2P_DEVELOPMENT;
+            case Environment::DEVELOPMENT:
+                $uri = PaymentUrl::DEVELOPMENT;
                 break;
             default:
                 $uri = null;
@@ -589,7 +598,7 @@ class PaymentMethod extends PaymentModule
     /**
      * @return string
      */
-    private function getPathSchudeleTask()
+    private function getPathScheduleTask()
     {
         return $this->getPathThisModule() . '/sonda.php';
     }
@@ -612,26 +621,26 @@ class PaymentMethod extends PaymentModule
         $order_id = Order::getOrderByCartId($cart_id);
 
         if (!$order_id) {
-            throw new PaymentException(Tools::displayError(), 109);
+            throw new PaymentException(Tools::displayError(), 201);
         }
 
         $order = new Order($order_id);
 
         if (!Validate::isLoadedObject($order)) {
-            throw new PaymentException(Tools::displayError(), 110);
+            throw new PaymentException(Tools::displayError(), 202);
         }
 
         return $order;
     }
 
     /**
-     * Obtiene el ID y redirecciona al Flujo
+     * Redirect to Place to pay Platform
+     *
      * @param Cart $cart
      * @throws PaymentException
      */
     public function redirect(Cart $cart)
     {
-        // Obtiene algunos datos de la orden
         $language = Language::getIsoById((int)($cart->id_lang));
         $customer = new Customer((int)($cart->id_customer));
         $currency = new Currency((int)($cart->id_currency));
@@ -640,104 +649,29 @@ class PaymentMethod extends PaymentModule
         $total_amount = floatval($cart->getOrderTotal(true));
         $tax_amount = floatval($total_amount - floatval($cart->getOrderTotal(false)));
 
-        // Verifica que los objetos se hayan cargado correctamente
         if (!Validate::isLoadedObject($customer)
             || !Validate::isLoadedObject($invoice_address)
             || !Validate::isLoadedObject($delivery_address)
             || !Validate::isLoadedObject($currency)
         ) {
-            throw new PaymentException('invalid address or customer', 106);
+            throw new PaymentException('invalid address or customer', 301);
         }
 
-        // Recupera otra informacion relacionada con la orden
         $delivery_country = new Country((int)($delivery_address->id_country));
         $delivery_state = null;
         if ($delivery_address->id_state) {
             $delivery_state = new State((int)($delivery_address->id_state));
         }
 
-        // Construye la URL de retorno, al que se redirecciona desde el proceso de pago
-        $reference = date('YmdH') . $cart->id;
-        $ip_address = (new RemoteAddress())->getIpAddress();
-        $return_url = $this->getReturnURL('process.php', '?cart_id=' . $cart->id);
-
-        // Crea solicitud de pago en Redirección
-        $request = [
-            'locale' => ($language == 'en') ? 'en_US' : 'es_CO',
-            'returnUrl' => $return_url,
-            'ip_address' => $ip_address,
-            'expiration' => date('c', strtotime('+2 days')),
-            'userAgent' => $_SERVER['HTTP_USER_AGENT'],
-            'buyer' => [
-                'name' => $delivery_address->firstname,
-                'surname' => $delivery_address->lastname,
-                'email' => $customer->email,
-                'mobile' => $delivery_address->phone_mobile,
-                'address' => [
-                    'country' => $delivery_country->iso_code,
-                    'state' => (empty($delivery_state) ? null : $delivery_state->name),
-                    'city' => $delivery_address->city,
-                    'street' => $delivery_address->address1 . " " . $delivery_address->address2,
-                ]
-            ],
-            'payment' => [
-                'reference' => $reference,
-                'description' => sprintf($this->getDescription(), $reference),
-                'amount' => [
-                    'currency' => $currency->iso_code,
-                    'total' => $total_amount,
-                ]
-            ]
-        ];
-
-        if ($tax_amount > 0) {
-            // Add taxes
-            $request['payment']['amount']['taxes'] = [
-                [
-                    'kind' => 'valueAddedTax',
-                    'amount' => $tax_amount,
-                    'base' => $total_amount - $tax_amount,
-                ]
-            ];
-        }
-
-        // Crea Instancia Placetopay
         try {
-            $placetopay = new PaymentRedirection($this->getLogin(), $this->getTrankey(), $this->getUri());
-            $response = $placetopay->request($request);
-        } catch (Exception $e) {
-            throw new PaymentException($e->getMessage(), 107);
-        }
+            $order_message = 'Success';
+            $order_status = $this->getOrderState();
+            $request_id = 0;
+            $expiration = date('c', strtotime('+2 days'));
+            $ip_address = (new RemoteAddress())->getIpAddress();
+            $return_url = $this->getReturnURL('process.php', '?cart_id=' . $cart->id);
 
-        try {
-
-            if ($response->isSuccessful()) {
-                $request_id = $response->requestId();
-                $_SESSION['request_id'] = $request_id;
-                $order_message = 'Success';
-                $order_status = $this->getOrderState();
-                $status = PaymentRedirection::P2P_PENDING;
-                $payment_url = $response->processUrl();
-
-            } else {
-                $request_id = 0;
-                $order_message = $response->status()->message();
-                $order_status = Configuration::get('PS_OS_ERROR');
-                $status = PaymentRedirection::P2P_FAILED;
-                $total_amount = 0;
-
-                // Genera la redirección al estado de la orden si no se pudo hacer la redireccion
-                $order = new Order($this->currentOrder);
-                $payment_url = __PS_BASE_URI__ . 'order-confirmation.php'
-                    . '?id_cart=' . $cart->id
-                    . '&id_module=' . $this->id
-                    . '&id_order=' . $this->currentOrder
-                    . '&key=' . $order->secure_key;
-            }
-
-            // Genera la orden en prestashop, si no se generó la URL
-            // crea la orden con el error, al menos para que quede asentada
-
+            // Create order in prestashop
             $this->validateOrder(
                 $cart->id,
                 $order_status,
@@ -750,19 +684,86 @@ class PaymentMethod extends PaymentModule
                 $cart->secure_key
             );
 
-            // Inserta la transacción en la tabla de PlacetoPay
+            // After order create in validateOrder
+            $reference = $this->currentOrderReference;
+
+            // Request payment
+            $request = [
+                'locale' => ($language == 'en') ? 'en_US' : 'es_CO',
+                'returnUrl' => $return_url,
+                'ip_address' => $ip_address,
+                'expiration' => $expiration,
+                'userAgent' => $_SERVER['HTTP_USER_AGENT'],
+                'buyer' => [
+                    'name' => $delivery_address->firstname,
+                    'surname' => $delivery_address->lastname,
+                    'email' => $customer->email,
+                    'mobile' => $delivery_address->phone_mobile,
+                    'address' => [
+                        'country' => $delivery_country->iso_code,
+                        'state' => (empty($delivery_state) ? null : $delivery_state->name),
+                        'city' => $delivery_address->city,
+                        'street' => $delivery_address->address1 . " " . $delivery_address->address2,
+                    ]
+                ],
+                'payment' => [
+                    'reference' => $reference,
+                    'description' => sprintf($this->getDescription(), $reference),
+                    'amount' => [
+                        'currency' => $currency->iso_code,
+                        'total' => $total_amount,
+                    ]
+                ]
+            ];
+
+            if ($tax_amount > 0) {
+                // Add taxes
+                $request['payment']['amount']['taxes'] = [
+                    [
+                        'kind' => 'valueAddedTax',
+                        'amount' => $tax_amount,
+                        'base' => $total_amount - $tax_amount,
+                    ]
+                ];
+            }
+
+            $transaction = (new PaymentRedirection($this->getLogin(), $this->getTrankey(), $this->getUri()))->request($request);
+
+            if ($transaction->isSuccessful()) {
+                $_SESSION['request_id'] = $request_id = $transaction->requestId();
+                $status = PaymentStatus::PENDING;
+                // Redirect to payment:
+                $payment_url = $transaction->processUrl();
+            } else {
+                $order_message = $transaction->status()->message();
+                $status = PaymentStatus::FAILED;
+                $total_amount = 0;
+                // Redirect to error:
+                $payment_url = __PS_BASE_URI__ . 'order-confirmation.php'
+                    . '?id_cart=' . $cart->id
+                    . '&id_module=' . $this->id
+                    . '&id_order=' . $this->currentOrder
+                    . '&key=' . $cart->secure_key;
+
+                $history = new OrderHistory();
+                $history->id_order = $this->currentOrder;
+                $history->changeIdOrderState(Configuration::get('PS_OS_ERROR'), $history->id_order);
+                $history->save();
+            }
+
+            // Register request
             $this->insertPaymentPlaceToPay($request_id, $cart->id, $cart->id_currency, $total_amount, $status, $order_message, $ip_address, $reference);
 
-            // Envia flujo a redireccion para realizar el pago
+            // Redirect flow
             Tools::redirectLink($payment_url);
-
         } catch (Exception $e) {
-            throw new PaymentException($response->status()->message() . "\n" . $e->getMessage(), 107);
+            throw new PaymentException($e->getMessage(), 302);
         }
     }
 
     /**
-     * Registra orden en los pagos de PaymentRedirection
+     * Register payment
+     *
      * @param $request_id
      * @param $order_id
      * @param $currency_id
@@ -810,14 +811,15 @@ class PaymentMethod extends PaymentModule
         ";
 
         if (!Db::getInstance()->Execute($sql)) {
-            throw new PaymentException('Cannot insert transaction ' . $sql, 111);
+            throw new PaymentException('Cannot insert transaction ' . $sql, 401);
         }
 
         return true;
     }
 
     /**
-     * Procesa la respuesta de pago dada por la plataforma
+     * Process response from Place to Pay Platform
+     *
      * @param null $cart_id
      * @throws PaymentException
      */
@@ -825,41 +827,41 @@ class PaymentMethod extends PaymentModule
     {
 
         if (!is_null($cart_id) && !empty($_SESSION['request_id'])) {
-            // Redireccion desde el proceso de pagos
+            // From payment URL to return URL
             $request_id = $_SESSION['request_id'];
         } elseif (!empty(file_get_contents("php://input"))) {
-            // Respuesta por norificationURL enviado desde PaymentRedirection
+            // From sonda process
             $json = file_get_contents("php://input");
             $obj = json_decode($json);
             $request_id = $obj->requestId;
             $cart_id = $this->getCartByRequestId((int)$request_id);
         } else {
-            // Opción no válida, se cancela
-            throw new PaymentException('option not valid in process', 108);
+            // Option no valid
+            throw new PaymentException('option not valid in process', 501);
         }
 
         $order = $this->getRelatedOrder($cart_id);
+        $response = (new PaymentRedirection($this->getLogin(), $this->getTrankey(), $this->getUri()))->query($request_id);
+        if ($response->isSuccessful()) {
+            $status = $this->getStatusPayment($response);
 
-        // Consulta el estado de la transaccion
-        $placetopay = new PaymentRedirection($this->getLogin(), $this->getTrankey(), $this->getUri());
+            // Set status order in CMS
+            $this->settleTransaction($status, $cart_id, $order, $response);
 
-        $response = $placetopay->query($request_id);
-
-        $status = $this->getStatusPayment($response);
-
-        // Asienta la operacion
-        $this->settleTransaction($status, $cart_id, $order, $response);
-
-        if (!isset($json)) {
-            // Redirige el flujo a la pagina de confirmación de orden
-            Tools::redirectLink(__PS_BASE_URI__ . 'order-confirmation.php'
-                . '?id_cart=' . $cart_id
-                . '&id_module=' . $this->id
-                . '&id_order=' . $order->id
-                . '&key=' . $order->secure_key
-            );
+            if (!isset($json)) {
+                // Redirect to confirmation page
+                Tools::redirectLink(__PS_BASE_URI__ . 'order-confirmation.php'
+                    . '?id_cart=' . $cart_id
+                    . '&id_module=' . $this->id
+                    . '&id_order=' . $order->id
+                    . '&key=' . $order->secure_key
+                );
+            } else {
+                // Show status to reference in console
+                echo "{$order->reference} [{$status}]" . PHP_EOL;
+            }
         } else {
-            echo $response->status()->message() . PHP_EOL;
+            throw new PaymentException($response->status()->message(), 502);
         }
     }
 
@@ -886,32 +888,37 @@ class PaymentMethod extends PaymentModule
      */
     public function getStatusPayment(RedirectInformation $response)
     {
-        // By default ss pending so make a query for it later (see information.php example)
-        $status = PaymentRedirection::P2P_PENDING;
+        // By default is pending so make a query for it later (see information.php example)
+        $status = PaymentStatus::PENDING;
+        $lastPayment = $response->lastTransaction();
 
-        if ($response->isSuccessful()) {
+        if ($response->isSuccessful() && !empty($lastPayment)) {
             // In order to use the functions please refer to the RedirectInformation class
-            if ($response->status()->isApproved()) {
+            if ($lastPayment->status()->isApproved()) {
                 // Approved status
-                $status = PaymentRedirection::P2P_APPROVED;
-            } elseif ($response->status()->isRejected()) {
+                $status = PaymentStatus::APPROVED;
+            } elseif ($lastPayment->status()->isRejected()) {
                 // This is why it has been rejected
-                $status = PaymentRedirection::P2P_DECLINED;
+                $status = PaymentStatus::REJECTED;
             }
         }
 
         return $status;
     }
 
-    private function settleTransaction($status, $cart_id, Order $order, $response)
+    /**
+     * @param $status
+     * @param $cart_id
+     * @param Order $order
+     * @param RedirectInformation $response
+     */
+    private function settleTransaction($status, $cart_id, Order $order, RedirectInformation $response)
     {
-        // Si ya habia sido aprobada no vuelva a reprocesar
+        // Order not has been processed
         if ($order->getCurrentState() != (int)Configuration::get('PS_OS_PAYMENT')) {
-            // procese la respuesta y dependiendo del tipo de respuesta
             switch ($status) {
-                case PaymentRedirection::P2P_FAILED:
-                case PaymentRedirection::P2P_DECLINED:
-
+                case PaymentStatus::FAILED:
+                case PaymentStatus::REJECTED:
                     if (
                     in_array(
                         $order->getCurrentState(),
@@ -924,21 +931,19 @@ class PaymentMethod extends PaymentModule
                         break;
                     }
 
-                    // Genera un nuevo estado en la orden de declinación
+                    // Update status order
                     $history = new OrderHistory();
                     $history->id_order = (int)($order->id);
 
-                    if ($status == PaymentRedirection::P2P_FAILED) {
+                    if ($status == PaymentStatus::FAILED) {
                         $history->changeIdOrderState(Configuration::get('PS_OS_ERROR'), $history->id_order);
-                    } elseif ($status == PaymentRedirection::P2P_DECLINED) {
+                    } elseif ($status == PaymentStatus::REJECTED) {
                         $history->changeIdOrderState(Configuration::get('PS_OS_CANCELED'), $history->id_order);
                     }
                     $history->addWithemail();
                     $history->save();
 
-                    // obtiene los productos de la orden, los recorre y vuelve a recargar las cantidades
-                    // en el inventario
-                    if ($this->getStockReinject() == '1') {
+                    if ($this->getStockReinject() == self::OPTION_ENABLED) {
                         $products = $order->getProducts();
                         foreach ($products as $product) {
                             $order_detail = new OrderDetail((int)($product['id_order_detail']));
@@ -946,8 +951,8 @@ class PaymentMethod extends PaymentModule
                         }
                     }
                     break;
-                case PaymentRedirection::P2P_DUPLICATE:
-                case PaymentRedirection::P2P_APPROVED:
+                case PaymentStatus::DUPLICATE:
+                case PaymentStatus::APPROVED:
                     // genera un nuevo estado en la orden de aprobación
                     $history = new OrderHistory();
                     $history->id_order = (int)($order->id);
@@ -955,27 +960,27 @@ class PaymentMethod extends PaymentModule
                     $history->addWithemail();
                     $history->save();
                     break;
-                case PaymentRedirection::P2P_PENDING:
+                case PaymentStatus::PENDING:
                     break;
             }
         }
 
-        // Actualiza la tabla de PlacetoPay con la información de la transacción
+        // Update status in payment table
         $this->updateTransaction($cart_id, $status, $response);
     }
 
     /**
      * @param $id_order
      * @param $status
-     * @param $payment
+     * @param $response
      * @return bool
      * @throws PaymentException
      */
-    private function updateTransaction($id_order, $status, $payment)
+    private function updateTransaction($id_order, $status, RedirectInformation $response)
     {
-        $date = pSQL($payment->status()->date());
-        $reason = pSQL($payment->status()->reason());
-        $reason_description = pSQL($payment->status()->message());
+        $date = pSQL($response->status()->date());
+        $reason = pSQL($response->status()->reason());
+        $reason_description = pSQL($response->status()->message());
 
         $bank = '';
         $franchise = '';
@@ -985,21 +990,23 @@ class PaymentMethod extends PaymentModule
         $conversion = '';
         $payer_email = '';
 
-        if (isset($payment->payment)) {
-            $date = pSQL($payment->payment[0]->status()->date());
-            $reason = pSQL($payment->payment[0]->status()->reason());
-            $reason_description = pSQL($payment->payment[0]->status()->message());
+        if (!empty($response->lastTransaction())) {
+            $payment = $response->lastTransaction();
 
-            $bank = pSQL($payment->payment[0]->issuerName());
-            $franchise = pSQL($payment->payment[0]->paymentMethod());
-            $franchise_name = pSQL($payment->payment[0]->paymentMethodName());
-            $auth_code = pSQL($payment->payment[0]->authorization());
-            $receipt = pSQL($payment->payment[0]->receipt());
-            $conversion = pSQL($payment->payment[0]->amount()->factor());
+            $date = pSQL($payment->status()->date());
+            $reason = pSQL($payment->status()->reason());
+            $reason_description = pSQL($payment->status()->message());
+
+            $bank = pSQL($payment->issuerName());
+            $franchise = pSQL($payment->paymentMethod());
+            $franchise_name = pSQL($payment->paymentMethodName());
+            $auth_code = pSQL($payment->authorization());
+            $receipt = pSQL($payment->receipt());
+            $conversion = pSQL($payment->amount()->factor());
         }
 
-        if (isset($payment->request()->buyer) && !empty($payment->request()->buyer()->email())) {
-            $payer_email = pSQL($payment->request()->buyer()->email());
+        if (!empty($response->request()->payer()) && !empty($response->request()->payer()->email())) {
+            $payer_email = pSQL($response->request()->payer()->email());
         }
 
         $sql = "
@@ -1019,27 +1026,27 @@ class PaymentMethod extends PaymentModule
         ";
 
         if (!Db::getInstance()->Execute($sql)) {
-            throw new PaymentException('Cannot update transaction ' . $sql, 112);
+            throw new PaymentException('Cannot update transaction ' . $sql, 601);
         }
 
         return true;
     }
 
     /**
-     * Bloque a visualizar cuando se retorna con el pago
-     * @array $params
-     * @return string
+     * Show information response payment to customer
+     *
+     * @param $params
+     * @return bool|mixed
      */
     public function hookPaymentReturn($params)
     {
 
         if ((!$this->active) || ($params['objOrder']->module != $this->name)) {
-            return;
+            return false;
         }
 
-
-        if ($this->getHistoryCustomized() == '1') {
-            return $this->getPaymentHistory($params);
+        if ($this->getHistoryCustomized() == self::OPTION_ENABLED) {
+            return $this->getPaymentHistory();
         } else {
             return $this->getPaymentDetails($params);
         }
@@ -1054,8 +1061,7 @@ class PaymentMethod extends PaymentModule
     {
         global $smarty;
 
-
-        // provee a la plantilla de la informacion
+        // Get information
         $transaction = $this->getTransactionInformation($params['objOrder']->id_cart);
         $cart = new Cart((int)$params['objOrder']->id_cart);
         $invoice_address = new Address((int)($cart->id_address_invoice));
@@ -1067,20 +1073,20 @@ class PaymentMethod extends PaymentModule
         $smarty->assign('transaction', $transaction);
 
         switch ($transaction['status']) {
-            case PaymentRedirection::P2P_APPROVED:
-            case PaymentRedirection::P2P_DUPLICATE:
+            case PaymentStatus::APPROVED:
+            case PaymentStatus::DUPLICATE:
                 $smarty->assign('status', 'ok');
                 $smarty->assign('status_description', 'Transacción aprobada');
                 break;
-            case PaymentRedirection::P2P_FAILED:
+            case PaymentStatus::FAILED:
                 $smarty->assign('status', 'fail');
                 $smarty->assign('status_description', 'Transacción fallida');
                 break;
-            case PaymentRedirection::P2P_DECLINED:
+            case PaymentStatus::REJECTED:
                 $smarty->assign('status', 'rejected');
                 $smarty->assign('status_description', 'Transacción rechazada');
                 break;
-            case PaymentRedirection::P2P_PENDING:
+            case PaymentStatus::PENDING:
                 $smarty->assign('status', 'pending');
                 $smarty->assign('status_description', 'Transacción pendiente');
                 break;
@@ -1094,7 +1100,7 @@ class PaymentMethod extends PaymentModule
         $smarty->assign('storeEmail', $this->getEmailContact());
         $smarty->assign('storePhone', $this->getTelephoneContact());
 
-        // Obtiene los datos del cliente
+        // Customer data
         $customer = new Customer((int)($params['objOrder']->id_customer));
 
         if (Validate::isLoadedObject($customer)) {
@@ -1107,10 +1113,9 @@ class PaymentMethod extends PaymentModule
             }
         }
 
-        // Asocia la ruta base donde encuentra las imagenes
         $smarty->assign('placetopayImgUrl', _MODULE_DIR_ . $this->name . '/views/img/');
 
-        // Asocia la moneda
+        // Currency data
         $currency = new CurrencyCore($cart->id_currency);
         $currency_iso = $currency->iso_code;
         $smarty->assign('currency_iso', $currency_iso);
@@ -1151,9 +1156,10 @@ class PaymentMethod extends PaymentModule
     /**
      * Get customer orders
      *
-     * @param int $id_customer Customer id
+     * @param $id_customer Customer id
      * @param bool $show_hidden_status Display or not hidden order statuses
-     * @return array Customer orders
+     * @param Context|null $context
+     * @return array
      */
     public function getCustomerOrders($id_customer, $show_hidden_status = false, Context $context = null)
     {
@@ -1221,40 +1227,45 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * Busca las transacciones que estan pendientes
+     * Update status order in background
+     *
      * @param int $minutes
+     * @throws PaymentException
      */
-    public function sonda($minutes = 7)
+    public function sonda($minutes = 12)
     {
-        // busca las operaciones que estan pendientes de resolver
-        // que tienen una antiguedad superior a n minutos
-        $date = date('Y-m-d H:i:s', time() - $minutes * 60);
+        echo 'Begins ' . date('Ymd H:i:s') . '.' . PHP_EOL;
 
+        $date = date('Y-m-d H:i:s', time() - $minutes * 60);
         $sql = "SELECT * 
             FROM `{$this->tablePayment}`
             WHERE `date` < '{$date}' 
-              AND `status` = " . PaymentRedirection::P2P_PENDING;;
+              AND `status` = " . PaymentStatus::PENDING;
 
         if ($result = Db::getInstance()->ExecuteS($sql)) {
-
             echo "Found (" . count($result) . ") payments pending." . PHP_EOL;
 
-            $placetopay = new PaymentRedirection($this->getLogin(), $this->getTrankey(), $this->getUri());
+            $place_to_pay = new PaymentRedirection($this->getLogin(), $this->getTrankey(), $this->getUri());
 
             foreach ($result as $row) {
+                $reference = $row['reference'];
                 $request_id = (int)$row['id_request'];
                 $cart_id = (int)$row['id_order'];
 
-                // Consta estado de la transaccion en PaymentRedirection
-                $response = $placetopay->query($request_id);
+                echo "Processing {$reference}." . PHP_EOL;
+
+                $response = $place_to_pay->query($request_id);
                 $status = $this->getStatusPayment($response);
                 $order = $this->getRelatedOrder($cart_id);
 
                 if ($order) {
                     $this->settleTransaction($status, $cart_id, $order, $response);
                 }
+
+                echo 'Status [' . $status . '].' . PHP_EOL;
             }
         }
-        echo 'Finished' . PHP_EOL;
+
+        echo 'Finished ' . date('Ymd H:i:s') . '.' . PHP_EOL;
     }
 }

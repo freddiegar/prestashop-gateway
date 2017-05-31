@@ -22,7 +22,7 @@ p.payment_module a.placetopay:hover {
 }
 
 .p2pinput {
-    width: 260px;
+    width: 260ppxx;
 }
 
 .p2pcontent {
@@ -36,8 +36,8 @@ p.payment_module a.placetopay:hover {
 }
 
 #HOOK_BEFORECARRIER > form > div:nth-child(1) > div, #HOOK_BEFORECARRIER > form > div:nth-child(2) > div {
-    padding-left: 0px;
-    padding-right: 0px;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 p.payment_module a.placetopay {

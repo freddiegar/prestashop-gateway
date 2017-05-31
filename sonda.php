@@ -1,23 +1,25 @@
 <?php
 /**
- * Validar el estado de los pagos pendientes de aprobación
+ * Payments pending
  */
 
-// Carga la configuracion de prestashop,
-if (isset($_SERVER['PWD']) && is_link($_SERVER['PWD'])) {
-    $pathPrestaShop = dirname(dirname($_SERVER['PWD']));
-} elseif (isset($_SERVER['SCRIPT_FILENAME'])) {
-    $pathPrestaShop = str_replace( '/modules/placetopaypayment/sonda.php', '', $_SERVER['SCRIPT_FILENAME']);
-} else {
-    $pathPrestaShop = dirname(dirname(getcwd()));
+try {
+    if (isset($_SERVER['PWD']) && is_link($_SERVER['PWD'])) {
+        $pathCMS = dirname(dirname($_SERVER['PWD']));
+    } elseif (isset($_SERVER['SCRIPT_FILENAME'])) {
+        $pathCMS = str_replace('/modules/placetopaypayment/sonda.php', '', $_SERVER['SCRIPT_FILENAME']);
+    } else {
+        $pathCMS = dirname(dirname(getcwd()));
+    }
+
+    if (!file_exists($pathCMS . '/config/config.inc.php')) {
+        die('Miss-configuration in Server [Sonda], valid setup.');
+    }
+
+    require $pathCMS . '/config/config.inc.php';
+    require _PS_MODULE_DIR_ . "/placetopaypayment/placetopaypayment.php";
+
+    (new PlaceToPayPayment())->sonda();
+} catch (Exception $e) {
+    die($e->getMessage());
 }
-
-if (!file_exists($pathPrestaShop . '/config/config.inc.php')) {
-    die('Miss-configuration in Server [Sonda], valid setup.');
-}
-
-require $pathPrestaShop . '/config/config.inc.php';
-require _PS_MODULE_DIR_ . "/placetopaypayment/placetopaypayment.php";
-
-// Ejecuta la sonda
-(new PlaceToPayPayment())->sonda();
