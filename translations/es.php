@@ -26,7 +26,7 @@ $_MODULE['<{placetopaypayment}prestashop>payment_c92ed2ff094e750adaa0baa69ee295c
 $_MODULE['<{placetopaypayment}prestashop>payment_f27eb14238eb38b33e14177abdf48a67'] = 'para consultar y preguntar por';
 $_MODULE['<{placetopaypayment}prestashop>payment_d4510b91a6d39ff09693d021ff481101'] = 'información sobre el comportamiento crediticio, financiero, comercial y de';
 $_MODULE['<{placetopaypayment}prestashop>payment_2de28d215e20c116e73d869aa84a2e03'] = 'terceros incluso en países de naturaleza similar al centro de información';
-$_MODULE['<{placetopaypayment}prestashop>payment_3331028c78a425f14a7122cefddcf98e'] = 'CIFIN S.A';
+$_MODULE['<{placetopaypayment}prestashop>payment_3331028c78a425f14a7122cefddcf98e'] = 'TRANSUNION';
 $_MODULE['<{placetopaypayment}prestashop>payment_7dd7734f1843fede04855fe5039ed1bd'] = ', generando una';
 $_MODULE['<{placetopaypayment}prestashop>payment_2830ccf15fbef7fa3077e861dfc58b7c'] = 'rastro de la consulta.';
 $_MODULE['<{placetopaypayment}prestashop>payment_31504b911f46d52f18359b3aa0cc05c9'] = 'El sitio web seguro de Place to Pay se mostrará cuando seleccione este método de pago.';
@@ -82,8 +82,8 @@ $_MODULE['<{placetopaypayment}prestashop>setting_28144e0941a5751b8b78a718ef942cb
 $_MODULE['<{placetopaypayment}prestashop>setting_93cba07454f06a4a960172bbd6e2a435'] = 'Si';
 $_MODULE['<{placetopaypayment}prestashop>setting_bafd7322c6e97d25b6299b5d6fe8920b'] = 'No';
 $_MODULE['<{placetopaypayment}prestashop>setting_35abc32460de744081596c5c71a6bc6b'] = '¿Habilitar mensaje de TransUnion?';
-$_MODULE['<{placetopaypayment}prestashop>setting_312db9e3e6cc39b55db7e1b845c93ed6'] = '¿Reinyectar el stock en la declinación?';
+$_MODULE['<{placetopaypayment}prestashop>setting_312db9e3e6cc39b55db7e1b845c93ed6'] = '¿Re-inyectar el stock en la declinación?';
+$_MODULE['<{placetopaypayment}prestashop>setting_6a8c1b534b184644e6fccc4bf1b5f12e'] = '¿Permitir compras con pagos pendientes?';
 $_MODULE['<{placetopaypayment}prestashop>setting_c80a51a60c5ee43553c3881459b8f431'] = 'Actualizar la configuración';
-$_MODULE['<{placetopaypayment}prestashop>setting_630f6dc397fe74e52d5189e2c80f282b'] = 'Volver a la lista';
 
 return $_MODULE;

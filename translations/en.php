@@ -26,7 +26,7 @@ $_MODULE['<{placetopaypayment}prestashop>payment_c92ed2ff094e750adaa0baa69ee295c
 $_MODULE['<{placetopaypayment}prestashop>payment_f27eb14238eb38b33e14177abdf48a67'] = 'to consult and ask for';
 $_MODULE['<{placetopaypayment}prestashop>payment_d4510b91a6d39ff09693d021ff481101'] = 'information from credit performance, financial , commercial and service to';
 $_MODULE['<{placetopaypayment}prestashop>payment_2de28d215e20c116e73d869aa84a2e03'] = 'third parties even in countries of a similar nature to the information center';
-$_MODULE['<{placetopaypayment}prestashop>payment_3331028c78a425f14a7122cefddcf98e'] = 'CIFIN S.A';
+$_MODULE['<{placetopaypayment}prestashop>payment_3331028c78a425f14a7122cefddcf98e'] = 'TRANSUNION';
 $_MODULE['<{placetopaypayment}prestashop>payment_7dd7734f1843fede04855fe5039ed1bd'] = ', generating a';
 $_MODULE['<{placetopaypayment}prestashop>payment_2830ccf15fbef7fa3077e861dfc58b7c'] = 'consultation trace.';
 $_MODULE['<{placetopaypayment}prestashop>payment_31504b911f46d52f18359b3aa0cc05c9'] = 'Place to Pay secure web site will be displayed when you select this payment method.';
@@ -82,8 +82,8 @@ $_MODULE['<{placetopaypayment}prestashop>setting_28144e0941a5751b8b78a718ef942cb
 $_MODULE['<{placetopaypayment}prestashop>setting_93cba07454f06a4a960172bbd6e2a435'] = 'Yes';
 $_MODULE['<{placetopaypayment}prestashop>setting_bafd7322c6e97d25b6299b5d6fe8920b'] = 'No';
 $_MODULE['<{placetopaypayment}prestashop>setting_35abc32460de744081596c5c71a6bc6b'] = 'Enable TransUnion message?';
-$_MODULE['<{placetopaypayment}prestashop>setting_312db9e3e6cc39b55db7e1b845c93ed6'] = 'Reinject stock on declination?';
+$_MODULE['<{placetopaypayment}prestashop>setting_312db9e3e6cc39b55db7e1b845c93ed6'] = 'Re-inject stock on declination?';
+$_MODULE['<{placetopaypayment}prestashop>setting_6a8c1b534b184644e6fccc4bf1b5f12e'] = 'Allow buy with pending payments?';
 $_MODULE['<{placetopaypayment}prestashop>setting_c80a51a60c5ee43553c3881459b8f431'] = 'Update configuration';
-$_MODULE['<{placetopaypayment}prestashop>setting_630f6dc397fe74e52d5189e2c80f282b'] = 'Back to list';
 
 return $_MODULE;

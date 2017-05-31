@@ -16,35 +16,35 @@
     <br/>
     <br/>
 
-    <form enctype="multipart/form-data" method="post" action="{$actionURL}">
+    <form enctype="multipart/form-data" method="post" action="{$action_url}">
         <fieldset>
             <legend>
                 <img src="../img/admin/cog.gif"
                      alt="{l s='Company data' mod='placetopaypayment'}"/>{l s='Company data' mod='placetopaypayment'}
             </legend>
 
-            <label class="control-label" for="companydocument">
+            <label class="control-label" for="company_document">
                 {l s='Company ID' mod='placetopaypayment'}
             </label>
             <div class="margin-form">
                 <input class="form-control"
                        type="text"
-                       id="companydocument"
-                       name="companydocument"
-                       value="{$companydocument}"
+                       id="company_document"
+                       name="company_document"
+                       value="{$company_document}"
                        width="120"
                        autocomplete="off"/>
             </div>
 
-            <label class="control-label" for="companyname">
+            <label class="control-label" for="company_name">
                 {l s='Company Name' mod='placetopaypayment'}
             </label>
             <div class="margin-form">
                 <input class="form-control"
                        type="text"
-                       id="companyname"
-                       name="companyname"
-                       value="{$companyname}"
+                       id="company_name"
+                       name="company_name"
+                       value="{$company_name}"
                        width="120"
                        autocomplete="off"/>
             </div>
@@ -99,7 +99,7 @@
                 {l s='URL Notification' mod='placetopaypayment'}
             </label>
             <div class="margin-form">
-                <span style="font-size: 16px;">{$urlnotification}</span><br/>
+                <span style="font-size: 16px;">{$url_notification}</span><br/>
                 {l s='Return URL where PlacetoPay will send status payment\'s  to Prestashop' mod='placetopaypayment'}
             </div>
 
@@ -107,7 +107,7 @@
                 {l s='Path schudele task' mod='placetopaypayment'}
             </label>
             <div class="margin-form">
-                <span style="font-size: 16px;">{$schudeletask}</span><br/>
+                <span style="font-size: 16px;">{$schedule_task}</span><br/>
                 {l s='Set this task to validate payments with pending status in your site' mod='placetopaypayment'}
             </div>
 
@@ -124,15 +124,15 @@
                        autocomplete="off"/>
             </div>
 
-            <label class="control-label" for="trankey">
+            <label class="control-label" for="tranKey">
                 {l s='Trankey Place to Pay' mod='placetopaypayment'}
             </label>
             <div class="margin-form">
                 <input class="form-control"
                        type="password"
-                       id="trankey"
-                       name="trankey"
-                       value="{$trankey}"
+                       id="tranKey"
+                       name="tranKey"
+                       value="{$tranKey}"
                        width="40"
                        autocomplete="off"/>
             </div>
@@ -142,57 +142,71 @@
             </label>
             <div class="margin-form">
                 <select class="form-control" id="environment" name="environment">
-                    <option value="PRODUCTION"
-                            {if $environment eq 'PRODUCTION'}selected="selected"{/if}>{l s='Production' mod='placetopaypayment'}
+                    <option value="{$production}"
+                            {if $environment eq $production}selected="selected"{/if}>{l s='Production' mod='placetopaypayment'}
                     </option>
-                    <option value="TEST"
-                            {if $environment eq 'TEST'}selected="selected"{/if}>{l s='Test' mod='placetopaypayment'}
+                    <option value="{$test}"
+                            {if $environment eq $test}selected="selected"{/if}>{l s='Test' mod='placetopaypayment'}
                     </option>
-                    <option value="DEVELOPMENT"
-                            {if $environment eq 'DEVELOPMENT'}selected="selected"{/if}>{l s='Development' mod='placetopaypayment'}
+                    <option value="{$development}"
+                            {if $environment eq $development}selected="selected"{/if}>{l s='Development' mod='placetopaypayment'}
                     </option>
                 </select>
             </div>
 
-            <label class="control-label" for="historycustomized">
+            <label class="control-label" for="history_customized">
                 {l s='Enable Order History Customized' mod='placetopaypayment'}
             </label>
             <div class="margin-form">
-                <select class="form-control" id="historycustomized" name="historycustomized">
-                    <option value="1"
-                            {if $historycustomized eq '1'}selected="selected"{/if}>{l s='Yes' mod='placetopaypayment'}
+                <select class="form-control" id="history_customized" name="history_customized">
+                    <option value="{$enabled}"
+                            {if $history_customized eq $enabled}selected="selected"{/if}>{l s='Yes' mod='placetopaypayment'}
                     </option>
-                    <option value="0"
-                            {if $historycustomized ne '1'}selected="selected"{/if}>{l s='No' mod='placetopaypayment'}
+                    <option value="{$disabled}"
+                            {if $history_customized eq $disabled}selected="selected"{/if}>{l s='No' mod='placetopaypayment'}
                     </option>
                 </select>
             </div>
             <br/>
 
-            <label class="control-label" for="cifinmessage">
+            <label class="control-label" for="cifin_message">
                 {l s='Enable CIFIN message' mod='placetopaypayment'}
             </label>
             <div class="margin-form">
-                <select class="form-control" id="cifinmessage" name="cifinmessage">
-                    <option value="1"
-                            {if $cifinmessage eq '1'}selected="selected"{/if}>{l s='Yes' mod='placetopaypayment'}
+                <select class="form-control" id="cifin_message" name="cifin_message">
+                    <option value="{$enabled}"
+                            {if $cifin_message eq $enabled}selected="selected"{/if}>{l s='Yes' mod='placetopaypayment'}
                     </option>
-                    <option value="0"
-                            {if $cifinmessage ne '1'}selected="selected"{/if}>{l s='No' mod='placetopaypayment'}
+                    <option value="{$disabled}"
+                            {if $cifin_message eq $disabled}selected="selected"{/if}>{l s='No' mod='placetopaypayment'}
                     </option>
                 </select>
             </div>
 
-            <label class="control-label" for="stockreinject">
+            <label class="control-label" for="stock_re_inject">
                 {l s='Reinject stock on declination?' mod='placetopaypayment'}
             </label>
             <div class="margin-form">
-                <select class="form-control" id="stockreinject" name="stockreinject">
-                    <option value="1"
-                            {if $stockreinject eq '1'}selected="selected"{/if}>{l s='Yes' mod='placetopaypayment'}
+                <select class="form-control" id="stock_re_inject" name="stock_re_inject">
+                    <option value="{$enabled}"
+                            {if $stock_re_inject eq $enabled}selected="selected"{/if}>{l s='Yes' mod='placetopaypayment'}
                     </option>
-                    <option value="0"
-                            {if $stockreinject ne '1'}selected="selected"{/if}>{l s='No' mod='placetopaypayment'}
+                    <option value="{$disabled}"
+                            {if $stock_re_inject eq $disabled}selected="selected"{/if}>{l s='No' mod='placetopaypayment'}
+                    </option>
+                </select>
+            </div>
+
+            <label class="control-label" for="allow_buy_with_pending_payments">
+                {l s='Allow buy with pending payments?' mod='placetopaypayment'}
+            </label>
+            <div class="margin-form">
+                <select class="form-control" id="allow_buy_with_pending_payments" name="allow_buy_with_pending_payments">
+                    <option value="{$enabled}"
+                            {if $allow_buy_with_pending_payments eq $enabled}selected="selected"{/if}>{l s='Yes' mod='placetopaypayment'}
+                    </option>
+                    <option value="{$disabled}"
+                            {if $allow_buy_with_pending_payments ne $enabled}selected="selected"{/if}>{l s='No' mod='placetopaypayment'}
                     </option>
                 </select>
             </div>

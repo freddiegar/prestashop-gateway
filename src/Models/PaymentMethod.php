@@ -50,6 +50,7 @@ class PaymentMethod extends PaymentModule
     const ENVIRONMENT = 'PLACETOPAY_ENVIRONMENT';
     const STOCK_REINJECT = 'PLACETOPAY_STOCKREINJECT';
     const CIFIN_MESSAGE = 'PLACETOPAY_CIFINMESSAGE';
+    const ALLOW_BUY_WITH_PENDING_PAYMENTS = 'PLACETOPAY_ALLOWBUYWITHPENDINGPAYMENTS';
     const HISTORY_CUSTOMIZED = 'PLACETOPAY_HISTORYCUSTOMIZED';
 
     const OPTION_ENABLED = '1';
@@ -80,7 +81,7 @@ class PaymentMethod extends PaymentModule
         $this->tableOrder = _DB_PREFIX_ . 'orders';
 
         $this->name = 'placetopaypayment';
-        $this->version = '2.4.1';
+        $this->version = '2.5';
         $this->author = 'EGM Ingeniería sin Fronteras S.A.S';
         $this->tab = 'payments_gateways';
         $this->need_instance = 0;
@@ -150,6 +151,7 @@ class PaymentMethod extends PaymentModule
         Configuration::updateValue(self::ENVIRONMENT, Environment::TEST);
         Configuration::updateValue(self::STOCK_REINJECT, self::OPTION_ENABLED);
         Configuration::updateValue(self::CIFIN_MESSAGE, self::OPTION_DISABLED);
+        Configuration::updateValue(self::ALLOW_BUY_WITH_PENDING_PAYMENTS, self::OPTION_DISABLED);
         Configuration::updateValue(self::HISTORY_CUSTOMIZED, self::OPTION_ENABLED);
 
         return true;
@@ -176,6 +178,7 @@ class PaymentMethod extends PaymentModule
             || !Configuration::deleteByName(self::ENVIRONMENT)
             || !Configuration::deleteByName(self::STOCK_REINJECT)
             || !Configuration::deleteByName(self::CIFIN_MESSAGE)
+            || !Configuration::deleteByName(self::ALLOW_BUY_WITH_PENDING_PAYMENTS)
             || !Configuration::deleteByName(self::HISTORY_CUSTOMIZED)
             || !parent::uninstall()
         ) {
@@ -327,23 +330,25 @@ class PaymentMethod extends PaymentModule
         $errors = array();
 
         // Company data
-        Configuration::updateValue(self::COMPANY_DOCUMENT, Tools::getValue('companydocument'));
-        Configuration::updateValue(self::COMPANY_NAME, Tools::getValue('companyname'));
+        Configuration::updateValue(self::COMPANY_DOCUMENT, Tools::getValue('company_document'));
+        Configuration::updateValue(self::COMPANY_NAME, Tools::getValue('company_name'));
         Configuration::updateValue(self::DESCRIPTION, Tools::getValue('description'));
         // Contact data
         Configuration::updateValue(self::EMAIL_CONTACT, Tools::getValue('email'));
         Configuration::updateValue(self::TELEPHONE_CONTACT, Tools::getValue('telephone'));
         // Redirection data
         Configuration::updateValue(self::LOGIN, Tools::getValue('login'));
-        Configuration::updateValue(self::TRAN_KEY, Tools::getValue('trankey'));
+        Configuration::updateValue(self::TRAN_KEY, Tools::getValue('tranKey'));
         Configuration::updateValue(self::ENVIRONMENT, Tools::getValue('environment'));
 
         // Stock re-inject option
-        Configuration::updateValue(self::STOCK_REINJECT, (Tools::getValue('stockreinject') == '1' ? self::OPTION_ENABLED : self::OPTION_DISABLED));
+        Configuration::updateValue(self::STOCK_REINJECT, (Tools::getValue('stock_re_inject') == self::OPTION_ENABLED ? self::OPTION_ENABLED : self::OPTION_DISABLED));
         // Cifin message option
-        Configuration::updateValue(self::CIFIN_MESSAGE, (Tools::getValue('cifinmessage') == '1' ? self::OPTION_ENABLED : self::OPTION_DISABLED));
+        Configuration::updateValue(self::CIFIN_MESSAGE, (Tools::getValue('cifin_message') == self::OPTION_ENABLED ? self::OPTION_ENABLED : self::OPTION_DISABLED));
         // History option
-        Configuration::updateValue(self::HISTORY_CUSTOMIZED, (Tools::getValue('historycustomized') == '1' ? self::OPTION_ENABLED : self::OPTION_DISABLED));
+        Configuration::updateValue(self::HISTORY_CUSTOMIZED, (Tools::getValue('history_customized') == self::OPTION_ENABLED ? self::OPTION_ENABLED : self::OPTION_DISABLED));
+        // Allow buy with pending payments
+        Configuration::updateValue(self::ALLOW_BUY_WITH_PENDING_PAYMENTS, (Tools::getValue('allow_buy_with_pending_payments') == self::OPTION_ENABLED ? self::OPTION_ENABLED : self::OPTION_DISABLED));
 
         if (!empty($errors)) {
             $error_msg = '';
@@ -366,25 +371,31 @@ class PaymentMethod extends PaymentModule
 
         $smarty->assign(
             array(
-                'actionURL' => Tools::safeOutput($_SERVER['REQUEST_URI']),
-                'actionBack' => AdminController::$currentIndex . '&token=' . Tools::getAdminTokenLite('AdminModules'),
+                'action_url' => Tools::safeOutput($_SERVER['REQUEST_URI']),
+                'action_back' => AdminController::$currentIndex . '&token=' . Tools::getAdminTokenLite('AdminModules'),
 
                 'version' => $this->getVersion(),
 
-                'companydocument' => $this->getCompanyDocument(),
-                'companyname' => $this->getCompanyName(),
+                'company_document' => $this->getCompanyDocument(),
+                'company_name' => $this->getCompanyName(),
                 'description' => $this->getDescription(),
                 'email' => $this->getEmailContact(),
                 'telephone' => $this->getTelephoneContact(),
 
                 'login' => $this->getLogin(),
-                'trankey' => $this->getTrankey(),
-                'urlnotification' => $this->getReturnURL('process.php'),
-                'schudeletask' => $this->getPathScheduleTask(),
+                'tranKey' => $this->getTrankey(),
+                'url_notification' => $this->getUrl('process.php'),
+                'schedule_task' => $this->getPathScheduleTask(),
                 'environment' => $this->getEnvironment(),
-                'stockreinject' => $this->getStockReinject(),
-                'cifinmessage' => $this->getCifinMessage(),
-                'historycustomized' => $this->getHistoryCustomized(),
+                'stock_re_inject' => $this->getStockReinject(),
+                'cifin_message' => $this->getCifinMessage(),
+                'allow_buy_with_pending_payments' => $this->getAllowBuyWithPendingPayments(),
+                'history_customized' => $this->getHistoryCustomized(),
+                'enabled' => self::OPTION_ENABLED,
+                'disabled' => self::OPTION_DISABLED,
+                'production' => Environment::PRODUCTION,
+                'test' => Environment::TEST,
+                'development' => Environment::DEVELOPMENT,
             )
         );
 
@@ -421,11 +432,17 @@ class PaymentMethod extends PaymentModule
                 'storeEmail' => $this->getEmailContact(),
                 'storePhone' => $this->getTelephoneContact()
             ));
+
+            $smarty->assign('payment_url', (
+            $this->getAllowBuyWithPendingPayments() == self::OPTION_ENABLED
+                ? $this->getUrl('redirect.php')
+                : 'javascript:;')
+            );
         } else {
             $smarty->assign('hasPending', false);
+            $smarty->assign('payment_url', $this->getUrl('redirect.php'));
         }
 
-        $smarty->assign('module', $this->name);
         $smarty->assign('sitename', Configuration::get('PS_SHOP_NAME'));
         $smarty->assign('cifinmessage', $this->getCifinMessage());
         $smarty->assign('companyname', $this->getCompanyName());
@@ -568,6 +585,14 @@ class PaymentMethod extends PaymentModule
     /**
      * @return mixed
      */
+    public function getAllowBuyWithPendingPayments()
+    {
+        return Configuration::get(self::ALLOW_BUY_WITH_PENDING_PAYMENTS);
+    }
+
+    /**
+     * @return mixed
+     */
     public function getHistoryCustomized()
     {
         return Configuration::get(self::HISTORY_CUSTOMIZED);
@@ -586,7 +611,7 @@ class PaymentMethod extends PaymentModule
      * @param string $params Query string to add in URL, please include symbol (?), eg: ?var=foo
      * @return string
      */
-    public function getReturnURL($page, $params = '')
+    public function getUrl($page, $params = '')
     {
 
         $protocol = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://');
@@ -669,7 +694,7 @@ class PaymentMethod extends PaymentModule
             $request_id = 0;
             $expiration = date('c', strtotime('+2 days'));
             $ip_address = (new RemoteAddress())->getIpAddress();
-            $return_url = $this->getReturnURL('process.php', '?cart_id=' . $cart->id);
+            $return_url = $this->getUrl('process.php', '?cart_id=' . $cart->id);
 
             // Create order in prestashop
             $this->validateOrder(
