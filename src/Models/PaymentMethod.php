@@ -901,6 +901,9 @@ class PaymentMethod extends PaymentModule
                 // This is why it has been rejected
                 $status = PaymentStatus::REJECTED;
             }
+        } elseif ($response->status()->isRejected()) {
+            // Canceled by user
+            $status = PaymentStatus::REJECTED;
         }
 
         return $status;
