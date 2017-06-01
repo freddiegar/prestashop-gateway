@@ -425,12 +425,12 @@ class PaymentMethod extends PaymentModule
 
         $lastPendingTransaction = $this->getLastPendingTransaction($params['cart']->id_customer);
         if (!empty($lastPendingTransaction)) {
+            $has_pending = true;
             $smarty->assign(array(
-                'hasPending' => true,
-                'lastOrder' => $lastPendingTransaction['reference'],
-                'lastAuthorization' => (string)$lastPendingTransaction['authcode'],
-                'storeEmail' => $this->getEmailContact(),
-                'storePhone' => $this->getTelephoneContact()
+                'last_order' => $lastPendingTransaction['reference'],
+                'last_authorization' => (string)$lastPendingTransaction['authcode'],
+                'store_email' => $this->getEmailContact(),
+                'store_phone' => $this->getTelephoneContact()
             ));
 
             $smarty->assign('payment_url', (
@@ -439,13 +439,16 @@ class PaymentMethod extends PaymentModule
                 : 'javascript:;')
             );
         } else {
-            $smarty->assign('hasPending', false);
+            $has_pending = false;
             $smarty->assign('payment_url', $this->getUrl('redirect.php'));
         }
 
-        $smarty->assign('sitename', Configuration::get('PS_SHOP_NAME'));
-        $smarty->assign('cifinmessage', $this->getCifinMessage());
-        $smarty->assign('companyname', $this->getCompanyName());
+        $smarty->assign('has_pending', $has_pending);
+        $smarty->assign('site_name', Configuration::get('PS_SHOP_NAME'));
+        $smarty->assign('site_name', Configuration::get('PS_SHOP_NAME'));
+        $smarty->assign('cifin_message', $this->getCifinMessage());
+        $smarty->assign('company_name', $this->getCompanyName());
+        $smarty->assign('allow_payment', ($this->getAllowBuyWithPendingPayments() == self::OPTION_ENABLED || !$has_pending));
 
         return $this->display($this->getPathThisModule(), '/views/templates/payment.tpl');
     }
@@ -1121,27 +1124,27 @@ class PaymentMethod extends PaymentModule
         }
         $smarty->assign($params);
 
-        $smarty->assign('companyDocument', $this->getCompanyDocument());
-        $smarty->assign('companyName', $this->getCompanyName());
-        $smarty->assign('paymentDescription', sprintf($this->getDescription(), $transaction['reference']));
+        $smarty->assign('company_document', $this->getCompanyDocument());
+        $smarty->assign('company_name', $this->getCompanyName());
+        $smarty->assign('payment_description', sprintf($this->getDescription(), $transaction['reference']));
 
-        $smarty->assign('storeEmail', $this->getEmailContact());
-        $smarty->assign('storePhone', $this->getTelephoneContact());
+        $smarty->assign('store_email', $this->getEmailContact());
+        $smarty->assign('store_phone', $this->getTelephoneContact());
 
         // Customer data
         $customer = new Customer((int)($params['objOrder']->id_customer));
 
         if (Validate::isLoadedObject($customer)) {
             if (empty($invoice_address)) {
-                $smarty->assign('payerName', $customer->firstname . ' ' . $customer->lastname);
-                $smarty->assign('payerEmail', $customer->email);
+                $smarty->assign('payer_name', $customer->firstname . ' ' . $customer->lastname);
+                $smarty->assign('payer_email', $customer->email);
             } else {
-                $smarty->assign('payerName', $invoice_address->firstname . ' ' . $invoice_address->lastname);
-                $smarty->assign('payerEmail', (isset($payer_email) ? $payer_email : $customer->email));
+                $smarty->assign('payer_name', $invoice_address->firstname . ' ' . $invoice_address->lastname);
+                $smarty->assign('payer_email', (isset($payer_email) ? $payer_email : $customer->email));
             }
         }
 
-        $smarty->assign('placetopayImgUrl', _MODULE_DIR_ . $this->name . '/views/img/');
+        $smarty->assign('placetopay_img_url', _MODULE_DIR_ . $this->name . '/views/img/');
 
         // Currency data
         $currency = new CurrencyCore($cart->id_currency);
