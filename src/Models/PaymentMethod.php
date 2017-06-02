@@ -53,6 +53,17 @@ class PaymentMethod extends PaymentModule
     const ALLOW_BUY_WITH_PENDING_PAYMENTS = 'PLACETOPAY_ALLOWBUYWITHPENDINGPAYMENTS';
     const HISTORY_CUSTOMIZED = 'PLACETOPAY_HISTORYCUSTOMIZED';
 
+    const EXPIRATION_TIME_MINUTES = 'PLACETOPAY_EXPIRATION_TIME_MINUTES';
+    const EXPIRATION_TIME_MINUTES_DEFAULT = 120;
+
+    const FILL_TAX_INFORMATION = 'PLACETOPAY_FILL_TAX_INFORMATION';
+    const CONNECTION_TYPE = 'PLACETOPAY_CONNECTION_TYPE';
+    const CONNECTION_TYPE_SOAP = 'soap';
+    const CONNECTION_TYPE_REST = 'rest';
+
+
+    const FILL_BUYER_INFORMATION = 'PLACETOPAY_FILL_BUYER_INFORMATION';
+
     const OPTION_ENABLED = '1';
     const OPTION_DISABLED = '0';
 
@@ -81,7 +92,7 @@ class PaymentMethod extends PaymentModule
         $this->tableOrder = _DB_PREFIX_ . 'orders';
 
         $this->name = 'placetopaypayment';
-        $this->version = '2.5';
+        $this->version = '2.6';
         $this->author = 'EGM Ingeniería sin Fronteras S.A.S';
         $this->tab = 'payments_gateways';
         $this->need_instance = 0;
@@ -154,6 +165,11 @@ class PaymentMethod extends PaymentModule
         Configuration::updateValue(self::ALLOW_BUY_WITH_PENDING_PAYMENTS, self::OPTION_DISABLED);
         Configuration::updateValue(self::HISTORY_CUSTOMIZED, self::OPTION_ENABLED);
 
+        Configuration::updateValue(self::EXPIRATION_TIME_MINUTES, self::EXPIRATION_TIME_MINUTES_DEFAULT);
+        Configuration::updateValue(self::FILL_TAX_INFORMATION, self::OPTION_ENABLED);
+        Configuration::updateValue(self::CONNECTION_TYPE, self::CONNECTION_TYPE_SOAP);
+        Configuration::updateValue(self::FILL_BUYER_INFORMATION, self::OPTION_ENABLED);
+
         return true;
     }
 
@@ -180,6 +196,11 @@ class PaymentMethod extends PaymentModule
             || !Configuration::deleteByName(self::CIFIN_MESSAGE)
             || !Configuration::deleteByName(self::ALLOW_BUY_WITH_PENDING_PAYMENTS)
             || !Configuration::deleteByName(self::HISTORY_CUSTOMIZED)
+
+            || !Configuration::deleteByName(self::EXPIRATION_TIME_MINUTES)
+            || !Configuration::deleteByName(self::FILL_TAX_INFORMATION)
+            || !Configuration::deleteByName(self::CONNECTION_TYPE)
+            || !Configuration::deleteByName(self::FILL_BUYER_INFORMATION)
             || !parent::uninstall()
         ) {
             return false;
@@ -341,14 +362,17 @@ class PaymentMethod extends PaymentModule
         Configuration::updateValue(self::TRAN_KEY, Tools::getValue('tranKey'));
         Configuration::updateValue(self::ENVIRONMENT, Tools::getValue('environment'));
 
-        // Stock re-inject option
-        Configuration::updateValue(self::STOCK_REINJECT, (Tools::getValue('stock_re_inject') == self::OPTION_ENABLED ? self::OPTION_ENABLED : self::OPTION_DISABLED));
-        // Cifin message option
-        Configuration::updateValue(self::CIFIN_MESSAGE, (Tools::getValue('cifin_message') == self::OPTION_ENABLED ? self::OPTION_ENABLED : self::OPTION_DISABLED));
-        // History option
-        Configuration::updateValue(self::HISTORY_CUSTOMIZED, (Tools::getValue('history_customized') == self::OPTION_ENABLED ? self::OPTION_ENABLED : self::OPTION_DISABLED));
-        // Allow buy with pending payments
-        Configuration::updateValue(self::ALLOW_BUY_WITH_PENDING_PAYMENTS, (Tools::getValue('allow_buy_with_pending_payments') == self::OPTION_ENABLED ? self::OPTION_ENABLED : self::OPTION_DISABLED));
+        // Config module
+        Configuration::updateValue(self::STOCK_REINJECT, Tools::getValue('stock_re_inject'));
+        Configuration::updateValue(self::CIFIN_MESSAGE, Tools::getValue('cifin_message'));
+        Configuration::updateValue(self::HISTORY_CUSTOMIZED, Tools::getValue('history_customized'));
+        Configuration::updateValue(self::ALLOW_BUY_WITH_PENDING_PAYMENTS, Tools::getValue('allow_buy_with_pending_payments'));
+
+        // Config redirection
+        Configuration::updateValue(self::EXPIRATION_TIME_MINUTES, Tools::getValue('expiration_time_minutes'));
+        Configuration::updateValue(self::FILL_TAX_INFORMATION, Tools::getValue('fill_tax_information'));
+        Configuration::updateValue(self::CONNECTION_TYPE, Tools::getValue('connection_type'));
+        Configuration::updateValue(self::FILL_BUYER_INFORMATION, Tools::getValue('fill_buyer_information'));
 
         if (!empty($errors)) {
             $error_msg = '';
@@ -391,11 +415,20 @@ class PaymentMethod extends PaymentModule
                 'cifin_message' => $this->getCifinMessage(),
                 'allow_buy_with_pending_payments' => $this->getAllowBuyWithPendingPayments(),
                 'history_customized' => $this->getHistoryCustomized(),
+
+                'expiration_time_minutes' => $this->getExpirationTimeMinutes(),
+                'fill_tax_information' => $this->getFillTaxInformation(),
+                'connection_type' => $this->getConnectionType(),
+                'fill_buyer_information' => $this->getFillBuyerInformation(),
+
+                // Constants
                 'enabled' => self::OPTION_ENABLED,
                 'disabled' => self::OPTION_DISABLED,
                 'production' => Environment::PRODUCTION,
                 'test' => Environment::TEST,
                 'development' => Environment::DEVELOPMENT,
+                'soap' => self::CONNECTION_TYPE_SOAP,
+                'rest' => self::CONNECTION_TYPE_REST,
             )
         );
 
@@ -444,6 +477,7 @@ class PaymentMethod extends PaymentModule
         }
 
         $smarty->assign('has_pending', $has_pending);
+        $smarty->assign('version', $this->getVersion());
         $smarty->assign('site_name', Configuration::get('PS_SHOP_NAME'));
         $smarty->assign('site_name', Configuration::get('PS_SHOP_NAME'));
         $smarty->assign('cifin_message', $this->getCifinMessage());
@@ -604,6 +638,44 @@ class PaymentMethod extends PaymentModule
     /**
      * @return mixed
      */
+    public function getExpirationTimeMinutes()
+    {
+        $minutes = Configuration::get(self::EXPIRATION_TIME_MINUTES);
+        return !is_numeric($minutes) || $minutes < 10
+            ? self::EXPIRATION_TIME_MINUTES_DEFAULT
+            : $minutes;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFillTaxInformation()
+    {
+        return Configuration::get(self::FILL_TAX_INFORMATION);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getConnectionType()
+    {
+        $connectionType = Configuration::get(self::CONNECTION_TYPE);
+        return empty($connectionType) || !in_array($connectionType, [self::CONNECTION_TYPE_SOAP, self::CONNECTION_TYPE_REST])
+            ? self::CONNECTION_TYPE_REST
+            : $connectionType;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFillBuyerInformation()
+    {
+        return Configuration::get(self::FILL_BUYER_INFORMATION);
+    }
+
+    /**
+     * @return mixed
+     */
     public function getOrderState()
     {
         return Configuration::get(self::ORDER_STATE);
@@ -695,7 +767,7 @@ class PaymentMethod extends PaymentModule
             $order_message = 'Success';
             $order_status = $this->getOrderState();
             $request_id = 0;
-            $expiration = date('c', strtotime('+2 days'));
+            $expiration = date('c', strtotime($this->getExpirationTimeMinutes() . ' minutes'));
             $ip_address = (new RemoteAddress())->getIpAddress();
             $return_url = $this->getUrl('process.php', '?cart_id=' . $cart->id);
 
@@ -719,6 +791,7 @@ class PaymentMethod extends PaymentModule
             $request = [
                 'locale' => ($language == 'en') ? 'en_US' : 'es_CO',
                 'returnUrl' => $return_url,
+                'noBuyerFill' => !(bool)$this->getFillBuyerInformation(),
                 'ip_address' => $ip_address,
                 'expiration' => $expiration,
                 'userAgent' => $_SERVER['HTTP_USER_AGENT'],
@@ -744,7 +817,7 @@ class PaymentMethod extends PaymentModule
                 ]
             ];
 
-            if ($tax_amount > 0) {
+            if ($this->getFillTaxInformation() == self::OPTION_ENABLED && $tax_amount > 0) {
                 // Add taxes
                 $request['payment']['amount']['taxes'] = [
                     [
@@ -755,7 +828,7 @@ class PaymentMethod extends PaymentModule
                 ];
             }
 
-            $transaction = (new PaymentRedirection($this->getLogin(), $this->getTrankey(), $this->getUri()))->request($request);
+            $transaction = (new PaymentRedirection($this->getLogin(), $this->getTrankey(), $this->getUri(), $this->getConnectionType()))->request($request);
 
             if ($transaction->isSuccessful()) {
                 $_SESSION['request_id'] = $request_id = $transaction->requestId();
@@ -869,7 +942,7 @@ class PaymentMethod extends PaymentModule
         }
 
         $order = $this->getRelatedOrder($cart_id);
-        $response = (new PaymentRedirection($this->getLogin(), $this->getTrankey(), $this->getUri()))->query($request_id);
+        $response = (new PaymentRedirection($this->getLogin(), $this->getTrankey(), $this->getUri(), $this->getConnectionType()))->query($request_id);
         if ($response->isSuccessful()) {
             $status = $this->getStatusPayment($response);
 
@@ -1276,7 +1349,7 @@ class PaymentMethod extends PaymentModule
         if ($result = Db::getInstance()->ExecuteS($sql)) {
             echo "Found (" . count($result) . ") payments pending." . PHP_EOL;
 
-            $place_to_pay = new PaymentRedirection($this->getLogin(), $this->getTrankey(), $this->getUri());
+            $place_to_pay = new PaymentRedirection($this->getLogin(), $this->getTrankey(), $this->getUri(), $this->getConnectionType());
 
             foreach ($result as $row) {
                 $reference = $row['reference'];

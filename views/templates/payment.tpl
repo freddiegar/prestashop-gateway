@@ -7,6 +7,7 @@
 
         <span>
 		{l s='(credit cards and debits account)' mod='placetopaypayment'}
+            <span style="color: white">Version: {$version}</span>
 	</span>
         <br/>
 

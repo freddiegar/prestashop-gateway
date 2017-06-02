@@ -111,49 +111,6 @@
                 {l s='Set this task to validate payments with pending status in your site' mod='placetopaypayment'}
             </div>
 
-            <label class="control-label" for="login">
-                {l s='Login Place to Pay' mod='placetopaypayment'}
-            </label>
-            <div class="margin-form">
-                <input class="form-control"
-                       type="text"
-                       id="login"
-                       name="login"
-                       value="{$login}"
-                       width="40"
-                       autocomplete="off"/>
-            </div>
-
-            <label class="control-label" for="tranKey">
-                {l s='Trankey Place to Pay' mod='placetopaypayment'}
-            </label>
-            <div class="margin-form">
-                <input class="form-control"
-                       type="password"
-                       id="tranKey"
-                       name="tranKey"
-                       value="{$tranKey}"
-                       width="40"
-                       autocomplete="off"/>
-            </div>
-
-            <label class="control-label" for="environment">
-                {l s='Environment' mod='placetopaypayment'}
-            </label>
-            <div class="margin-form">
-                <select class="form-control" id="environment" name="environment">
-                    <option value="{$production}"
-                            {if $environment eq $production}selected="selected"{/if}>{l s='Production' mod='placetopaypayment'}
-                    </option>
-                    <option value="{$test}"
-                            {if $environment eq $test}selected="selected"{/if}>{l s='Test' mod='placetopaypayment'}
-                    </option>
-                    <option value="{$development}"
-                            {if $environment eq $development}selected="selected"{/if}>{l s='Development' mod='placetopaypayment'}
-                    </option>
-                </select>
-            </div>
-
             <label class="control-label" for="history_customized">
                 {l s='Enable Order History Customized' mod='placetopaypayment'}
             </label>
@@ -201,12 +158,120 @@
                 {l s='Allow buy with pending payments?' mod='placetopaypayment'}
             </label>
             <div class="margin-form">
-                <select class="form-control" id="allow_buy_with_pending_payments" name="allow_buy_with_pending_payments">
+                <select class="form-control" id="allow_buy_with_pending_payments"
+                        name="allow_buy_with_pending_payments">
                     <option value="{$enabled}"
                             {if $allow_buy_with_pending_payments eq $enabled}selected="selected"{/if}>{l s='Yes' mod='placetopaypayment'}
                     </option>
                     <option value="{$disabled}"
                             {if $allow_buy_with_pending_payments ne $enabled}selected="selected"{/if}>{l s='No' mod='placetopaypayment'}
+                    </option>
+                </select>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>
+                <img src="../img/admin/cog.gif"
+                     alt="{l s='Configuration Connection' mod='placetopaypayment'}"/>{l s='Configuration Connection' mod='placetopaypayment'}
+            </legend>
+
+            <label class="control-label" for="environment">
+                {l s='Environment' mod='placetopaypayment'}
+            </label>
+            <div class="margin-form">
+                <select class="form-control" id="environment" name="environment" required>
+                    <option value="{$production}"
+                            {if $environment eq $production}selected="selected"{/if}>{l s='Production' mod='placetopaypayment'}
+                    </option>
+                    <option value="{$test}"
+                            {if $environment eq $test}selected="selected"{/if}>{l s='Test' mod='placetopaypayment'}
+                    </option>
+                    <option value="{$development}"
+                            {if $environment eq $development}selected="selected"{/if}>{l s='Development' mod='placetopaypayment'}
+                    </option>
+                </select>
+            </div>
+
+            <label class="control-label" for="login">
+                {l s='Login Place to Pay' mod='placetopaypayment'}
+            </label>
+            <div class="margin-form">
+                <input class="form-control"
+                       type="text"
+                       required
+                       id="login"
+                       name="login"
+                       value="{$login}"
+                       width="40"
+                       autocomplete="off"/>
+            </div>
+
+            <label class="control-label" for="tranKey">
+                {l s='Trankey Place to Pay' mod='placetopaypayment'}
+            </label>
+            <div class="margin-form">
+                <input class="form-control"
+                       type="password"
+                       required
+                       id="tranKey"
+                       name="tranKey"
+                       value="{$tranKey}"
+                       width="40"
+                       autocomplete="off"/>
+            </div>
+
+            <label class="control-label" for="expiration_time_minutes">
+                {l s='Expiration time minutes' mod='placetopaypayment'}
+            </label>
+            <div class="margin-form">
+                <input class="form-control"
+                       type="number"
+                       required
+                       id="expiration_time_minutes"
+                       name="expiration_time_minutes"
+                       value="{$expiration_time_minutes}"
+                       autocomplete="off"/>
+            </div>
+
+            <label class="control-label" for="fill_tax_information">
+                {l s='Fill TAX information?' mod='placetopaypayment'}
+            </label>
+            <div class="margin-form">
+                <select class="form-control" id="fill_tax_information" name="fill_tax_information">
+                    <option value="{$enabled}"
+                            {if $fill_tax_information eq $enabled}selected="selected"{/if}>{l s='Yes' mod='placetopaypayment'}
+                    </option>
+                    <option value="{$disabled}"
+                            {if $fill_tax_information eq $disabled}selected="selected"{/if}>{l s='No' mod='placetopaypayment'}
+                    </option>
+                </select>
+            </div>
+
+            <label class="control-label" for="connection_type">
+                {l s='Connection type' mod='placetopaypayment'}
+            </label>
+            <div class="margin-form">
+                <select class="form-control" id="connection_type" name="connection_type" required>
+                    <option value="{$soap}"
+                            {if $connection_type eq $soap}selected="selected"{/if}>{l s='SOAP' mod='placetopaypayment'}
+                    </option>
+                    <option value="{$rest}"
+                            {if $connection_type eq $rest}selected="selected"{/if}>{l s='REST' mod='placetopaypayment'}
+                    </option>
+                </select>
+            </div>
+
+            <label class="control-label" for="fill_buyer_information">
+                {l s='Fill buyer information?' mod='placetopaypayment'}
+            </label>
+            <div class="margin-form">
+                <select class="form-control" id="fill_buyer_information" name="fill_buyer_information" required>
+                    <option value="{$enabled}"
+                            {if $fill_buyer_information eq $enabled}selected="selected"{/if}>{l s='Yes' mod='placetopaypayment'}
+                    </option>
+                    <option value="{$disabled}"
+                            {if $fill_buyer_information eq $disabled}selected="selected"{/if}>{l s='No' mod='placetopaypayment'}
                     </option>
                 </select>
             </div>
