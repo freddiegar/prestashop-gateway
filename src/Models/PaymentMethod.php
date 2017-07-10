@@ -86,13 +86,13 @@ class PaymentMethod extends PaymentModule
     public function __construct()
     {
         /**
-         * PHP < 5.6 no allowed this definitions in constructor
+         * PHP < 5.6 not allowed this definitions in constructor
          */
         $this->tablePayment = _DB_PREFIX_ . 'payment_placetopay';
         $this->tableOrder = _DB_PREFIX_ . 'orders';
 
         $this->name = 'placetopaypayment';
-        $this->version = '2.6';
+        $this->version = '2.6.1';
         $this->author = 'EGM Ingeniería sin Fronteras S.A.S';
         $this->tab = 'payments_gateways';
         $this->need_instance = 0;
@@ -999,8 +999,11 @@ class PaymentMethod extends PaymentModule
                 // Approved status
                 $status = PaymentStatus::APPROVED;
             } elseif ($lastPayment->status()->isRejected()) {
-                // This is why it has been rejected
+                // This is why it has been reject
                 $status = PaymentStatus::REJECTED;
+            } elseif ($lastPayment->status()->isFailed()) {
+                // This is why it has been fail
+                $status = PaymentStatus::FAILED;
             }
         } elseif ($response->status()->isRejected()) {
             // Canceled by user
@@ -1338,6 +1341,7 @@ class PaymentMethod extends PaymentModule
      */
     public function sonda($minutes = 12)
     {
+        echo sprintf('Versions: PS [%s] | Plugin [%s]', _PS_VERSION_, $this->getVersion()) . PHP_EOL;
         echo 'Begins ' . date('Ymd H:i:s') . '.' . PHP_EOL;
 
         $date = date('Y-m-d H:i:s', time() - $minutes * 60);
