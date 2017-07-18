@@ -92,7 +92,7 @@ class PaymentMethod extends PaymentModule
         $this->tableOrder = _DB_PREFIX_ . 'orders';
 
         $this->name = 'placetopaypayment';
-        $this->version = '2.6.1';
+        $this->version = '2.6.2';
         $this->author = 'EGM Ingeniería sin Fronteras S.A.S';
         $this->tab = 'payments_gateways';
         $this->need_instance = 0;
@@ -1097,7 +1097,7 @@ class PaymentMethod extends PaymentModule
         $conversion = '';
         $payer_email = '';
 
-        if (!empty($response->lastTransaction())) {
+        if ($response->isApproved() && !empty($response->lastTransaction())) {
             $payment = $response->lastTransaction();
 
             $date = pSQL($payment->status()->date());
@@ -1112,7 +1112,7 @@ class PaymentMethod extends PaymentModule
             $conversion = pSQL($payment->amount()->factor());
         }
 
-        if (!empty($response->request()->payer()) && !empty($response->request()->payer()->email())) {
+        if ($response->isApproved() && !empty($response->request()->payer()) && !empty($response->request()->payer()->email())) {
             $payer_email = pSQL($response->request()->payer()->email());
         }
 
@@ -1179,25 +1179,7 @@ class PaymentMethod extends PaymentModule
 
         $smarty->assign('transaction', $transaction);
 
-        switch ($transaction['status']) {
-            case PaymentStatus::APPROVED:
-            case PaymentStatus::DUPLICATE:
-                $smarty->assign('status', 'ok');
-                $smarty->assign('status_description', 'Transacción aprobada');
-                break;
-            case PaymentStatus::FAILED:
-                $smarty->assign('status', 'fail');
-                $smarty->assign('status_description', 'Transacción fallida');
-                break;
-            case PaymentStatus::REJECTED:
-                $smarty->assign('status', 'rejected');
-                $smarty->assign('status_description', 'Transacción rechazada');
-                break;
-            case PaymentStatus::PENDING:
-                $smarty->assign('status', 'pending');
-                $smarty->assign('status_description', 'Transacción pendiente');
-                break;
-        }
+        $smarty->assign($this->getStatusDescription($transaction['status']));
         $smarty->assign($params);
 
         $smarty->assign('company_document', $this->getCompanyDocument());
@@ -1232,6 +1214,42 @@ class PaymentMethod extends PaymentModule
         $context->cookie->__set('customer_id', $cart->id_customer);
 
         return $this->display($this->getPathThisModule(), '/views/templates/response.tpl');
+    }
+
+    /**
+     * @param $status
+     * @return array
+     */
+    private function getStatusDescription($status)
+    {
+        $description = [
+            'status' => 'pending',
+            'status_description' => 'Transacción pendiente'
+        ];
+
+        switch ($status) {
+            case PaymentStatus::APPROVED:
+            case PaymentStatus::DUPLICATE:
+                $description = [
+                    'status' => 'ok',
+                    'status_description' => 'Transacción aprobada'
+                ];
+                break;
+            case PaymentStatus::FAILED:
+                $description = [
+                    'status' => 'fail',
+                    'status_description' => 'Transacción fallida'
+                ];
+                break;
+            case PaymentStatus::REJECTED:
+                $description = [
+                    'status' => 'rejected',
+                    'status_description' => 'Transacción rechazada'
+                ];
+                break;
+        }
+
+        return $description;
     }
 
     /**
@@ -1341,8 +1359,10 @@ class PaymentMethod extends PaymentModule
      */
     public function sonda($minutes = 12)
     {
-        echo sprintf('Versions: PS [%s] | Plugin [%s]', _PS_VERSION_, $this->getVersion()) . PHP_EOL;
-        echo 'Begins ' . date('Ymd H:i:s') . '.' . PHP_EOL;
+        echo sprintf('Versions: PS [%s]', _PS_VERSION_) . $this->breakLine();
+        echo sprintf('Plugin [%s]', $this->getVersion()) . $this->breakLine();
+        echo sprintf('Environment [%s]', $this->getEnvironment()) . $this->breakLine(2);
+        echo 'Begins ' . date('Ymd H:i:s') . '.' . $this->breakLine();
 
         $date = date('Y-m-d H:i:s', time() - $minutes * 60);
         $sql = "SELECT * 
@@ -1351,29 +1371,62 @@ class PaymentMethod extends PaymentModule
               AND `status` = " . PaymentStatus::PENDING;
 
         if ($result = Db::getInstance()->ExecuteS($sql)) {
-            echo "Found (" . count($result) . ") payments pending." . PHP_EOL;
+            echo "Found (" . count($result) . ") payments pending." . $this->breakLine(2);
 
-            $place_to_pay = new PaymentRedirection($this->getLogin(), $this->getTrankey(), $this->getUri(), $this->getConnectionType());
+            try {
+                $place_to_pay = new PaymentRedirection($this->getLogin(), $this->getTrankey(), $this->getUri(), $this->getConnectionType());
 
-            foreach ($result as $row) {
-                $reference = $row['reference'];
-                $request_id = (int)$row['id_request'];
-                $cart_id = (int)$row['id_order'];
+                foreach ($result as $row) {
+                    $reference = $row['reference'];
+                    $request_id = (int)$row['id_request'];
+                    $cart_id = (int)$row['id_order'];
 
-                echo "Processing {$reference}." . PHP_EOL;
+                    echo "Processing {$reference}." . $this->breakLine();
 
-                $response = $place_to_pay->query($request_id);
-                $status = $this->getStatusPayment($response);
-                $order = $this->getRelatedOrder($cart_id);
+                    $response = $place_to_pay->query($request_id);
+                    $status = $this->getStatusPayment($response);
+                    $order = $this->getRelatedOrder($cart_id);
 
-                if ($order) {
-                    $this->settleTransaction($status, $cart_id, $order, $response);
+                    if ($order) {
+                        $this->settleTransaction($status, $cart_id, $order, $response);
+                    }
+
+                    echo sprintf('%s status is %s [%s]', $order->reference, implode('=', $this->getStatusDescription($status)), $status) . $this->breakLine(2);
                 }
+            } catch (Exception $e) {
+                echo 'Error: ' . $e->getMessage() . $this->breakLine(2);
 
-                echo 'Status [' . $status . '].' . PHP_EOL;
             }
+        } else {
+            echo 'Not exists payments pending.' . $this->breakLine();
         }
 
-        echo 'Finished ' . date('Ymd H:i:s') . '.' . PHP_EOL;
+        echo 'Finished ' . date('Ymd H:i:s') . '.' . $this->breakLine();
+    }
+
+    private function isConsole()
+    {
+        static $isConsole;
+
+        if (is_null($isConsole)) {
+            $isConsole = 'cli' == php_sapi_name();
+        }
+
+        return $isConsole;
+    }
+
+    /**
+     * @param int $multiplier
+     * @return string
+     */
+    private function breakLine($multiplier = 1)
+    {
+        static $breakLine;
+
+        if (is_null($breakLine)) {
+            $breakLine = $this->isConsole() ? PHP_EOL : '<br/>';
+        }
+
+        return str_repeat($breakLine, $multiplier);
     }
 }
