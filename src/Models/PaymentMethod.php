@@ -92,7 +92,7 @@ class PaymentMethod extends PaymentModule
         $this->tableOrder = _DB_PREFIX_ . 'orders';
 
         $this->name = 'placetopaypayment';
-        $this->version = '2.6.2';
+        $this->version = '2.6.3';
         $this->author = 'EGM Ingeniería sin Fronteras S.A.S';
         $this->tab = 'payments_gateways';
         $this->need_instance = 0;
@@ -162,12 +162,12 @@ class PaymentMethod extends PaymentModule
         Configuration::updateValue(self::ENVIRONMENT, Environment::TEST);
         Configuration::updateValue(self::STOCK_REINJECT, self::OPTION_ENABLED);
         Configuration::updateValue(self::CIFIN_MESSAGE, self::OPTION_DISABLED);
-        Configuration::updateValue(self::ALLOW_BUY_WITH_PENDING_PAYMENTS, self::OPTION_DISABLED);
+        Configuration::updateValue(self::ALLOW_BUY_WITH_PENDING_PAYMENTS, self::OPTION_ENABLED);
         Configuration::updateValue(self::HISTORY_CUSTOMIZED, self::OPTION_ENABLED);
 
         Configuration::updateValue(self::EXPIRATION_TIME_MINUTES, self::EXPIRATION_TIME_MINUTES_DEFAULT);
         Configuration::updateValue(self::FILL_TAX_INFORMATION, self::OPTION_ENABLED);
-        Configuration::updateValue(self::CONNECTION_TYPE, self::CONNECTION_TYPE_SOAP);
+        Configuration::updateValue(self::CONNECTION_TYPE, self::CONNECTION_TYPE_REST);
         Configuration::updateValue(self::FILL_BUYER_INFORMATION, self::OPTION_ENABLED);
 
         return true;
@@ -1395,7 +1395,6 @@ class PaymentMethod extends PaymentModule
                 }
             } catch (Exception $e) {
                 echo 'Error: ' . $e->getMessage() . $this->breakLine(2);
-
             }
         } else {
             echo 'Not exists payments pending.' . $this->breakLine();
