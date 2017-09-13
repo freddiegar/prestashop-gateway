@@ -92,7 +92,7 @@ class PaymentMethod extends PaymentModule
         $this->tableOrder = _DB_PREFIX_ . 'orders';
 
         $this->name = 'placetopaypayment';
-        $this->version = '2.6.3';
+        $this->version = '2.6.4';
         $this->author = 'EGM Ingeniería sin Fronteras S.A.S';
         $this->tab = 'payments_gateways';
         $this->need_instance = 0;
@@ -317,7 +317,7 @@ class PaymentMethod extends PaymentModule
 
             if ($orderState->save()) {
                 Configuration::updateValue(self::ORDER_STATE, $orderState->id);
-                copy($this->getPathThisModule() . '/views/img/logo.png', _PS_IMG_DIR_ . 'os/' . $orderState->id . '.gif');
+                copy($this->getPathThisModule() . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . 'logo.png', _PS_IMG_DIR_ . 'os' . DIRECTORY_SEPARATOR . $orderState->id . '.gif');
             } else {
                 return false;
             }
@@ -432,7 +432,7 @@ class PaymentMethod extends PaymentModule
             )
         );
 
-        return $this->display($this->getPathThisModule(), '/views/templates/setting.tpl');
+        return $this->display($this->getPathThisModule(), DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'setting.tpl');
     }
 
     /**
@@ -484,7 +484,7 @@ class PaymentMethod extends PaymentModule
         $smarty->assign('company_name', $this->getCompanyName());
         $smarty->assign('allow_payment', ($this->getAllowBuyWithPendingPayments() == self::OPTION_ENABLED || !$has_pending));
 
-        return $this->display($this->getPathThisModule(), '/views/templates/payment.tpl');
+        return $this->display($this->getPathThisModule(), DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'payment.tpl');
     }
 
     /**
@@ -700,7 +700,7 @@ class PaymentMethod extends PaymentModule
      */
     private function getPathScheduleTask()
     {
-        return $this->getPathThisModule() . '/sonda.php';
+        return $this->getPathThisModule() . DIRECTORY_SEPARATOR . 'sonda.php';
     }
 
     /**
@@ -1060,7 +1060,7 @@ class PaymentMethod extends PaymentModule
                     break;
                 case PaymentStatus::DUPLICATE:
                 case PaymentStatus::APPROVED:
-                    // genera un nuevo estado en la orden de aprobación
+                    // Order approved, change state
                     $history = new OrderHistory();
                     $history->id_order = (int)($order->id);
                     $history->changeIdOrderState(Configuration::get('PS_OS_PAYMENT'), $history->id_order);
@@ -1213,7 +1213,7 @@ class PaymentMethod extends PaymentModule
         $context = Context::getContext();
         $context->cookie->__set('customer_id', $cart->id_customer);
 
-        return $this->display($this->getPathThisModule(), '/views/templates/response.tpl');
+        return $this->display($this->getPathThisModule(), DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'response.tpl');
     }
 
     /**
@@ -1275,7 +1275,7 @@ class PaymentMethod extends PaymentModule
             'slowValidation' => Tools::isSubmit('slowvalidation')
         ));
 
-        return $this->display($this->getPathThisModule(), '/views/templates/history.tpl');
+        return $this->display($this->getPathThisModule(), DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'history.tpl');
     }
 
     /**
@@ -1359,7 +1359,9 @@ class PaymentMethod extends PaymentModule
      */
     public function sonda($minutes = 12)
     {
-        echo sprintf('Versions: PS [%s]', _PS_VERSION_) . $this->breakLine();
+        echo sprintf('Versions') . $this->breakLine();
+        echo sprintf('PHP [%s]', PHP_VERSION) . $this->breakLine();
+        echo sprintf('PrestaShop [%s]', _PS_VERSION_) . $this->breakLine();
         echo sprintf('Plugin [%s]', $this->getVersion()) . $this->breakLine();
         echo sprintf('Environment [%s]', $this->getEnvironment()) . $this->breakLine(2);
         echo 'Begins ' . date('Ymd H:i:s') . '.' . $this->breakLine();
@@ -1423,7 +1425,7 @@ class PaymentMethod extends PaymentModule
         static $breakLine;
 
         if (is_null($breakLine)) {
-            $breakLine = $this->isConsole() ? PHP_EOL : '<br/>';
+            $breakLine = $this->isConsole() ? PHP_EOL : '<br />';
         }
 
         return str_repeat($breakLine, $multiplier);
