@@ -57,3 +57,6 @@
 {l s='day(s)' mod='placetopaypayment'}
 {l s='week(s)' mod='placetopaypayment'}
 {l s='month(s)' mod='placetopaypayment'}
+{l s='Save' mod='placetopaypayment'}
+{l s='Yes' mod='placetopaypayment'}
+{l s='No' mod='placetopaypayment'}

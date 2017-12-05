@@ -651,7 +651,7 @@ class PaymentMethod extends PaymentModule
                     ),
                 ),
                 'submit' => array(
-                    'title' => $this->trans('Save', array(), 'Admin.Actions'),
+                    'title' => $this->ll('Save'),
                 )
             ),
         );
@@ -714,7 +714,7 @@ class PaymentMethod extends PaymentModule
                     $compatibility_1_6,
                 ),
                 'submit' => array(
-                    'title' => $this->trans('Save', array(), 'Admin.Actions'),
+                    'title' => $this->ll('Save'),
                 )
             ),
         );
@@ -805,7 +805,7 @@ class PaymentMethod extends PaymentModule
                     ),
                 ),
                 'submit' => array(
-                    'title' => $this->trans('Save', array(), 'Admin.Actions'),
+                    'title' => $this->ll('Save'),
                 )
             ),
         );
@@ -2047,12 +2047,12 @@ class PaymentMethod extends PaymentModule
             array(
                 'id' => 'active_on',
                 'value' => self::OPTION_ENABLED,
-                'label' => $this->trans('Enabled', array(), 'Admin.Global'),
+                'label' => $this->ll('Yes'),
             ),
             array(
                 'id' => 'active_off',
                 'value' => self::OPTION_DISABLED,
-                'label' => $this->trans('Disabled', array(), 'Admin.Global'),
+                'label' => $this->ll('No'),
             )
         );
     }

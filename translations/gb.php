@@ -55,6 +55,9 @@ $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_01e16aa827d5caa063c1a
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_225e75c29d32392d311f5dc94c792384'] = 'day(s)';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_b9ac6d4cfd0e2c80dddcaa66089b9dfe'] = 'week(s)';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_6eb15db009c9c6488d73157ff2c03b9b'] = 'month(s)';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_c9cc8cce247e49bae79f15173ce97354'] = 'Save';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_93cba07454f06a4a960172bbd6e2a435'] = 'Yes';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_bafd7322c6e97d25b6299b5d6fe8920b'] = 'No';
 $_MODULE['<{placetopaypayment}prestashop>response_5d5c4a24285e79624af97a58941965cf'] = 'Completed payment';
 $_MODULE['<{placetopaypayment}prestashop>response_c1ccca925eb496e3073123ebab2da997'] = 'Dear customer, your payment is approved thank you for your purchase.';
 $_MODULE['<{placetopaypayment}prestashop>response_08fc2add263dba5610ca59b67ec43346'] = 'Failed payment';
