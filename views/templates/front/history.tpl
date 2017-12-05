@@ -5,7 +5,7 @@
 	<span class="navigation-pipe">{$navigationPipe}</span>
 	<span class="navigation_page">{l s='Order history'}</span>
 {/capture}
-{include file="$tpl_dir./errors.tpl"}
+
 <h1 class="page-heading bottom-indent">{l s='Order history'}</h1>
 <p class="info-title">{l s='Here are the orders you\'ve placed since your account was created.'}</p>
 {if $slowValidation}
@@ -23,7 +23,6 @@
 					<th data-sort-ignore="true" data-hide="phone,tablet" class="item">{l s='Authorization/CUS'}</th>
 					<th class="item">{l s='Status'}</th>
 					<th data-sort-ignore="true" data-hide="phone,tablet" class="item">{l s='Invoice'}</th>
-					<!-- <th data-sort-ignore="true" data-hide="phone,tablet" class="last_item">&nbsp;</th> -->
 				</tr>
 			</thead>
 			<tbody>
@@ -33,7 +32,7 @@
 							{if isset($order.invoice) && $order.invoice && isset($order.virtual) && $order.virtual}
 								<img class="icon" src="{$img_dir}icon/download_product.gif"	alt="{l s='Products to download'}" title="{l s='Products to download'}" />
 							{/if}
-							<a class="color-myaccount" href="javascript:showOrder(1, {$order.id_order|intval}, '{$link->getPageLink('order-detail', true, NULL, "id_order={$order.id_order|intval}")|escape:'html':'UTF-8'}');">
+							<a class="color-myaccount" href="{$link->getPageLink('order-detail', true, NULL, "id_order={$order.id_order|intval}")|escape:'html':'UTF-8'}">
 								{$order.reference}
 							</a>
 						</td>
@@ -42,7 +41,7 @@
 						</td>
 						<td class="history_price" data-value="{$order.total_paid}">
 							<span class="price">
-								{displayPrice price=$order.total_paid currency=$order.id_currency no_utf8=false convert=false}
+                                {Tools::displayPrice($order.total_paid)}
 							</span>
 						</td>
 						<td class="history_method">{$order.payment|escape:'html':'UTF-8'}</td>
@@ -63,22 +62,6 @@
 								-
 							{/if}
 						</td>
-						<!-- <td class="history_detail">
-							<a class="btn btn-default button button-small" href="javascript:showOrder(1, {$order.id_order|intval}, '{$link->getPageLink('order-detail', true, NULL, "id_order={$order.id_order|intval}")|escape:'html':'UTF-8'}');">
-								<span>
-									{l s='Details'}<i class="icon-chevron-right right"></i>
-								</span>
-							</a>
-							{if isset($opc) && $opc}
-								<a class="link-button" href="{$link->getPageLink('order-opc', true, NULL, "submitReorder&id_order={$order.id_order|intval}")|escape:'html':'UTF-8'}" title="{l s='Reorder'}">
-							{else}
-								<a class="link-button" href="{$link->getPageLink('order', true, NULL, "submitReorder&id_order={$order.id_order|intval}")|escape:'html':'UTF-8'}" title="{l s='Reorder'}">
-							{/if}
-								{if isset($reorderingAllowed) && $reorderingAllowed}
-									<i class="icon-refresh"></i>{l s='Reorder'}
-								{/if}
-							</a>
-						</td> -->
 					</tr>
 				{/foreach}
 			</tbody>
@@ -88,17 +71,12 @@
 		<p class="alert alert-warning">{l s='You have not placed any orders.'}</p>
 	{/if}
 </div>
-{*<ul class="footer_links clearfix">*}
-	{*<li>*}
-		{*<a class="btn btn-default button button-small" href="{$link->getPageLink('my-account', true)|escape:'html':'UTF-8'}">*}
-			{*<span>*}
-				{*<i class="icon-chevron-left"></i> {l s='Back to Your Account'}*}
-			{*</span>*}
-		{*</a>*}
-	{*</li>*}
-	{*<li>*}
-		{*<a class="btn btn-default button button-small" href="{$base_dir}">*}
-			{*<span><i class="icon-chevron-left"></i> {l s='Home'}</span>*}
-		{*</a>*}
-	{*</li>*}
-{*</ul>*}
+<ul class="footer_links clearfix">
+	<li>
+		<a class="btn btn-default button button-small" href="{$link->getPageLink('my-account', true)|escape:'html':'UTF-8'}">
+			<span>
+				<i class="icon-chevron-left"></i> {l s='Back to Your Account'}
+			</span>
+		</a>
+	</li>
+</ul>

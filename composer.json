@@ -18,6 +18,9 @@
     ],
     "minimum-stability": "dev",
     "autoload": {
+        "files": [
+            "helpers.php"
+        ],
         "psr-4": {
             "PlacetoPay\\": "src/"
 	    }

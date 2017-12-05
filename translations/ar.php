@@ -99,7 +99,7 @@ $_MODULE['<{placetopaypayment}prestashop>message_payment_c92ed2ff094e750adaa0baa
 $_MODULE['<{placetopaypayment}prestashop>message_payment_f27eb14238eb38b33e14177abdf48a67'] = 'para que consulte y solicite';
 $_MODULE['<{placetopaypayment}prestashop>message_payment_d4510b91a6d39ff09693d021ff481101'] = 'información del comportamiento crediticio, financiero, comercial y de';
 $_MODULE['<{placetopaypayment}prestashop>message_payment_2de28d215e20c116e73d869aa84a2e03'] = 'servicios a terceros, incluso en países de la misma naturaleza en las centrales de riesgo';
-$_MODULE['<{placetopaypayment}prestashop>message_payment_c4ebf5f6191ec97d7a281f4c301c8656'] = 'TRANSUNION S.A';
+$_MODULE['<{placetopaypayment}prestashop>message_payment_c4ebf5f6191ec97d7a281f4c301c8656'] = '(TRANSUNION S.A, etc)';
 $_MODULE['<{placetopaypayment}prestashop>message_payment_7dd7734f1843fede04855fe5039ed1bd'] = ', generándose';
 $_MODULE['<{placetopaypayment}prestashop>message_payment_2830ccf15fbef7fa3077e861dfc58b7c'] = 'una huella de la consulta.';
 $_MODULE['<{placetopaypayment}prestashop>pending_payment_0eaadb4fcb48a0a0ed7bc9868be9fbaa'] = 'Atención';

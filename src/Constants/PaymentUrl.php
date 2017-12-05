@@ -3,23 +3,45 @@
 namespace PlacetoPay\Constants;
 
 /**
- * Interface PaymentUrl
+ * Class PaymentUrl
  * @package PlacetoPay\Constants
  */
-interface PaymentUrl
+abstract class PaymentUrl
 {
     /**
-     * URL Production
+     * @return array
      */
-    const PRODUCTION = 'https://secure.placetopay.com/redirection';
+    static public function getDefaultEndpoints()
+    {
+        return [
+            Environment::PRODUCTION => 'https://secure.placetopay.com/redirection',
+            Environment::TEST => 'https://test.placetopay.com/redirection',
+            Environment::DEVELOPMENT => 'https://dev.placetopay.com/redirection',
+        ];
+    }
 
     /**
-     * URL Test
+     * @param string $countryCode Value of Constants\CountryCode
+     * @return array
      */
-    const TEST = 'https://test.placetopay.com/redirection';
+    static public function getEndpointsTo($countryCode)
+    {
+        switch ($countryCode) {
+            case CountryCode::ECUADOR:
+                $endpoints = [
+                    Environment::PRODUCTION => 'https://secure.placetopay.ec/redirection',
+                    Environment::TEST => 'https://test.placetopay.ec/redirection',
+                    Environment::DEVELOPMENT => 'https://dev.placetopay.ec/redirection',
+                ];
+                break;
+            case CountryCode::MEXICO:
+            case CountryCode::PERU:
+            case CountryCode::COLOMBIA:
+            default:
+                $endpoints = self::getDefaultEndpoints();
+                break;
+        }
 
-    /**
-     * URL Development
-     */
-    const DEVELOPMENT = 'https://dev.placetopay.com/redirection';
+        return $endpoints;
+    }
 }
