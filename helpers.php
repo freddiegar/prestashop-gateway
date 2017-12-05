@@ -90,3 +90,14 @@ if (!function_exists('getModuleName')) {
         return 'placetopaypayment';
     }
 }
+
+if (!function_exists('isUtf8')) {
+    /**
+     * @param $string
+     * @return bool
+     */
+    function isUtf8($string)
+    {
+        return (bool)preg_match('//u', $string);
+    }
+}

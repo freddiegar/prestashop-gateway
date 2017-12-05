@@ -926,7 +926,7 @@ class PaymentMethod extends PaymentModule
         $newOption = new PaymentOption();
         $newOption->setCallToActionText($this->ll('Pay by Place to Pay'))
             ->setAdditionalInformation($this->ll('Place to Pay secure web site will be displayed when you select this payment method.'))
-            ->setForm(utf8_decode($form));
+            ->setForm(isUtf8($form) ? $form : utf8_decode($form));
 
         return array($newOption);
     }
