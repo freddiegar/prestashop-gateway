@@ -20,10 +20,10 @@ $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_961b9a68822e8a47a046b
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_254f642527b45bc260048e30704edb39'] = 'Configuration';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_7e07e9e90c97ced358b7191599066be6'] = 'Expiration time to pay';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_7cb035b7a69b159cf733884472d3d4d7'] = 'Show on payment return';
-$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_6c13a05f626c6bb8b29ab2757fbeebaa'] = 'If you has PSE method payment in your commerce, set it in: PSE List.';
-$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_589d213944623dd93012c9f0b314442a'] = 'PrestaShop View';
-$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_accea76d09b0193c332cf51c646a205c'] = 'Payment Details';
-$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_293270e21c674fa0408db264f62a6dbd'] = 'PSE List';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_6c13a05f626c6bb8b29ab2757fbeebaa'] = 'If you has PSE method payment in your commerce, set it in: Payment list.';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_589d213944623dd93012c9f0b314442a'] = 'Default';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_accea76d09b0193c332cf51c646a205c'] = 'Payment details';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_293270e21c674fa0408db264f62a6dbd'] = 'Payment list';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_8ec99a29fa6cd2466b9670f96a2a9d3e'] = 'Enable TransUnion message?';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_6a8c1b534b184644e6fccc4bf1b5f12e'] = 'Allow buy with pending payments?';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_f13d07d8a2bb8341f8f06b77048e0cef'] = 'Fill TAX information?';

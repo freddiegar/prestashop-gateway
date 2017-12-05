@@ -20,10 +20,10 @@ $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_961b9a68822e8a47a046b
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_254f642527b45bc260048e30704edb39'] = 'Configuración';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_7e07e9e90c97ced358b7191599066be6'] = 'El pago expirá después de';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_7cb035b7a69b159cf733884472d3d4d7'] = 'Al regresar de Place to Pay mostrar';
-$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_6c13a05f626c6bb8b29ab2757fbeebaa'] = 'Si aceptas pago por PSE, por favor selecciona: Listado para PSE';
-$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_589d213944623dd93012c9f0b314442a'] = 'Vista PrestaShop';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_6c13a05f626c6bb8b29ab2757fbeebaa'] = 'Si aceptas pago por PSE, por favor selecciona: Listado de pagos';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_589d213944623dd93012c9f0b314442a'] = 'Predeterminado';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_accea76d09b0193c332cf51c646a205c'] = 'Detalle del pago';
-$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_293270e21c674fa0408db264f62a6dbd'] = 'Listado para PSE';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_293270e21c674fa0408db264f62a6dbd'] = 'Listado de pagos';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_8ec99a29fa6cd2466b9670f96a2a9d3e'] = '¿Habilitar el mensaje de TransUnion?';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_6a8c1b534b184644e6fccc4bf1b5f12e'] = '¿Permitir compras con pagos pendientes?';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_f13d07d8a2bb8341f8f06b77048e0cef'] = '¿Detallar de los impuestos aplicados en el pago?';
