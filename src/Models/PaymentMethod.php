@@ -1440,7 +1440,8 @@ class PaymentMethod extends PaymentModule
             $paymentPlaceToPay = $this->getPaymentPlaceToPayBy('reference', $reference);
         } elseif (!empty(file_get_contents("php://input"))) {
             // On resolve function called process
-            $requestId = (int)(json_decode(file_get_contents("php://input")))->requestId;
+            $input = json_decode(file_get_contents("php://input"));
+            $requestId = (int)$input->requestId;
             $paymentPlaceToPay = $this->getPaymentPlaceToPayBy('request_id', $requestId);
         }
 
@@ -1592,8 +1593,8 @@ class PaymentMethod extends PaymentModule
                     if (versionComparePlaceToPay('1.7.0.0', '<') && $this->getStockReinject() == self::OPTION_ENABLED) {
                         $products = $order->getProducts();
                         foreach ($products as $product) {
-                            $order_detail = new OrderDetail((int)($product['id_order_detail']));
-                            Product::reinjectQuantities($order_detail, $product['product_quantity']);
+                            $order_detail = new \OrderDetail((int)($product['id_order_detail']));
+                            \Product::reinjectQuantities($order_detail, $product['product_quantity']);
                         }
                     }
                     break;
@@ -2114,5 +2115,18 @@ class PaymentMethod extends PaymentModule
     private function ll($string)
     {
         return $this->l($string, getModuleName());
+    }
+
+    /**
+     * @param array $errors
+     * @return mixed
+     */
+    public function displayError(array $errors)
+    {
+        if (versionComparePlaceToPay('1.7.0.0', '<')) {
+            $errors = implode('<br>', $errors);
+        }
+
+        return parent::displayError($errors);
     }
 }

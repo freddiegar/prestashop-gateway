@@ -1,6 +1,41 @@
+<style type="text/css">
+    p.payment_module a.placetopay:after {
+        display: block;
+        content: "\f054";
+        position: absolute;
+        right: 15px;
+        margin-top: -11px;
+        top: 50%;
+        font-family: "FontAwesome";
+        font-size: 25px;
+        height: 22px;
+        width: 14px;
+        color: #777;
+    }
+
+    p.payment_module a.placetopay {
+        background-color: #fbfbfb;
+    }
+
+    p.payment_module a.placetopay:hover {
+        background-color: #f6f6f6;
+    }
+
+    p.payment_module a.placetopay {
+        text-align: justify;
+        padding-right: 90px;
+    }
+
+    p.payment_module a.placetopay {
+        padding: 33px 40px 34px 20px;
+    }
+	.main{
+		padding: 15px;
+	}
+</style>
 <p class="payment_module">
     <a class="placetopay" href="{$payment_url}">
-        <img src="https://www.placetopay.com/images/providers/placetopay_xh48.png"
+        <img src="https://static.placetopay.com/admin/custom/application-logo.svg" width="170px"
              alt="{l s='Pay with Place to Pay' mod='placetopaypayment'}"/>
 
         <b>{l s='Pay with Place to Pay' mod='placetopaypayment'}</b>
@@ -8,7 +43,7 @@
         <span>
 		{l s='(credit cards and debits account)' mod='placetopaypayment'}
             <span style="color: white">Version: {$version}</span>
-	</span>
+		</span>
         <br/>
 
         {if $allow_payment}
@@ -17,12 +52,11 @@
         {/if}
 
         {if $has_pending}
-            <br/>
-            <span style="color: red">
-				<b>&gt;&gt; {l s='Warning' mod='placetopaypayment'}</b>
-			</span>
-            <span class="main">
-			<br/>
+            <span class="main" style="background-color: {if $allow_payment}#fcf8e3{else}#f2dede{/if}; display: inline-block">
+				<span style="color: {if $allow_payment}black{else}red{/if};">
+					<b>&gt;&gt; {l s='Warning' mod='placetopaypayment'}</b>
+				</span>
+				<br/>
                 {l s='At this time your order' mod='placetopaypayment'}
                 <b># {$last_order}</b>
                 {l s='presents a checkout transaction which is PENDING to receive confirmation from your bank, please wait a few minutes and check back later to see if your payment was successfully confirmed.' mod='placetopaypayment'}
@@ -38,10 +72,9 @@
             <br/>
         {/if}
 
-
         {if $cifin_message && $allow_payment}
             <br/>
-            <span>
+			<span class="main" style="background-color: #d9edf7; display: inline-block">
 			<small>
                 {l s='Anyone who make a purchase on the site' mod='placetopaypayment'}
 			</small>
