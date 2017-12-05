@@ -1164,8 +1164,8 @@ class PaymentMethod extends PaymentModule
     public function getUrl($page, $params = '')
     {
 
-        $protocol = (Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://');
-        $domain = (Configuration::get('PS_SHOP_DOMAIN_SSL')) ? Configuration::get('PS_SHOP_DOMAIN_SSL') : Tools::getHttpHost();
+        $protocol = Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://';
+        $domain = Configuration::get('PS_SHOP_DOMAIN_SSL') ? Configuration::get('PS_SHOP_DOMAIN_SSL') : Tools::getHttpHost();
 
         return $protocol . $domain . __PS_BASE_URI__ . 'modules/' . getModuleName() . '/' . $page . $params;
     }
@@ -1286,7 +1286,7 @@ class PaymentMethod extends PaymentModule
                     'name' => $deliveryAddress->firstname,
                     'surname' => $deliveryAddress->lastname,
                     'email' => $customer->email,
-                    'mobile' => $deliveryAddress->phone_mobile,
+                    'mobile' => (!empty($deliveryAddress->phone) ? $deliveryAddress->phone : $deliveryAddress->phone_mobile),
                     'address' => [
                         'country' => $deliveryCountry->iso_code,
                         'state' => (empty($deliveryState) ? null : $deliveryState->name),
