@@ -3,6 +3,7 @@
     "description": "Plugin for integration Place to Pay gateway with PrestaShop CMS",
     "type": "plugin",
     "require": {
+        "php": ">=5.5",
         "dnetix/redirection": "^0.4"
     },
     "license": "MIT",

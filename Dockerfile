@@ -1,4 +1,4 @@
-FROM prestashop/prestashop:1.6
+FROM prestashop/prestashop:1.6-5.5
 
 COPY . /var/www/html/modules/placetopaypayment
 
