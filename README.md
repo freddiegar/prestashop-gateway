@@ -3,7 +3,7 @@ Plugin Payment for Prestashop 1.5 to 1.7
 
 ### Compatibility Version
 
-This library need PHP >= 5.5 with curl, soap extensions
+This library need PHP >= 5.5 with curl, soap and mbstring extensions
 
 | Prestashop | Plugin                |
 |------------|-----------------------|

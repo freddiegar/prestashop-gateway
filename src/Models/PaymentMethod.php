@@ -100,7 +100,7 @@ class PaymentMethod extends PaymentModule
         $this->tableOrder = _DB_PREFIX_ . 'orders';
 
         $this->name = getModuleName();
-        $this->version = '3.0.0';
+        $this->version = '3.0.1';
         $this->author = 'EGM Ingeniería sin Fronteras S.A.S';
         $this->tab = 'payments_gateways';
         $this->limited_countries = array('us', CountryCode::COLOMBIA, CountryCode::ECUADOR);
@@ -926,7 +926,7 @@ class PaymentMethod extends PaymentModule
         $newOption = new PaymentOption();
         $newOption->setCallToActionText($this->ll('Pay by Place to Pay'))
             ->setAdditionalInformation($this->ll('Place to Pay secure web site will be displayed when you select this payment method.'))
-            ->setForm(isUtf8($form) ? $form : utf8_decode($form));
+            ->setForm($form);
 
         return array($newOption);
     }
@@ -943,6 +943,8 @@ class PaymentMethod extends PaymentModule
         } else {
             $action = "action='{$action}'";
         }
+
+        $content = mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8');
 
         return "<form accept-charset='UTF-8' {$action} id='payment-form'>{$content}</form>";
     }
