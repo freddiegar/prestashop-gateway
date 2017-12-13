@@ -5,14 +5,15 @@ Plugin Payment for Prestashop 1.5 to 1.7
 
 This library need PHP >= 5.5 with curl, soap and mbstring extensions
 
-| Prestashop | Plugin                |
-|------------|-----------------------|
-| 1.5.x      | [v2.6.4][link-v2.6.4] |
-| 1.6.x      | [v3.0.0][link-v3.0.0] |
-| 1.7.x      | [v3.0.0][link-v3.0.0] |
+| Prestashop | Plugin    |
+|------------|-----------|
+| 1.5.x      | ~ 2.*     |
+| 1.6.x      | \>= 2.*   |
+| 1.7.x      | ~ 3.*     |
 
-[link-v2.6.4]: https://github.com/freddiegar/prestashop-gateway/releases/tag/v2.6.4 
-[link-v3.0.0]: https://github.com/freddiegar/prestashop-gateway/releases/tag/v3.0.0
+View releases [here][link-releases]
+
+[link-releases]: https://github.com/freddiegar/prestashop-gateway/releases 
 
 ### Install CMS
 
