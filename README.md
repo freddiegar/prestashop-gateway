@@ -19,7 +19,7 @@ View releases [here][link-releases]
 
 Create folder placetopaypayment (this is required, with this name)
 ```bash
-mkdir /var/www/prestashop/modules/placetopaypayment
+mkdir /var/www/html/modules/placetopaypayment
 ```
 
 Clone Project in modules 
