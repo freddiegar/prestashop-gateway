@@ -408,7 +408,7 @@ class PaymentMethod extends PaymentModule
             if (count($this->_postErrors) == 0) {
                 $this->_postProcess();
             } else {
-                $this->_html .= $this->displayError($this->_postErrors);
+                $this->_html .= $this->showError($this->_postErrors);
             }
         } else {
             $this->_html .= '<br />';
@@ -2121,12 +2121,12 @@ class PaymentMethod extends PaymentModule
      * @param array $errors
      * @return mixed
      */
-    public function displayError(array $errors)
+    private function showError(array $errors)
     {
         if (versionComparePlaceToPay('1.7.0.0', '<')) {
             $errors = implode('<br>', $errors);
         }
 
-        return parent::displayError($errors);
+        return $this->displayError($errors);
     }
 }
