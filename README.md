@@ -9,7 +9,7 @@ This library need PHP >= 5.5 with curl, soap and mbstring extensions
 |------------|----------|
 | 1.5.x      | ~2.6.4   |
 | 1.6.x      | \>=2.6.4 |
-| 1.7.x      | ~3.*     |
+| 1.7.x      | 3.*      |
 
 View releases [here][link-releases]
 

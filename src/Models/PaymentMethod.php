@@ -100,7 +100,7 @@ class PaymentMethod extends PaymentModule
         $this->tableOrder = _DB_PREFIX_ . 'orders';
 
         $this->name = getModuleName();
-        $this->version = '3.0.1';
+        $this->version = '3.0.2';
         $this->author = 'EGM Ingeniería sin Fronteras S.A.S';
         $this->tab = 'payments_gateways';
         $this->limited_countries = array('us', CountryCode::COLOMBIA, CountryCode::ECUADOR);
@@ -115,7 +115,7 @@ class PaymentMethod extends PaymentModule
         $this->bootstrap = true;
 
         parent::__construct();
-        http://localhost:8030/index.php?controller=my-account
+
         $this->displayName = $this->ll('Place to Pay');
         $this->description = $this->ll('Accept payments by credit cards and debits account');
 
@@ -1444,7 +1444,7 @@ class PaymentMethod extends PaymentModule
             // On resolve function called process
             $input = json_decode(file_get_contents("php://input"));
             $requestId = (int)$input->requestId;
-            $paymentPlaceToPay = $this->getPaymentPlaceToPayBy('request_id', $requestId);
+            $paymentPlaceToPay = $this->getPaymentPlaceToPayBy('id_request', $requestId);
         }
 
         if (empty($paymentPlaceToPay)) {
