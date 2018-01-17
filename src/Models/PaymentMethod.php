@@ -1165,11 +1165,15 @@ class PaymentMethod extends PaymentModule
      */
     public function getUrl($page, $params = '')
     {
+        $baseUrl = Context::getContext()->shop->getBaseURL(true);
+        $url = $baseUrl . 'modules/' . getModuleName() . '/' . $page . $params;
 
-        $protocol = Configuration::get('PS_SSL_ENABLED') ? 'https://' : 'http://';
-        $domain = Configuration::get('PS_SHOP_DOMAIN_SSL') ? Configuration::get('PS_SHOP_DOMAIN_SSL') : Tools::getHttpHost();
+        if (isDebugEnable()) {
+            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, $baseUrl));
+            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, $url));
+        }
 
-        return $protocol . $domain . __PS_BASE_URI__ . 'modules/' . getModuleName() . '/' . $page . $params;
+        return $url;
     }
 
     /**
