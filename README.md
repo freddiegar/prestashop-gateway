@@ -29,6 +29,7 @@ git clone git@github.com:freddiegar/prestashop-gateway.git /var/www/html/modules
 ```
 
 Install dependencies with composer
+
 ```bash
 cd /var/www/html/modules/placetopaypayment && composer install
 ```
@@ -41,19 +42,25 @@ Install Prestashop 1.6 with PHP 5.5 (and MySQL 5.7). In folder of project;
 docker-compose up -d
 ```
 
-Then... (Please wait 5 min, while install all and load Apache :D to continue), you can go to
+Then... (Please wait ~8 min, while install ALL and load Apache :D to continue), you can go to
  
 - [store](http://localhost:8787)
-- [admin](http://localhost:8787/adminstore) 
+- [admin](http://localhost:8787/adminstore)
+
+***ATTENTION:*** If server return error code (400, 404, 500) you can status in docker logs until that installation process end
+
+```bash
+docker logs placetopaypayment_prestashop_1 -f
+```
 
 Admin data access
  
 - email: demo@prestashop.com
-- password :prestashop_demo
+- password: prestashop_demo
 
 ### Another docker in prestashop
 
-Others installation options are [here](https://store.docker.com/community/images/prestashop/prestashop), yo can see changing `FROM` in Dockerfile, for instance
+Others installation options are [here](https://store.docker.com/community/images/prestashop/prestashop), you can to change `FROM` in Dockerfile, for instance
 
 ```yaml
 # Install Prestashop 1.6 with PHP 5.5 (Default option)
