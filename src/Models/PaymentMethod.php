@@ -954,19 +954,24 @@ class PaymentMethod extends PaymentModule
      *
      * @param $customerId
      * @return mixed
+     * @throws PaymentException
      */
     private function getLastPendingTransaction($customerId)
     {
         $status = PaymentStatus::PENDING;
 
-        $result = Db::getInstance()->ExecuteS("
-            SELECT p.* 
-            FROM `{$this->tablePayment}` p
-                INNER JOIN `{$this->tableOrder}` o ON o.id_cart = p.id_order
-            WHERE o.`id_customer` = {$customerId} 
-                AND p.`status` = {$status} 
-            LIMIT 1
-        ");
+        try {
+            $result = Db::getInstance()->ExecuteS("
+                SELECT p.* 
+                FROM `{$this->tablePayment}` p
+                    INNER JOIN `{$this->tableOrder}` o ON o.id_cart = p.id_order
+                WHERE o.`id_customer` = {$customerId} 
+                    AND p.`status` = {$status} 
+                LIMIT 1
+            ");
+        } catch (Exception $e) {
+            throw new PaymentException($e->getMessage(), 901);
+        }
 
         if (!empty($result)) {
             $result = $result[0];
@@ -1452,8 +1457,24 @@ class PaymentMethod extends PaymentModule
         }
 
         if (empty($paymentPlaceToPay)) {
-            $message = sprintf('Payment place to pay not found, reference: [%s]', isset($reference) ? $reference : $_reference);
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 501, $message));
+            $error = 501;
+            $message = sprintf('Payment _reference: [%s] not found', $_reference);
+
+            if (isset($reference)) {
+                $error = 502;
+                $message = sprintf('Payment with reference: [%s] not found', $reference);
+            } elseif (isset($requestId)) {
+                $error = 503;
+                $message = sprintf('Payment with id_request: [%s] not found', $requestId);
+            }
+
+            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, $error, $message));
+
+            if (!empty($input)) {
+                // Show status to reference in console
+                die($message . PHP_EOL);
+            }
+
             Tools::redirect('authentication.php?back=order.php');
         }
 
@@ -1469,6 +1490,12 @@ class PaymentMethod extends PaymentModule
         if (!isDebugEnable() && $oldStatus != PaymentStatus::PENDING) {
             $message = sprintf('Payment # %d not is pending, current status is [%d]', $paymentId, $oldStatus);
             PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, $message));
+
+            if (!empty($input)) {
+                // Show status to reference in console
+                die($message . PHP_EOL);
+            }
+
             Tools::redirect('authentication.php?back=order.php');
         }
 
@@ -1490,18 +1517,18 @@ class PaymentMethod extends PaymentModule
             // Set status order in CMS
             $this->settleTransaction($paymentId, $newStatus, $order, $response);
 
-            if (!empty($_reference)) {
-                // Redirect to confirmation page
-                Tools::redirectLink(__PS_BASE_URI__ . 'order-confirmation.php'
-                    . '?id_cart=' . $cartId
-                    . '&id_module=' . $this->id
-                    . '&id_order=' . $order->id
-                    . '&key=' . $order->secure_key
-                );
-            } else {
+            if (!empty($input)) {
                 // Show status to reference in console
-                die("{$order->reference} [{$newStatus}]" . PHP_EOL);
+                die("{$order->reference} change from [{$oldStatus}] to [{$newStatus}] status" . PHP_EOL);
             }
+
+            // Redirect to confirmation page
+            Tools::redirectLink(__PS_BASE_URI__ . 'order-confirmation.php'
+                . '?id_cart=' . $cartId
+                . '&id_module=' . $this->id
+                . '&id_order=' . $order->id
+                . '&key=' . $order->secure_key
+            );
         } elseif (!$response->isSuccessful()) {
             throw new PaymentException($response->status()->message(), 502);
         } elseif (!$order) {
@@ -1514,16 +1541,21 @@ class PaymentMethod extends PaymentModule
     /**
      * @param string $column You can any column from $this->tablePayment table
      * @param int $value
-     * @return bool|array
+     * @return array|bool
+     * @throws PaymentException
      */
     private function getPaymentPlaceToPayBy($column, $value = null)
     {
-        if (!empty($column) && !empty($value)) {
-            $rows = Db::getInstance()->ExecuteS("
-                SELECT * 
-                FROM  `{$this->tablePayment}` 
+        try {
+            if (!empty($column) && !empty($value)) {
+                $rows = Db::getInstance()->ExecuteS("
+                SELECT *
+                FROM  `{$this->tablePayment}`
                 WHERE {$column} = '{$value}'
             ");
+            }
+        } catch (Exception $e) {
+            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 701, $e->getMessage()));
         }
 
         return !empty($rows[0]) ? $rows[0] : false;
@@ -1880,6 +1912,7 @@ class PaymentMethod extends PaymentModule
      * @param $cartId
      * @param null $orderId
      * @return mixed
+     * @throws PaymentException
      */
     private function getTransactionInformation($cartId, $orderId = null)
     {
@@ -1888,7 +1921,11 @@ class PaymentMethod extends PaymentModule
             ? "(SELECT `id_cart` FROM `{$this->tableOrder}` WHERE `id_order` = {$orderId})"
             : $cartId);
 
-        $result = Db::getInstance()->ExecuteS("SELECT * FROM `{$this->tablePayment}` WHERE `id_order` = {$id_order}");
+        try {
+            $result = Db::getInstance()->ExecuteS("SELECT * FROM `{$this->tablePayment}` WHERE `id_order` = {$id_order}");
+        } catch (Exception $e) {
+            throw new PaymentException($e->getMessage(), 801);
+        }
 
         if (!empty($result)) {
             $result = $result[0];
@@ -1923,6 +1960,7 @@ class PaymentMethod extends PaymentModule
             echo sprintf('%s [%s]', $this->ll('Connection type'), $this->getConnectionType()) . breakLine();
             echo sprintf('%s [%s]', $this->ll('Allow buy with pending payments?'), $this->getAllowBuyWithPendingPayments()) . breakLine(2);
         }
+
         echo 'Begins ' . date('Ymd H:i:s') . '.' . breakLine();
 
         $date = date('Y-m-d H:i:s', time() - ($minutes * 60));
@@ -1935,10 +1973,10 @@ class PaymentMethod extends PaymentModule
             PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, $sql));
         }
 
-        if ($result = Db::getInstance()->ExecuteS($sql)) {
-            echo "Found (" . count($result) . ") payments pending." . breakLine(2);
+        try {
+            if ($result = Db::getInstance()->ExecuteS($sql)) {
+                echo "Found (" . count($result) . ") payments pending." . breakLine(2);
 
-            try {
                 $place_to_pay = new PaymentRedirection($this->getLogin(), $this->getTranKey(), $this->getUri(), $this->getConnectionType());
 
                 foreach ($result as $row) {
@@ -1959,12 +1997,12 @@ class PaymentMethod extends PaymentModule
 
                     echo sprintf('%s status is %s [%s]', $order->reference, implode('=', $this->getStatusDescription($status)), $status) . breakLine(2);
                 }
-            } catch (Exception $e) {
-                PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 999, $e->getMessage()));
-                echo 'Error: ' . $e->getMessage() . breakLine(2);
+            } else {
+                echo 'Not exists payments pending.' . breakLine();
             }
-        } else {
-            echo 'Not exists payments pending.' . breakLine();
+        } catch (Exception $e) {
+            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 999, $e->getMessage()));
+            echo 'Error: ' . $e->getMessage() . breakLine(2);
         }
 
         echo 'Finished ' . date('Ymd H:i:s') . '.' . breakLine();
