@@ -16,25 +16,30 @@ View releases [here][link-releases]
 
 [link-releases]: https://github.com/freddiegar/prestashop-gateway/releases 
 
-## Manual Installation
+## Installation
 
 Create folder placetopaypayment (this is required, with this name)
+
 ```bash
 mkdir /var/www/html/modules/placetopaypayment
 ```
 
-Clone Project in modules 
+Clone Project in modules
+ 
 ```bash
 git clone git@github.com:freddiegar/prestashop-gateway.git /var/www/html/modules/placetopaypayment
 ```
 
-Install dependencies with composer
+Set permissions and install dependencies with composer
 
 ```bash
-cd /var/www/html/modules/placetopaypayment && composer install
+cd /var/www/html/modules/placetopaypayment \ 
+    && sudo setfacl -dR -m u:www-data:rwX -m u:`whoami`:rwX `pwd` \ 
+    && sudo setfacl -R -m u:www-data:rwX -m u:`whoami`:rwX `pwd` \
+    && composer install
 ```
 
-## Docker Installation
+## Docker Prestashop Installation
 
 Install Prestashop 1.6 with PHP 5.5 (and MySQL 5.7). In folder of project;
  
@@ -58,7 +63,7 @@ Admin data access
 - email: demo@prestashop.com
 - password: prestashop_demo
 
-### Another docker in prestashop
+### Another docker Prestashop installation
 
 Others installation options are [here](https://store.docker.com/community/images/prestashop/prestashop), you can to change `FROM` in Dockerfile, for instance
 
@@ -74,7 +79,7 @@ FROM prestashop/prestashop:1.7-7.0
 
 Ports by default in this installation are
 
-- Web Server: 8787 => 80 [localhost](http://localhost:8787) - [in docker](http://ip_address)
+- Apache: 8787 => 80
 - MySQL: 33060 => 3306
 
 ## Setup module

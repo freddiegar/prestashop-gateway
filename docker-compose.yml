@@ -10,11 +10,13 @@ services:
       - 33060:3306
 
   prestashop:
-    build: .
+    image: prestashop/prestashop:1.6-5.5
     links:
       - mysql
     ports:
-        - 8787:80
+      - 8787:80
+    volumes:
+      - .:/var/www/html/modules/placetopaypayment
     environment:
       DB_SERVER: mysql # Use MySQL image
       PS_DEV_MODE: 1
