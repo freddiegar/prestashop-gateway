@@ -58,10 +58,18 @@ Then... (Please wait ~8 min, while install ALL and load Apache :D to continue), 
 docker logs placetopaypayment_prestashop_1 -f
 ```
 
-Admin data access
+__Preshtashop Admin Access__
  
 - email: demo@prestashop.com
 - password: prestashop_demo
+
+__MySQL Access__
+
+- user: root
+- password: admin
+- database: prestashop
+
+See details in `docker-compose.yml` 
 
 ### Another docker Prestashop installation
 

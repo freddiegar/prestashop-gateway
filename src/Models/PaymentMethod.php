@@ -1483,12 +1483,18 @@ class PaymentMethod extends PaymentModule
         $requestId = $paymentPlaceToPay['id_request'];
         $oldStatus = $paymentPlaceToPay['status'];
 
+        $order = $this->getOrderByCartId($cartId);
+
         if (isDebugEnable()) {
             PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, print_r($paymentPlaceToPay, true)));
         }
 
         if (!isDebugEnable() && $oldStatus != PaymentStatus::PENDING) {
-            $message = sprintf('Payment # %d not is pending, current status is [%d]', $paymentId, $oldStatus);
+            $message = sprintf('Payment with reference: [%s] not is pending, current status is [%d=%s]',
+                $order->reference,
+                $oldStatus,
+                implode('->', $this->getStatusDescription($oldStatus))
+            );
             PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, $message));
 
             if (!empty($input)) {
@@ -1499,7 +1505,6 @@ class PaymentMethod extends PaymentModule
             Tools::redirect('authentication.php?back=order.php');
         }
 
-        $order = $this->getOrderByCartId($cartId);
         $response = (new PaymentRedirection($this->getLogin(), $this->getTranKey(), $this->getUri(), $this->getConnectionType()))->query($requestId);
 
         if (isDebugEnable()) {
@@ -1510,7 +1515,13 @@ class PaymentMethod extends PaymentModule
             $newStatus = $this->getStatusPayment($response);
 
             if (isDebugEnable()) {
-                $message = sprintf('Updating status by payment # %d from [%d] to [%d]', $paymentId, $oldStatus, $newStatus);
+                $message = sprintf('Updating status to payment with reference: [%s] from [%d=%s] to [%d=%s]',
+                    $order->reference,
+                    $oldStatus,
+                    implode('->', $this->getStatusDescription($oldStatus)),
+                    $newStatus,
+                    implode('->', $this->getStatusDescription($newStatus))
+                );
                 PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, $message));
             }
 
@@ -1702,8 +1713,8 @@ class PaymentMethod extends PaymentModule
 
         $sql = "
             UPDATE `{$this->tablePayment}` SET
-                `date` = '{$date}',
                 `status` = {$status},
+                `date` = '{$date}',
                 `reason` = '{$reason}',
                 `reason_description` = '{$reasonDescription}',
                 `franchise` = '{$franchise}',
