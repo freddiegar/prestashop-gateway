@@ -1692,7 +1692,7 @@ class PaymentMethod extends PaymentModule
         $conversion = '';
         $payerEmail = '';
 
-        if ($response->isApproved() && !empty($response->lastTransaction())) {
+        if (!empty($response->lastTransaction()) && $response->lastTransaction()->status()->isApproved()) {
             $payment = $response->lastTransaction();
 
             $date = pSQL($payment->status()->date());
@@ -1707,7 +1707,7 @@ class PaymentMethod extends PaymentModule
             $conversion = pSQL($payment->amount()->factor());
         }
 
-        if ($response->isApproved() && !empty($response->request()->payer()) && !empty($response->request()->payer()->email())) {
+        if (!empty($response->request()->payer()) && !empty($response->request()->payer()->email())) {
             $payerEmail = pSQL($response->request()->payer()->email());
         }
 
