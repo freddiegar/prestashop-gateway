@@ -11,6 +11,7 @@ use Currency;
 use CurrencyCore;
 use Customer;
 use Db;
+use Dnetix\Redirection\Message\Notification;
 use Dnetix\Redirection\Message\RedirectInformation;
 use Exception;
 use HelperForm;
@@ -1451,8 +1452,21 @@ class PaymentMethod extends PaymentModule
             $paymentPlaceToPay = $this->getPaymentPlaceToPayBy('reference', $reference);
         } elseif (!empty(file_get_contents("php://input"))) {
             // On resolve function called process
-            $input = json_decode(file_get_contents("php://input"));
-            $requestId = (int)$input->requestId;
+            $input = json_decode(file_get_contents("php://input"), 1);
+
+            $notification = new Notification((array)$input, $this->getTranKey());
+
+            if (!$notification->isValidNotification()) {
+                if (isDebugEnable()) {
+                    die('Change signature value in your request to: ' . $notification->makeSignature());
+                }
+
+                $message = 'Notification is not valid, process canceled. Input request: ' . PHP_EOL . print_r($input, 1);
+
+                throw new PaymentException($message, 507);
+            }
+
+            $requestId = (int)$input['requestId'];
             $paymentPlaceToPay = $this->getPaymentPlaceToPayBy('id_request', $requestId);
         }
 
@@ -1461,10 +1475,10 @@ class PaymentMethod extends PaymentModule
             $message = sprintf('Payment _reference: [%s] not found', $_reference);
 
             if (isset($reference)) {
-                $error = 502;
+                $error = 505;
                 $message = sprintf('Payment with reference: [%s] not found', $reference);
             } elseif (isset($requestId)) {
-                $error = 503;
+                $error = 506;
                 $message = sprintf('Payment with id_request: [%s] not found', $requestId);
             }
 
