@@ -1706,7 +1706,8 @@ class PaymentMethod extends PaymentModule
         $conversion = '';
         $payerEmail = '';
 
-        if (!empty($response->lastTransaction()) && $response->lastTransaction()->status()->isApproved()) {
+        if (!empty($response->lastTransaction()) &&
+            ($response->lastTransaction()->status()->isApproved() || $response->lastTransaction()->status()->isRejected())) {
             $payment = $response->lastTransaction();
 
             $date = pSQL($payment->status()->date());
