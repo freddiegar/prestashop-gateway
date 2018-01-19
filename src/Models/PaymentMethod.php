@@ -1297,7 +1297,7 @@ class PaymentMethod extends PaymentModule
                     'name' => $deliveryAddress->firstname,
                     'surname' => $deliveryAddress->lastname,
                     'email' => $customer->email,
-                    'mobile' => (!empty($deliveryAddress->phone) ? $deliveryAddress->phone : $deliveryAddress->phone_mobile),
+                    'mobile' => (!empty($deliveryAddress->phone_mobile) ? $deliveryAddress->phone_mobile : $deliveryAddress->phone),
                     'address' => [
                         'country' => $deliveryCountry->iso_code,
                         'state' => (empty($deliveryState) ? null : $deliveryState->name),
@@ -1519,7 +1519,13 @@ class PaymentMethod extends PaymentModule
 
             if (!empty($input)) {
                 // Show status to reference in console
-                die("{$order->reference} change from [{$oldStatus}] to [{$newStatus}] status" . PHP_EOL);
+                die(sprintf('Payment with reference: [%s] status change from [%d=%s] to [%d=%s]',
+                    $order->reference,
+                    $oldStatus,
+                    implode('->', $this->getStatusDescription($oldStatus)),
+                    $newStatus,
+                    implode('->', $this->getStatusDescription($newStatus))
+                ));
             }
 
             // Redirect to confirmation page
@@ -1985,7 +1991,7 @@ class PaymentMethod extends PaymentModule
                     $paymentId = (int)$row['id_payment'];
                     $cartId = (int)$row['id_order'];
 
-                    echo "Processing {$reference}." . breakLine();
+                    echo "Processing reference: [{$reference}] (Request ID: {$requestId})." . breakLine();
 
                     $response = $place_to_pay->query($requestId);
                     $status = $this->getStatusPayment($response);
@@ -1995,7 +2001,7 @@ class PaymentMethod extends PaymentModule
                         $this->settleTransaction($paymentId, $status, $order, $response);
                     }
 
-                    echo sprintf('%s status is %s [%s]', $order->reference, implode('=', $this->getStatusDescription($status)), $status) . breakLine(2);
+                    echo sprintf('Payment with reference: [%s] is [%d=%s]', $order->reference, $status, implode('->', $this->getStatusDescription($status))) . breakLine(2);
                 }
             } else {
                 echo 'Not exists payments pending.' . breakLine();
