@@ -832,6 +832,7 @@ class PaymentMethod extends PaymentModule
      *
      * @param array $params
      * @return string
+     * @throws PaymentException
      */
     public function hookPayment($params)
     {
@@ -883,6 +884,7 @@ class PaymentMethod extends PaymentModule
      * PrestaShop 1.7 or later
      * @param $params
      * @return array
+     * @throws PaymentException
      */
     public function hookPaymentOptions($params)
     {
@@ -1569,7 +1571,6 @@ class PaymentMethod extends PaymentModule
      * @param string $column You can any column from $this->tablePayment table
      * @param int $value
      * @return array|bool
-     * @throws PaymentException
      */
     private function getPaymentPlaceToPayBy($column, $value = null)
     {
@@ -1623,6 +1624,7 @@ class PaymentMethod extends PaymentModule
      * @param $status
      * @param Order $order
      * @param RedirectInformation $response
+     * @throws PaymentException
      */
     private function settleTransaction($paymentId, $status, Order $order, RedirectInformation $response)
     {
@@ -1786,6 +1788,7 @@ class PaymentMethod extends PaymentModule
     /**
      * @param Order $order
      * @return mixed
+     * @throws PaymentException
      */
     private function getPaymentDetails(Order $order)
     {
@@ -1974,7 +1977,6 @@ class PaymentMethod extends PaymentModule
      * Update status order in background
      *
      * @param int $minutes
-     * @throws PaymentException
      */
     public function resolvePendingPayments($minutes)
     {
@@ -2037,7 +2039,7 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     *
+     * Options to show when user return from payment
      */
     private function getListOptionShowOnReturn()
     {
