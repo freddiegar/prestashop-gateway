@@ -1,5 +1,5 @@
 {
-    "name": "placetopay/placetopaypayment",
+    "name": "placetopay/prestashop-gateway",
     "description": "Plugin for integration Place to Pay gateway with PrestaShop CMS",
     "type": "plugin",
     "require": {
@@ -11,11 +11,7 @@
         {
 	       "name": "Place To Pay",
 	       "email": "desarrollo@placetopay.com"
-	    },
-        {
-            "name": "Fredy Mendivelso",
-            "email": "fredy.mendivelso@placetopay.com"
-        }
+	    }
     ],
     "minimum-stability": "dev",
     "autoload": {
