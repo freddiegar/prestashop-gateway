@@ -484,7 +484,7 @@ class PaymentMethod extends PaymentModule
             Configuration::updateValue(self::FILL_TAX_INFORMATION, Tools::getValue(self::FILL_TAX_INFORMATION));
             Configuration::updateValue(self::FILL_BUYER_INFORMATION, Tools::getValue(self::FILL_BUYER_INFORMATION));
             if (versionComparePlaceToPay('1.7.0.0', '<')) {
-                Configuration::updateValue(self::STOCK_REINJECT, Tools::getValue(self::FILL_BUYER_INFORMATION));
+                Configuration::updateValue(self::STOCK_REINJECT, Tools::getValue(self::STOCK_REINJECT));
             }
 
             // Configuration Connection
