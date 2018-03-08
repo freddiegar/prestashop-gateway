@@ -16,7 +16,7 @@ View releases [here][link-releases]
 
 [link-releases]: https://github.com/freddiegar/prestashop-gateway/releases 
 
-## Installation
+## Manual Installation
 
 Create folder placetopaypayment (this is required, with this name)
 
@@ -39,12 +39,12 @@ cd /var/www/html/modules/placetopaypayment \
     && composer install
 ```
 
-## Docker Prestashop Installation
+## Docker Installation
 
-Install Prestashop 1.6 with PHP 5.5 (and MySQL 5.7). In folder of project;
+Install Prestashop 1.6 with PHP 5.6 (and MySQL 5.7). In folder of project;
  
 ```bash
-docker-compose up -d
+make install
 ```
 
 Then... (Please wait ~8 min, while install ALL and load Apache :D to continue), you can go to
@@ -52,10 +52,10 @@ Then... (Please wait ~8 min, while install ALL and load Apache :D to continue), 
 - [store](http://localhost:8787)
 - [admin](http://localhost:8787/adminstore)
 
-***ATTENTION:*** If server return error code (400, 404, 500) you can status in docker logs until that installation process end
+***ATTENTION:*** If server return error code (400, 404, 500) you can status in docker logs until that installation process end, use:
 
 ```bash
-docker logs placetopaypayment_prestashop_1 -f
+make logs-prestashop
 ```
 
 __Preshtashop Admin Access__
@@ -71,27 +71,37 @@ __MySQL Access__
 
 See details in `docker-compose.yml` 
 
-### Another docker Prestashop installation
+### Customize docker installation
 
-Others installation options are [here](https://store.docker.com/community/images/prestashop/prestashop), you can to change `FROM` in Dockerfile, for instance
+Default versions
 
-```yaml
-# Install Prestashop 1.6 with PHP 5.5 (Default option)
-FROM prestashop/prestashop:1.6-5.5
-...
-# change to Install Prestashop 1.7 with PHP 7.0
-FROM prestashop/prestashop:1.7-7.0
-``` 
+- PrestaShop: 1.6
+- PHP: 5.6
+- MySQL: 5.7
 
-### Port bind
+Others installation options are [here](https://store.docker.com/community/images/prestashop/prestashop/tags), You can change versions in `.env` file
+
+```bash
+# Prestashop 1.7 with PHP 7.0
+PS_VERSION=1.7-7.0
+
+# Prestashop 1.6.1.1 with PHP 5.6
+PS_VERSION=1.6.1.1
+
+# Prestashop latest with PHP 5.6 and MySQL 5.5 
+PS_VERSION=latest
+MYSQL_VERSION=5.5
+```
+
+### Binding Ports
 
 Ports by default in this installation are
 
-- Apache: 8787 => 80
-- MySQL: 33060 => 3306
+- Web Server (`WEB_PORT`): 8787 => 80
+- Database (`MYSQL_PORT`): 33060 => 3306
 
 ## Setup module
 
-Install and setup you login and trankey in [store](http://localhost:8787/adminstore)!
+Install and setup you `login` and `trankey` in your [store](http://localhost:8787/adminstore)!
 
 Enjoy development and test!
