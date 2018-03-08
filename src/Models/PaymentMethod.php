@@ -62,7 +62,6 @@ class PaymentMethod extends PaymentModule
     const CONNECTION_TYPE = 'PLACETOPAY_CONNECTION_TYPE';
 
     const EXPIRATION_TIME_MINUTES_DEFAULT = 120; // 2 Hours
-    const EXPIRATION_TIME_MINUTES_LIMIT = 241920; // 6 Months of 4 weeks
 
     const SHOW_ON_RETURN_DEFAULT = 'default';
     const SHOW_ON_RETURN_PSE_LIST = 'pse_list';
@@ -664,14 +663,11 @@ class PaymentMethod extends PaymentModule
                 ),
                 'input' => array(
                     array(
-                        'type' => 'select',
+                        'type' => 'text',
                         'label' => $this->ll('Expiration time to pay'),
                         'name' => self::EXPIRATION_TIME_MINUTES,
-                        'options' => array(
-                            'id' => 'value',
-                            'name' => 'label',
-                            'query' => $this->getListOptionExpirationMinutes(),
-                        ),
+                        'required' => true,
+                        'autocomplete' => 'off',
                     ),
                     array(
                         'type' => 'select',
@@ -2059,58 +2055,6 @@ class PaymentMethod extends PaymentModule
                 'label' => $this->ll('PSE List'),
             ),
         );
-
-        return $options;
-    }
-
-    /**
-     * Get expiration time minutes list
-     *
-     * @return array
-     */
-    private function getListOptionExpirationMinutes()
-    {
-        $options = array();
-        $minutes = 10;
-        $txtMinutes = $this->ll('minutes');
-        $txtHours = $this->ll('hour(s)');
-        $txtDays = $this->ll('day(s)');
-        $txtWeeks = $this->ll('week(s)');
-        $txtMonths = $this->ll('month(s)');
-
-        while ($minutes <= self::EXPIRATION_TIME_MINUTES_LIMIT) {
-            if ($minutes < 60) {
-                $options[] = array(
-                    'value' => $minutes,
-                    'label' => sprintf('%d %s', $minutes, $txtMinutes),
-                );
-                $minutes += 10;
-            } elseif ($minutes >= 60 && $minutes < 1440) {
-                $options[] = array(
-                    'value' => $minutes,
-                    'label' => sprintf('%d %s', $minutes / 60, $txtHours),
-                );
-                $minutes += 60;
-            } elseif ($minutes >= 1440 && $minutes < 10080) {
-                $options[] = array(
-                    'value' => $minutes,
-                    'label' => sprintf('%d %s', $minutes / 1440, $txtDays),
-                );
-                $minutes += 1440;
-            } elseif ($minutes >= 10080 && $minutes < 40320) {
-                $options[] = array(
-                    'value' => $minutes,
-                    'label' => sprintf('%d %s', $minutes / 10080, $txtWeeks),
-                );
-                $minutes += 10080;
-            } else {
-                $options[] = array(
-                    'value' => $minutes,
-                    'label' => sprintf('%d %s', $minutes / 40320, $txtMonths),
-                );
-                $minutes += 40320;
-            }
-        }
 
         return $options;
     }
