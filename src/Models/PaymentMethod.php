@@ -724,7 +724,7 @@ class PaymentMethod extends PaymentModule
                     ),
                     array(
                         'type' => 'switch',
-                        'label' => $this->ll('Skip result on approved?'),
+                        'label' => $this->ll('Skip result?'),
                         'name' => self::SKIP_RESULT,
                         'is_bool' => true,
                         'values' => $this->getListOptionSwitch(),
