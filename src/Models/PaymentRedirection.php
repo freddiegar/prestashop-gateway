@@ -11,13 +11,14 @@ use Dnetix\Redirection\PlacetoPay;
 class PaymentRedirection extends PlacetoPay
 {
     /**
-     * Instantiates a Place to Pay object providing the login and tranKey,
+     * Instantiates a PlacetoPay object providing the login and tranKey,
      * also the url that will be used for the service
      *
      * @param array $login
      * @param $tranKey
      * @param string $uri_service
      * @param string $type soap|rest
+     * @throws \Dnetix\Redirection\Exceptions\PlacetoPayException
      */
     public function __construct($login, $tranKey, $uri_service = '', $type = 'rest')
     {

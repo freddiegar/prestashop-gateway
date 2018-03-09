@@ -1,6 +1,6 @@
 <?php
 /**
- * Redirect to Place to Pay
+ * Redirect to PlacetoPay
  */
 try {
     require_once 'helpers.php';

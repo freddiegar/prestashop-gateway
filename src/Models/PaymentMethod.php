@@ -1003,7 +1003,7 @@ class PaymentMethod extends PaymentModule
     /**
      * @return string
      */
-    public function getUri()
+    private function getUri()
     {
         $uri = null;
         $endpoints = PaymentUrl::getEndpointsTo($this->getCountry());
@@ -1018,7 +1018,7 @@ class PaymentMethod extends PaymentModule
     /**
      * @return string
      */
-    public function getCountry()
+    private function getCountry()
     {
         $country = $this->getCurrentValueOf(self::COUNTRY);
 
@@ -1030,7 +1030,7 @@ class PaymentMethod extends PaymentModule
     /**
      * @return string
      */
-    public function getEnvironment()
+    private function getEnvironment()
     {
         $env = $this->getCurrentValueOf(self::ENVIRONMENT);
 
@@ -1040,9 +1040,17 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
+     * @return bool
+     */
+    private function isProduction()
+    {
+        return $this->getEnvironment() === Environment::PRODUCTION;
+    }
+
+    /**
      * @return string
      */
-    public function getLogin()
+    private function getLogin()
     {
         return $this->getCurrentValueOf(self::LOGIN);
     }
@@ -1050,7 +1058,7 @@ class PaymentMethod extends PaymentModule
     /**
      * @return string
      */
-    public function getTranKey()
+    private function getTranKey()
     {
         return $this->getCurrentValueOf(self::TRAN_KEY);
     }
@@ -1058,7 +1066,7 @@ class PaymentMethod extends PaymentModule
     /**
      * @return string
      */
-    public function getCompanyDocument()
+    private function getCompanyDocument()
     {
         return $this->getCurrentValueOf(self::COMPANY_DOCUMENT);
     }
@@ -1066,7 +1074,7 @@ class PaymentMethod extends PaymentModule
     /**
      * @return string
      */
-    public function getCompanyName()
+    private function getCompanyName()
     {
         return $this->getCurrentValueOf(self::COMPANY_NAME);
     }
@@ -1074,7 +1082,7 @@ class PaymentMethod extends PaymentModule
     /**
      * @return string
      */
-    public function getDescription()
+    private function getDescription()
     {
         return $this->getCurrentValueOf(self::DESCRIPTION);
     }
@@ -1082,7 +1090,7 @@ class PaymentMethod extends PaymentModule
     /**
      * @return string
      */
-    public function getEmailContact()
+    private function getEmailContact()
     {
         $emailContact = $this->getCurrentValueOf(self::EMAIL_CONTACT);
 
@@ -1094,7 +1102,7 @@ class PaymentMethod extends PaymentModule
     /**
      * @return string
      */
-    public function getTelephoneContact()
+    private function getTelephoneContact()
     {
         $telephoneContact = $this->getCurrentValueOf(self::TELEPHONE_CONTACT);
 
@@ -1106,7 +1114,7 @@ class PaymentMethod extends PaymentModule
     /**
      * @return bool
      */
-    public function getTransUnionMessage()
+    private function getTransUnionMessage()
     {
         return $this->getCurrentValueOf(self::CIFIN_MESSAGE);
     }
@@ -1114,7 +1122,7 @@ class PaymentMethod extends PaymentModule
     /**
      * @return bool
      */
-    public function getAllowBuyWithPendingPayments()
+    private function getAllowBuyWithPendingPayments()
     {
         return (int)$this->getCurrentValueOf(self::ALLOW_BUY_WITH_PENDING_PAYMENTS);
     }
@@ -1122,7 +1130,7 @@ class PaymentMethod extends PaymentModule
     /**
      * @return mixed
      */
-    public function getShowOnReturn()
+    private function getShowOnReturn()
     {
         return $this->getCurrentValueOf(self::SHOW_ON_RETURN);
     }
@@ -1130,7 +1138,7 @@ class PaymentMethod extends PaymentModule
     /**
      * @return int
      */
-    public function getExpirationTimeMinutes()
+    private function getExpirationTimeMinutes()
     {
         $minutes = $this->getCurrentValueOf(self::EXPIRATION_TIME_MINUTES);
 
@@ -1142,7 +1150,7 @@ class PaymentMethod extends PaymentModule
     /**
      * @return bool
      */
-    public function getFillTaxInformation()
+    private function getFillTaxInformation()
     {
         return $this->getCurrentValueOf(self::FILL_TAX_INFORMATION);
     }
@@ -1150,7 +1158,7 @@ class PaymentMethod extends PaymentModule
     /**
      * @return bool
      */
-    public function getStockReInject()
+    private function getStockReInject()
     {
         return $this->getCurrentValueOf(self::STOCK_REINJECT);
     }
@@ -1158,7 +1166,7 @@ class PaymentMethod extends PaymentModule
     /**
      * @return string
      */
-    public function getConnectionType()
+    private function getConnectionType()
     {
         $connectionType = $this->getCurrentValueOf(self::CONNECTION_TYPE);
 
@@ -1170,7 +1178,7 @@ class PaymentMethod extends PaymentModule
     /**
      * @return bool
      */
-    public function getFillBuyerInformation()
+    private function getFillBuyerInformation()
     {
         return $this->getCurrentValueOf(self::FILL_BUYER_INFORMATION);
     }
@@ -1178,7 +1186,7 @@ class PaymentMethod extends PaymentModule
     /**
      * @return bool
      */
-    public function getSkipResult()
+    private function getSkipResult()
     {
         return $this->getCurrentValueOf(self::SKIP_RESULT);
     }
@@ -1186,7 +1194,7 @@ class PaymentMethod extends PaymentModule
     /**
      * @return mixed
      */
-    public function getOrderState()
+    private function getOrderState()
     {
         return Configuration::get(self::ORDER_STATE);
     }
@@ -1196,7 +1204,7 @@ class PaymentMethod extends PaymentModule
      * @param string $params Query string to add in URL, please include symbol (?), eg: ?var=foo
      * @return string
      */
-    public function getUrl($page, $params = '')
+    private function getUrl($page, $params = '')
     {
         $baseUrl = Context::getContext()->shop->getBaseURL(true);
         $url = $baseUrl . 'modules/' . getModuleName() . '/' . $page . $params;
@@ -1465,10 +1473,11 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * Process response from Place to Pay Platform
+     * Process response from PlacetoPay Platform
      *
      * @param null $_reference
      * @throws PaymentException
+     * @throws \Dnetix\Redirection\Exceptions\PlacetoPayException
      */
     public function process($_reference = null)
     {
@@ -1623,7 +1632,7 @@ class PaymentMethod extends PaymentModule
      * @param RedirectInformation $response
      * @return int
      */
-    public function getStatusPayment(RedirectInformation $response)
+    private function getStatusPayment(RedirectInformation $response)
     {
         // By default is pending so make a query for it later (see information.php example)
         $status = PaymentStatus::PENDING;
@@ -1933,7 +1942,7 @@ class PaymentMethod extends PaymentModule
      * @param Context|null $context
      * @return array
      */
-    public function getCustomerOrders($id_customer, $show_hidden_status = false, Context $context = null)
+    private function getCustomerOrders($id_customer, $show_hidden_status = false, Context $context = null)
     {
         if (!$context) {
             $context = Context::getContext();
@@ -2006,21 +2015,13 @@ class PaymentMethod extends PaymentModule
 
     /**
      * Update status order in background
-     *
      * @param int $minutes
      */
-    public function resolvePendingPayments($minutes)
+    public function resolvePendingPayments($minutes = 12)
     {
-        if ($minutes == 0) {
-            echo $this->ll('Configuration') . breakLine();
-            echo sprintf('PHP [%s]', PHP_VERSION) . breakLine();
-            echo sprintf('PrestaShop [%s]', _PS_VERSION_) . breakLine();
-            echo sprintf('Plugin [%s]', $this->getPluginVersion()) . breakLine();
-            echo sprintf('URL Base [%s]', $this->getUrl('')) . breakLine();
-            echo sprintf('%s [%s]', $this->ll('Country'), $this->getCountry()) . breakLine();
-            echo sprintf('%s [%s]', $this->ll('Environment'), $this->getEnvironment()) . breakLine();
-            echo sprintf('%s [%s]', $this->ll('Connection type'), $this->getConnectionType()) . breakLine();
-            echo sprintf('%s [%s]', $this->ll('Allow buy with pending payments?'), $this->getAllowBuyWithPendingPayments()) . breakLine(2);
+        if ($this->showSetupIsEnable()) {
+            echo $this->getSetup();
+            $minutes = 0;
         }
 
         echo 'Begins ' . date('Ymd H:i:s') . '.' . breakLine();
@@ -2068,6 +2069,39 @@ class PaymentMethod extends PaymentModule
         }
 
         echo 'Finished ' . date('Ymd H:i:s') . '.' . breakLine();
+    }
+
+    /**
+     * @return bool
+     */
+    private function showSetupIsEnable()
+    {
+        $force = isset($_GET['f']) ? $_GET['f'] : null;
+
+        return (!$this->isProduction()
+            && !empty($force)
+            && strlen($force) === 5
+            && substr($this->getLogin(), -5) === $force)
+            ? true
+            : false;
+    }
+
+    /**
+     * @return string
+     */
+    private function getSetup()
+    {
+        $setup = $this->ll('Configuration') . breakLine();
+        $setup .= sprintf('PHP [%s]', PHP_VERSION) . breakLine();
+        $setup .= sprintf('PrestaShop [%s]', _PS_VERSION_) . breakLine();
+        $setup .= sprintf('Plugin [%s]', $this->getPluginVersion()) . breakLine();
+        $setup .= sprintf('URL Base [%s]', $this->getUrl('')) . breakLine();
+        $setup .= sprintf('%s [%s]', $this->ll('Country'), $this->getCountry()) . breakLine();
+        $setup .= sprintf('%s [%s]', $this->ll('Environment'), $this->getEnvironment()) . breakLine();
+        $setup .= sprintf('%s [%s]', $this->ll('Connection type'), $this->getConnectionType()) . breakLine();
+        $setup .= sprintf('%s [%s]', $this->ll('Allow buy with pending payments?'), $this->getAllowBuyWithPendingPayments()) . breakLine(2);
+
+        return $setup;
     }
 
     /**
