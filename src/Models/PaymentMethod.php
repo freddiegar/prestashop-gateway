@@ -53,6 +53,7 @@ class PaymentMethod extends PaymentModule
     const ALLOW_BUY_WITH_PENDING_PAYMENTS = 'PLACETOPAY_ALLOWBUYWITHPENDINGPAYMENTS';
     const FILL_TAX_INFORMATION = 'PLACETOPAY_FILL_TAX_INFORMATION';
     const FILL_BUYER_INFORMATION = 'PLACETOPAY_FILL_BUYER_INFORMATION';
+    const SKIP_RESULT = 'PLACETOPAY_SKIP_RESULT';
     const STOCK_REINJECT = 'PLACETOPAY_STOCKREINJECT';
 
     const COUNTRY = 'PLACETOPAY_COUNTRY';
@@ -195,6 +196,7 @@ class PaymentMethod extends PaymentModule
         Configuration::updateValue(self::ALLOW_BUY_WITH_PENDING_PAYMENTS, self::OPTION_ENABLED);
         Configuration::updateValue(self::FILL_TAX_INFORMATION, self::OPTION_ENABLED);
         Configuration::updateValue(self::FILL_BUYER_INFORMATION, self::OPTION_ENABLED);
+        Configuration::updateValue(self::SKIP_RESULT, self::OPTION_DISABLED);
 
         if (versionComparePlaceToPay('1.7.0.0', '<')) {
             Configuration::updateValue(self::STOCK_REINJECT, self::OPTION_ENABLED);
@@ -230,6 +232,7 @@ class PaymentMethod extends PaymentModule
             || !Configuration::deleteByName(self::ALLOW_BUY_WITH_PENDING_PAYMENTS)
             || !Configuration::deleteByName(self::FILL_TAX_INFORMATION)
             || !Configuration::deleteByName(self::FILL_BUYER_INFORMATION)
+            || !Configuration::deleteByName(self::SKIP_RESULT)
 
             || !Configuration::deleteByName(self::COUNTRY)
             || !Configuration::deleteByName(self::ENVIRONMENT)
@@ -482,6 +485,8 @@ class PaymentMethod extends PaymentModule
             Configuration::updateValue(self::ALLOW_BUY_WITH_PENDING_PAYMENTS, Tools::getValue(self::ALLOW_BUY_WITH_PENDING_PAYMENTS));
             Configuration::updateValue(self::FILL_TAX_INFORMATION, Tools::getValue(self::FILL_TAX_INFORMATION));
             Configuration::updateValue(self::FILL_BUYER_INFORMATION, Tools::getValue(self::FILL_BUYER_INFORMATION));
+            Configuration::updateValue(self::SKIP_RESULT, Tools::getValue(self::SKIP_RESULT));
+
             if (versionComparePlaceToPay('1.7.0.0', '<')) {
                 Configuration::updateValue(self::STOCK_REINJECT, Tools::getValue(self::STOCK_REINJECT));
             }
@@ -581,6 +586,7 @@ class PaymentMethod extends PaymentModule
             self::ALLOW_BUY_WITH_PENDING_PAYMENTS => $this->getAllowBuyWithPendingPayments(),
             self::FILL_TAX_INFORMATION => $this->getFillTaxInformation(),
             self::FILL_BUYER_INFORMATION => $this->getFillBuyerInformation(),
+            self::SKIP_RESULT => $this->getSkipResult(),
 
             self::COUNTRY => $this->getCountry(),
             self::ENVIRONMENT => $this->getEnvironment(),
@@ -705,6 +711,13 @@ class PaymentMethod extends PaymentModule
                         'type' => 'switch',
                         'label' => $this->ll('Fill buyer information?'),
                         'name' => self::FILL_BUYER_INFORMATION,
+                        'is_bool' => true,
+                        'values' => $this->getListOptionSwitch(),
+                    ),
+                    array(
+                        'type' => 'switch',
+                        'label' => $this->ll('Skip result on approved?'),
+                        'name' => self::SKIP_RESULT,
                         'is_bool' => true,
                         'values' => $this->getListOptionSwitch(),
                     ),
@@ -1019,7 +1032,7 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getLogin()
     {
@@ -1027,7 +1040,7 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getTranKey()
     {
@@ -1035,7 +1048,7 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getCompanyDocument()
     {
@@ -1043,7 +1056,7 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getCompanyName()
     {
@@ -1051,7 +1064,7 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getDescription()
     {
@@ -1059,7 +1072,7 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getEmailContact()
     {
@@ -1071,7 +1084,7 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getTelephoneContact()
     {
@@ -1083,7 +1096,7 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * @return mixed
+     * @return bool
      */
     public function getTransUnionMessage()
     {
@@ -1091,7 +1104,7 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * @return mixed
+     * @return bool
      */
     public function getAllowBuyWithPendingPayments()
     {
@@ -1107,7 +1120,7 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * @return mixed
+     * @return int
      */
     public function getExpirationTimeMinutes()
     {
@@ -1119,7 +1132,7 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * @return mixed
+     * @return bool
      */
     public function getFillTaxInformation()
     {
@@ -1127,7 +1140,7 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * @return mixed
+     * @return bool
      */
     public function getStockReInject()
     {
@@ -1135,7 +1148,7 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getConnectionType()
     {
@@ -1147,11 +1160,19 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * @return mixed
+     * @return bool
      */
     public function getFillBuyerInformation()
     {
         return $this->getCurrentValueOf(self::FILL_BUYER_INFORMATION);
+    }
+
+    /**
+     * @return bool
+     */
+    public function getSkipResult()
+    {
+        return $this->getCurrentValueOf(self::SKIP_RESULT);
     }
 
     /**
@@ -1289,6 +1310,7 @@ class PaymentMethod extends PaymentModule
                 'locale' => ($language == 'en') ? 'en_US' : 'es_CO',
                 'returnUrl' => $returnUrl,
                 'noBuyerFill' => !(bool)$this->getFillBuyerInformation(),
+                'skipResult' => (bool)$this->getSkipResult(),
                 'ipAddress' => $ipAddress,
                 'expiration' => $expiration,
                 'userAgent' => $_SERVER['HTTP_USER_AGENT'],
@@ -1754,6 +1776,7 @@ class PaymentMethod extends PaymentModule
      *
      * @param $params
      * @return bool|mixed
+     * @throws PaymentException
      */
     public function hookPaymentReturn($params)
     {
