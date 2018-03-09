@@ -31,6 +31,7 @@ use Shop;
 use State;
 use Tools;
 use Validate;
+use PrestaShopDatabaseException;
 
 /**
  * Class PlaceToPayPaymentMethod
@@ -152,21 +153,21 @@ class PaymentMethod extends PaymentModule
     {
         switch (true) {
             case !parent::install():
-                throw new PaymentException('error on install', 101);
+                throw new PaymentException('Error on install', 101);
             case !$this->createPaymentTable():
-                throw new PaymentException('error on install', 102);
+                throw new PaymentException('Error on install creating table', 102);
             case !$this->createOrderState();
-                throw new PaymentException('error on install', 103);
+                throw new PaymentException('Error on install creating status', 103);
             case !$this->alterColumnIpAddress();
-                throw new PaymentException('error on install', 104);
+                throw new PaymentException('Error on install adding IP Address column', 104);
             case !$this->addColumnEmail();
-                throw new PaymentException('error on install', 105);
+                throw new PaymentException('Error on install adding email column', 105);
             case !$this->addColumnRequestId();
-                throw new PaymentException('error on install', 106);
+                throw new PaymentException('Error on install adding request id column', 106);
             case !$this->addColumnReference();
-                throw new PaymentException('error on install', 107);
+                throw new PaymentException('Error on install adding reference column', 107);
             case !$this->registerHook('paymentReturn');
-                throw new PaymentException('error on install', 108);
+                throw new PaymentException('Error on install registering paymentReturn hook', 108);
                 break;
         }
 
@@ -176,7 +177,7 @@ class PaymentMethod extends PaymentModule
         }
 
         if (!$this->registerHook($hookPaymentName)) {
-            throw new PaymentException('error on install', 109);
+            throw new PaymentException(sprintf('Error on install registering %s hook', $hookPaymentName), 109);
         }
 
         if (isDebugEnable()) {
@@ -297,6 +298,10 @@ class PaymentMethod extends PaymentModule
 
         try {
             Db::getInstance()->Execute($sql);
+        } catch (PrestaShopDatabaseException $e) {
+            // Column had been to change before
+            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 601, $e->getMessage()));
+            return true;
         } catch (Exception $e) {
             PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 601, $e->getMessage()));
             return false;
@@ -314,6 +319,10 @@ class PaymentMethod extends PaymentModule
 
         try {
             Db::getInstance()->Execute($sql);
+        } catch (PrestaShopDatabaseException $e) {
+            // Column had been to change before
+            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 601, $e->getMessage()));
+            return true;
         } catch (Exception $e) {
             PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 601, $e->getMessage()));
             return false;
@@ -331,6 +340,10 @@ class PaymentMethod extends PaymentModule
 
         try {
             Db::getInstance()->Execute($sql);
+        } catch (PrestaShopDatabaseException $e) {
+            // Column had been to change before
+            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 601, $e->getMessage()));
+            return true;
         } catch (Exception $e) {
             PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 601, $e->getMessage()));
             return false;
@@ -349,6 +362,10 @@ class PaymentMethod extends PaymentModule
 
         try {
             Db::getInstance()->Execute($sql);
+        } catch (PrestaShopDatabaseException $e) {
+            // Column had been to change before
+            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 601, $e->getMessage()));
+            return true;
         } catch (Exception $e) {
             PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 601, $e->getMessage()));
             return false;
@@ -1288,7 +1305,7 @@ class PaymentMethod extends PaymentModule
             || !Validate::isLoadedObject($deliveryAddress)
             || !Validate::isLoadedObject($currency)
         ) {
-            throw new PaymentException('invalid address or customer', 301);
+            throw new PaymentException('Invalid address or customer', 301);
         }
 
         $deliveryCountry = new Country((int)($deliveryAddress->id_country));
@@ -2019,7 +2036,7 @@ class PaymentMethod extends PaymentModule
      */
     public function resolvePendingPayments($minutes = 12)
     {
-        if ($this->showSetupIsEnable()) {
+        if ($this->isEnableShowSetup()) {
             echo $this->getSetup();
             $minutes = 0;
         }
@@ -2074,7 +2091,7 @@ class PaymentMethod extends PaymentModule
     /**
      * @return bool
      */
-    private function showSetupIsEnable()
+    private function isEnableShowSetup()
     {
         $force = isset($_GET['f']) ? $_GET['f'] : null;
 
