@@ -408,7 +408,7 @@ class PaymentMethod extends PaymentModule
 
             if ($orderState->save()) {
                 Configuration::updateValue(self::ORDER_STATE, $orderState->id);
-                copy($this->getPathThisModule() . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'img' . DIRECTORY_SEPARATOR . 'logo.png', _PS_IMG_DIR_ . 'os' . DIRECTORY_SEPARATOR . $orderState->id . '.gif');
+                copy($this->getPathThisModule() . DIRECTORY_SEPARATOR . 'logo.png', _PS_IMG_DIR_ . 'os' . DIRECTORY_SEPARATOR . $orderState->id . '.gif');
             } else {
                 return false;
             }
