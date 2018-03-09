@@ -63,6 +63,7 @@ class PaymentMethod extends PaymentModule
     const CONNECTION_TYPE = 'PLACETOPAY_CONNECTION_TYPE';
 
     const EXPIRATION_TIME_MINUTES_DEFAULT = 120; // 2 Hours
+    const EXPIRATION_TIME_MINUTES_MIN = 10; // 10 Minutes
 
     const SHOW_ON_RETURN_DEFAULT = 'default';
     const SHOW_ON_RETURN_PSE_LIST = 'pse_list';
@@ -445,6 +446,13 @@ class PaymentMethod extends PaymentModule
             }
             if (!Tools::getValue(self::DESCRIPTION)) {
                 $this->_postErrors[] = sprintf('%s %s', $this->ll('Payment description'), $this->ll('is required.'));
+            }
+
+            if (!Tools::getValue(self::EXPIRATION_TIME_MINUTES)) {
+                $this->_postErrors[] = sprintf('%s %s', $this->ll('Expiration time to pay'), $this->ll('is required.'));
+            } elseif (filter_var(Tools::getValue(self::EXPIRATION_TIME_MINUTES), FILTER_VALIDATE_INT) === false
+                || Tools::getValue(self::EXPIRATION_TIME_MINUTES) < self::EXPIRATION_TIME_MINUTES_MIN) {
+                $this->_postErrors[] = sprintf('%s %s (min %d)', $this->ll('Expiration time to pay'), $this->ll('is not valid.'), self::EXPIRATION_TIME_MINUTES_MIN);
             }
 
             // Configuration Connection
@@ -1126,7 +1134,7 @@ class PaymentMethod extends PaymentModule
     {
         $minutes = $this->getCurrentValueOf(self::EXPIRATION_TIME_MINUTES);
 
-        return !is_numeric($minutes) || $minutes < 10
+        return !is_numeric($minutes) || $minutes < self::EXPIRATION_TIME_MINUTES_MIN
             ? self::EXPIRATION_TIME_MINUTES_DEFAULT
             : $minutes;
     }
@@ -2008,6 +2016,7 @@ class PaymentMethod extends PaymentModule
             echo sprintf('PHP [%s]', PHP_VERSION) . breakLine();
             echo sprintf('PrestaShop [%s]', _PS_VERSION_) . breakLine();
             echo sprintf('Plugin [%s]', $this->getPluginVersion()) . breakLine();
+            echo sprintf('URL Base [%s]', $this->getUrl('')) . breakLine();
             echo sprintf('%s [%s]', $this->ll('Country'), $this->getCountry()) . breakLine();
             echo sprintf('%s [%s]', $this->ll('Environment'), $this->getEnvironment()) . breakLine();
             echo sprintf('%s [%s]', $this->ll('Connection type'), $this->getConnectionType()) . breakLine();
