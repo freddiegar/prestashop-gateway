@@ -105,3 +105,14 @@ Ports by default in this installation are
 Install and setup you `login` and `trankey` in your [store](http://localhost:8787/adminstore)!
 
 Enjoy development and test!
+
+## Troubleshooting
+
+If shop is not auto-installed, then rename folder `xinstall` in container and installed from [wizard](http://localhost:8787/install)
+
+```bash
+make bash-prestashop
+mv xinstall install
+```
+
+This apply to last versions from Prestashop (> 1.7)
