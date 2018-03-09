@@ -2,6 +2,7 @@ CONTAINER_PS=plugin_ps_prestashop
 CONTAINER_DB=plugin_ps_database
 FOLDER_PATH=/var/www/html/modules/prestashop-gateway
 CURRENT_FOLDER=$(shell pwd)
+UID=$(shell id -u)
 
 .PHONY: config
 config:
@@ -49,23 +50,23 @@ install: down up
 
 .PHONY: compile
 compile:
-	touch ~/Downloads/prestashop-gateway_test \
-        && sudo rm -Rf ~/Downloads/prestashop-gateway* \
-        && sudo cp $(CURRENT_FOLDER) ~/Downloads/. -R \
-        && sudo find ~/Downloads/prestashop-gateway/ -type d -name ".git*" -exec rm -Rf {} + \
-        && sudo rm -Rf ~/Downloads/prestashop-gateway/.git* \
-        && sudo rm -Rf ~/Downloads/prestashop-gateway/.idea \
-        && sudo rm -Rf ~/Downloads/prestashop-gateway/config* \
-        && sudo rm -Rf ~/Downloads/prestashop-gateway/Dockerfile \
-        && sudo rm -Rf ~/Downloads/prestashop-gateway/Makefile \
-        && sudo rm -Rf ~/Downloads/prestashop-gateway/.env* \
-        && sudo rm -Rf ~/Downloads/prestashop-gateway/docker* \
-        && sudo rm -Rf ~/Downloads/prestashop-gateway/composer.* \
-        && sudo rm -Rf ~/Downloads/prestashop-gateway/*.md \
-        && sudo rm -Rf ~/Downloads/prestashop-gateway/LICENSE \
+	@touch ~/Downloads/placetopaypayment_test \
+        && sudo rm -Rf ~/Downloads/placetopaypayment* \
+        && sudo cp $(CURRENT_FOLDER) ~/Downloads/placetopaypayment -R \
+        && sudo find ~/Downloads/placetopaypayment/ -type d -name ".git*" -exec rm -Rf {} + \
+        && sudo rm -Rf ~/Downloads/placetopaypayment/.git* \
+        && sudo rm -Rf ~/Downloads/placetopaypayment/.idea \
+        && sudo rm -Rf ~/Downloads/placetopaypayment/config* \
+        && sudo rm -Rf ~/Downloads/placetopaypayment/Dockerfile \
+        && sudo rm -Rf ~/Downloads/placetopaypayment/Makefile \
+        && sudo rm -Rf ~/Downloads/placetopaypayment/.env* \
+        && sudo rm -Rf ~/Downloads/placetopaypayment/docker* \
+        && sudo rm -Rf ~/Downloads/placetopaypayment/composer.* \
+        && sudo rm -Rf ~/Downloads/placetopaypayment/*.md \
+        && sudo rm -Rf ~/Downloads/placetopaypayment/LICENSE \
         && cd ~/Downloads \
-        && sudo zip -r -q -o prestashop-gateway_$(PLUGIN_VERSION).zip prestashop-gateway \
-        && sudo chown freddie:freddie prestashop-gateway_$(PLUGIN_VERSION).zip \
-        && sudo chmod 644 prestashop-gateway_$(PLUGIN_VERSION).zip \
-        && sudo rm -Rf ~/Downloads/prestashop-gateway
-	@echo "Compile file complete"
+        && sudo zip -r -q -o placetopaypayment_$(PLUGIN_VERSION).zip placetopaypayment \
+        && sudo chown $(UID):$(UID) placetopaypayment_$(PLUGIN_VERSION).zip \
+        && sudo chmod 644 placetopaypayment_$(PLUGIN_VERSION).zip \
+        && sudo rm -Rf ~/Downloads/placetopaypayment
+	@echo "Compile file complete: ~/Downloads/placetopaypayment_$(PLUGIN_VERSION).zip"
