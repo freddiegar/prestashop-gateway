@@ -2080,9 +2080,12 @@ class PaymentMethod extends PaymentModule
             } else {
                 echo 'Not exists payments pending.' . breakLine();
             }
+        } catch (PrestaShopDatabaseException $e) {
+            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 998, $e->getMessage()));
+            echo 'Error: Module not installed' . breakLine();
         } catch (Exception $e) {
             PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 999, $e->getMessage()));
-            echo 'Error: ' . $e->getMessage() . breakLine(2);
+            echo 'Error: ' . $e->getMessage() . breakLine();
         }
 
         echo 'Finished ' . date('Ymd H:i:s') . '.' . breakLine();
