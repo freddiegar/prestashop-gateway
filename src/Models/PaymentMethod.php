@@ -2128,7 +2128,10 @@ class PaymentMethod extends PaymentModule
         $setup .= sprintf('%s [%s]', $this->ll('Country'), $this->getCountry()) . breakLine();
         $setup .= sprintf('%s [%s]', $this->ll('Environment'), $this->getEnvironment()) . breakLine();
         $setup .= sprintf('%s [%s]', $this->ll('Connection type'), $this->getConnectionType()) . breakLine();
-        $setup .= sprintf('%s [%s]', $this->ll('Allow buy with pending payments?'), $this->getAllowBuyWithPendingPayments()) . breakLine(2);
+        $setup .= sprintf('%s [%s]', $this->ll('Expiration time to pay'), $this->getExpirationTimeMinutes()) . breakLine();
+        $setup .= sprintf('%s [%s]', $this->ll('Allow buy with pending payments?'), $this->getAllowBuyWithPendingPayments()) . breakLine();
+        $setup .= sprintf('%s [%s]', $this->ll('Skip result?'), $this->getSkipResult()) . breakLine();
+        $setup .= breakLine();
 
         return $setup;
     }
