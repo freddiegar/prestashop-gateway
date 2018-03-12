@@ -1,4 +1,4 @@
-# Place to Pay Gateway on Prestashop
+# PlacetoPay Gateway on Prestashop
 
 Plugin Payment for Prestashop 1.5 to 1.7
 
@@ -103,6 +103,8 @@ Ports by default in this installation are
 ## Setup module
 
 Install and setup you `login` and `trankey` in your [store](http://localhost:8787/adminstore)!
+
+Maybe you need to setup on shipping carriers.
 
 Enjoy development and test!
 
