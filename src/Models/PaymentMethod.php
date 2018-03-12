@@ -588,6 +588,16 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
+     * Show warning pending payment
+     *
+     * @return string
+     */
+    private function displayBrandMessage()
+    {
+        return $this->display($this->getPathThisModule(), DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'hook' . DIRECTORY_SEPARATOR . 'brand_payment.tpl');
+    }
+
+    /**
      * @return array
      */
     private function getConfigFieldsValues()
@@ -909,7 +919,6 @@ class PaymentMethod extends PaymentModule
         }
 
         $this->context->smarty->assign('has_pending', $has_pending);
-        $this->context->smarty->assign('version', $this->getPluginVersion());
         $this->context->smarty->assign('site_name', Configuration::get('PS_SHOP_NAME'));
         $this->context->smarty->assign('cifin_message', $this->getTransUnionMessage());
         $this->context->smarty->assign('company_name', $this->getCompanyName());
@@ -943,7 +952,7 @@ class PaymentMethod extends PaymentModule
             return null;
         }
 
-        $content = '';
+        $content = $this->displayBrandMessage();
         $action = $this->getUrl('redirect.php');
         $lastPendingTransaction = $this->getLastPendingTransaction($params['cart']->id_customer);
 
@@ -961,8 +970,8 @@ class PaymentMethod extends PaymentModule
         $form = $this->_generateForm($action, $content);
 
         $newOption = new PaymentOption();
-        $newOption->setCallToActionText($this->ll('Pay by Place to Pay'))
-            ->setAdditionalInformation($this->ll('Place to Pay secure web site will be displayed when you select this payment method.'))
+        $newOption->setCallToActionText($this->ll('Pay by PlacetoPay'))
+            ->setAdditionalInformation('')
             ->setForm($form);
 
         return array($newOption);
