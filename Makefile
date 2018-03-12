@@ -26,7 +26,7 @@ rebuild: down
 
 .PHONY: bash-prestashop
 bash-prestashop:
-	docker exec -u www-data -it $(CONTAINER_PS) bash
+	docker exec -u root -it $(CONTAINER_PS) bash
 
 .PHONY: bash-database
 bash-database:
