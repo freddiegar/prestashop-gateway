@@ -2050,6 +2050,12 @@ class PaymentMethod extends PaymentModule
             $minutes = 0;
         }
 
+        if (!isConsole() && !isDebugEnable()) {
+            $message = 'Only from CLI is available execute this command, aborted';
+            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s SAPI: %s", __FILE__, __LINE__, 0, $message, php_sapi_name()));
+            die($message);
+        }
+
         echo 'Begins ' . date('Ymd H:i:s') . '.' . breakLine();
 
         $date = date('Y-m-d H:i:s', time() - ($minutes * 60));
