@@ -25,7 +25,8 @@ if (versionComparePlaceToPay('1.7.0.0', '<')) {
                 $class = str_replace('Dnetix\\Redirection\\', '', $className);
                 break;
             default:
-                throw new Exception(sprintf('Error with class [%s]', $className));
+                // Another class are ignore
+                return true;
         }
 
         $filename = $src . DIRECTORY_SEPARATOR . str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
