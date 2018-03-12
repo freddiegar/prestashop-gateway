@@ -36,18 +36,18 @@
 <p class="payment_module">
     <a class="placetopay" href="{$payment_url}">
         <img src="https://static.placetopay.com/admin/custom/application-logo.svg" width="170px"
-             alt="{l s='Pay with Place to Pay' mod='placetopaypayment'}"/>
+             alt="{l s='Pay with PlacetoPay' mod='placetopaypayment'}"/>
 
-        <b>{l s='Pay with Place to Pay' mod='placetopaypayment'}</b>
+        <b>{l s='Pay with PlacetoPay' mod='placetopaypayment'}</b>
 
         <span>
 		{l s='(credit cards and debits account)' mod='placetopaypayment'}
-            <span style="color: white">Version: {$version}</span>
 		</span>
+
         <br/>
 
         {if $allow_payment}
-            {l s='Place to Pay secure web site will be displayed when you select this payment method.' mod='placetopaypayment'}
+            {l s='PlacetoPay secure web site will be displayed when you select this payment method.' mod='placetopaypayment'}
             <br/>
         {/if}
 
@@ -97,7 +97,7 @@
 				{l s=' and / or ' mod='placetopaypayment'}
 			</small>
 
-			<b>{l s='Place to Pay' mod='placetopaypayment'}</b>
+			<b>{l s='PlacetoPay' mod='placetopaypayment'}</b>
 
 			<small>
 				{l s='to consult and ask for ' mod='placetopaypayment'}

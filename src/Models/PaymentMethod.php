@@ -119,7 +119,7 @@ class PaymentMethod extends PaymentModule
 
         parent::__construct();
 
-        $this->displayName = $this->ll('Place to Pay');
+        $this->displayName = $this->ll('PlacetoPay');
         $this->description = $this->ll('Accept payments by credit cards and debits account');
 
         $this->confirmUninstall = $this->ll('Are you sure you want to uninstall?');
@@ -129,7 +129,7 @@ class PaymentMethod extends PaymentModule
         }
 
         if (!$this->isSetCredentials()) {
-            $this->warning = $this->ll('You need to configure your Place to Pay account before using this module');
+            $this->warning = $this->ll('You need to configure your PlacetoPay account before using this module');
         }
 
         @date_default_timezone_set(Configuration::get('PS_TIMEZONE'));
@@ -527,7 +527,7 @@ class PaymentMethod extends PaymentModule
             Configuration::updateValue(self::CONNECTION_TYPE, Tools::getValue(self::CONNECTION_TYPE));
         }
 
-        $this->_html .= $this->displayConfirmation($this->ll('Place to Pay settings updated'));
+        $this->_html .= $this->displayConfirmation($this->ll('PlacetoPay settings updated'));
     }
 
     /**
@@ -883,7 +883,7 @@ class PaymentMethod extends PaymentModule
         }
 
         if (!$this->isSetCredentials()) {
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, 'Error, set your credentials to used Place to Pay Payment Module'));
+            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, 'Error, set your credentials to used PlacetoPay Payment Module'));
             return null;
         }
 
@@ -939,7 +939,7 @@ class PaymentMethod extends PaymentModule
         }
 
         if (!$this->isSetCredentials()) {
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, 'Error, set your credentials to used Place to Pay Payment Module'));
+            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, 'Error, set your credentials to used PlacetoPay Payment Module'));
             return null;
         }
 
@@ -1277,7 +1277,7 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * Redirect to Place to pay Platform
+     * Redirect to PlacetoPay Platform
      *
      * @param Cart $cart
      * @throws PaymentException

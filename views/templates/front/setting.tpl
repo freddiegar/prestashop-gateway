@@ -1,10 +1,10 @@
 <div class="panel">
     <div class="alert alert-info">
         <img src="https://www.placetopay.com/images/providers/placetopay.full.png"
-             style="float:left; margin-right:15px;" alt="Place to Pay" height="48">
+             style="float:left; margin-right:15px;" alt="PlacetoPay" height="48">
         <p>
             <strong>
-                {l s='This module allows you to accept payments by Place to Pay.' mod='placetopaypayment'}
+                {l s='This module allows you to accept payments by PlacetoPay.' mod='placetopaypayment'}
             </strong>
         </p>
         <p>
@@ -15,7 +15,7 @@
     {if !$is_set_credentials}
         <div class="alert alert-warning">
             <p>
-                {l s='You need to configure your Place to Pay account before using this module.' mod='placetopaypayment'}
+                {l s='You need to configure your PlacetoPay account before using this module.' mod='placetopaypayment'}
             </p>
         </div>
     {/if}

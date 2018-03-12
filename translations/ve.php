@@ -2,14 +2,14 @@
 
 global $_MODULE;
 $_MODULE = array();
-$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_c92ed2ff094e750adaa0baa69ee295cc'] = 'PlacetoPay';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_f867d2feefb8fd5a080864a00faf9f09'] = 'PlacetoPay';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_96b1f8b105303b62fa80db89c6f97327'] = 'Acepta pagos con tarjetas de crédito y débito';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_876f23178c29dc2552c0b48bf23cd9bd'] = 'Estás seguro de querer des-instalar el módulo?';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_a02758d758e8bec77a33d7f392eb3f8a'] = 'No se ha configurado una moneda para este módulo';
-$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_cdbed72365c96d84e7be0ca8f1bb1aa5'] = 'Necesitas configurar tu cuenta PlacetoPay antes de usar este módulo';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_303abcabb179fbb226ff8dacada64c94'] = 'Necesitas configurar tu cuenta PlacetoPay antes de usar este módulo';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_ee66f9c9930cb33d2a5dde9b240d3f7e'] = 'es obligatorio.';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_b0f2aa53ca75f7cb21943f01e6cf22ff'] = 'no es válido.';
-$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_97364679b74c11a2bbc63ea8f1b9fbeb'] = 'Configuración de PlacetoPay actualizada';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_9e682e30199eee42b1b3063282f3f35a'] = 'Configuración de PlacetoPay actualizada';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_a5239217cade6840bdf6bad4790c2405'] = '¿Restaurar el stock cuando el pago sea declinado?';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_60daa6e5d5cf70fa4b01349f1d3209e9'] = 'Datos del Comercio';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_229a7ec501323b94db7ff3157a7623c9'] = 'Número de documento';
@@ -44,7 +44,7 @@ $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_6332f3778e6c3ae54d794
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_d0afed67605524c7117536fe92ce3da8'] = 'Conectarme usando';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_4de91f0fcb9cd3a20b6b1d64610a0a3d'] = 'SOAP';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_50780f47f6839d47d60bc4555ee00c3f'] = 'REST';
-$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_84c83f8271f9a6e2fed8a73517364c0d'] = 'Pagar con PlacetoPay';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_c4db16fa4821b4108ccc331d5cff89e6'] = 'Pagar con PlacetoPay';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_31504b911f46d52f18359b3aa0cc05c9'] = 'Puedes pagar usando tus tarjetas crédito o débito de forma rápida y segura.';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_e59458c2ad3850466357a1cd342adc51'] = 'Pago pendiente';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_5d5c4a24285e79624af97a58941965cf'] = 'Pago realizado';
@@ -99,7 +99,7 @@ $_MODULE['<{placetopaypayment}prestashop>message_payment_ccaf60f3194e23d493abd85
 $_MODULE['<{placetopaypayment}prestashop>message_payment_fc37c7fe93fdd08848d7728f3fe620a1'] = ', a través del proveedor de servicios';
 $_MODULE['<{placetopaypayment}prestashop>message_payment_673f7d4d25a1ba09d9458aa892107a43'] = 'EGM Ingeniería Sin Fronteras S.A.S';
 $_MODULE['<{placetopaypayment}prestashop>message_payment_fbcc5af1de84b2eac78ae7ebe8a367b8'] = 'y/o';
-$_MODULE['<{placetopaypayment}prestashop>message_payment_c92ed2ff094e750adaa0baa69ee295cc'] = 'PlacetoPay';
+$_MODULE['<{placetopaypayment}prestashop>message_payment_f867d2feefb8fd5a080864a00faf9f09'] = 'PlacetoPay';
 $_MODULE['<{placetopaypayment}prestashop>message_payment_f27eb14238eb38b33e14177abdf48a67'] = 'para que consulte y solicite';
 $_MODULE['<{placetopaypayment}prestashop>message_payment_d4510b91a6d39ff09693d021ff481101'] = 'información del comportamiento crediticio, financiero, comercial y de';
 $_MODULE['<{placetopaypayment}prestashop>message_payment_2de28d215e20c116e73d869aa84a2e03'] = 'servicios a terceros, incluso en países de la misma naturaleza en las centrales de riesgo';
@@ -127,10 +127,12 @@ $_MODULE['<{placetopaypayment}prestashop>payment_ccaf60f3194e23d493abd857318195e
 $_MODULE['<{placetopaypayment}prestashop>payment_fc37c7fe93fdd08848d7728f3fe620a1'] = ', a través del proveedor de servicios';
 $_MODULE['<{placetopaypayment}prestashop>payment_673f7d4d25a1ba09d9458aa892107a43'] = 'EGM Ingeniería Sin Fronteras S.A.S';
 $_MODULE['<{placetopaypayment}prestashop>payment_fbcc5af1de84b2eac78ae7ebe8a367b8'] = 'y/o';
-$_MODULE['<{placetopaypayment}prestashop>payment_c92ed2ff094e750adaa0baa69ee295cc'] = 'PlacetoPay';
+$_MODULE['<{placetopaypayment}prestashop>payment_f867d2feefb8fd5a080864a00faf9f09'] = 'PlacetoPay';
 $_MODULE['<{placetopaypayment}prestashop>payment_f27eb14238eb38b33e14177abdf48a67'] = 'para que consulte y solicite';
 $_MODULE['<{placetopaypayment}prestashop>payment_d4510b91a6d39ff09693d021ff481101'] = 'información del comportamiento crediticio, financiero, comercial y de';
 $_MODULE['<{placetopaypayment}prestashop>payment_2de28d215e20c116e73d869aa84a2e03'] = 'servicios a terceros, incluso en países de la misma naturaleza en las centrales de riesgo';
 $_MODULE['<{placetopaypayment}prestashop>payment_c4ebf5f6191ec97d7a281f4c301c8656'] = 'TRANSUNION S.A';
 $_MODULE['<{placetopaypayment}prestashop>payment_7dd7734f1843fede04855fe5039ed1bd'] = ', generándose';
 $_MODULE['<{placetopaypayment}prestashop>payment_2830ccf15fbef7fa3077e861dfc58b7c'] = 'una huella de la consulta.';
+$_MODULE['<{placetopaypayment}prestashop>brand_payment_bca22c1fc0054ffe1b1fef823dbb2318'] = 'Paga con PlacetoPay';
+$_MODULE['<{placetopaypayment}prestashop>brand_payment_f77653895afd18bd2b51465e1304e7ed'] = 'Puedes pagar usando tus tarjetas crédito o débito de forma rápida y segura.';
