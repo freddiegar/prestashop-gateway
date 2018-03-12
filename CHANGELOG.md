@@ -1,4 +1,34 @@
-### Changelog
+# Changelog
+
+## [3.1.0] - 2018-03-11
+
+### Added
+- Add makefile with docker
+- Add validation in notification to signature
+- Add extra security, to show setup is necesary send last 5 characteres of login to show data
+- Add skipResult setup to skip last screen in payment process on payment
+- Add Placetopay brand in PS >= 1.7 in payment options form
+- Add validation to execute sonda process, from browser not is available, only CLI
+
+### Fixed
+- Fix bug in way to get URL base
+- Fix bug when transacction not is approved not update reason and reaso…
+- Fix bug updating description in payments rejected (error in bd)
+- Fix bug in value assigned of stock reinject on update
+- Fix errors when module is re-install, catch error generate by rename columns
+- Fix error when module is executed but it is not installed yet (from sonda process)
+- Fix bug in installation on PS 1.7.2.5, logo.png was change path
+- Fix Skip class when some are not found in PS 1.7 loader
+
+### Updated
+- Update dependecy redirection from 0.4.1 to 0.4.2
+- Update dependencies guzzle from 6.2 to 6.3
+- Update message trace on development
+- Update translation changing Place to Pay -> PlacetoPay
+
+### Created
+- Create CONTRIBUTING.md
+- Create LICENSE
 
 ## [3.0.2] - 2018-01-10
 - Fix bug in notification process, column name error

@@ -103,7 +103,7 @@ class PaymentMethod extends PaymentModule
         $this->tableOrder = _DB_PREFIX_ . 'orders';
 
         $this->name = getModuleName();
-        $this->version = '3.0.2';
+        $this->version = '3.1.0';
         $this->author = 'EGM Ingeniería sin Fronteras S.A.S';
         $this->tab = 'payments_gateways';
         $this->limited_countries = array('us', CountryCode::COLOMBIA, CountryCode::ECUADOR);
