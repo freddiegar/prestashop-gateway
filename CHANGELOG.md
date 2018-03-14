@@ -1,5 +1,10 @@
 # Changelog
 
+## [3.1.1] - 2018-03-14
+
+### Fixed
+- Fix bug in Windows Sustem with Apache Server installed (Separator)
+
 ## [3.1.0] - 2018-03-11
 
 ### Added
@@ -31,13 +36,21 @@
 - Create LICENSE
 
 ## [3.0.2] - 2018-01-10
+
+### Fixed
 - Fix bug in notification process, column name error
 
 ## [3.0.1] - 2017-12-13
+
+### Fixed
 - Fix bug in utf8 translations in spanish in some installations in Prestashop < 1.7
  
 ## [3.0.0] - 2017-12-06
+
+### Added
 - Add compatibility with Prestashop >= 1.7
 
 ## [2.6.4] - 2017-12-01
+
+### Fixed
 - Fixed bug in Windows Server Systems
