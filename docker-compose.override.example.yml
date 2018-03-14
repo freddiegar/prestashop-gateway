@@ -11,7 +11,8 @@ services:
         - /var/www/prestashop:/var/www/html
     environment:
       # IP Address from database to use
-      DB_SERVER: 192.168.33.10
+      DB_SERVER: db
+      PS_INSTALL_AUTO: 0
       # Is possible replace another values by default.
       # DB_USER: Override default MySQL user (default value: root)
       # DB_PASSWD: Override default MySQL password (default value: admin)
@@ -19,7 +20,7 @@ services:
       # Another vars in: https://store.docker.com/community/images/prestashop/prestashop
     networks:
       development:
-        ipv4_address: 192.168.33.30
+        ipv4_address: db
 
 # If is necessary add another network in container
 networks:
