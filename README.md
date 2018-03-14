@@ -118,3 +118,21 @@ mv xinstall install
 ```
 
 This apply to last versions from Prestashop (> 1.7)
+
+## Used another database in dockerfile
+
+You can override setup in docker, rename `docker-compose.override.example.yml` to `docker-compose.override.yml` and [customize](https://store.docker.com/community/images/prestashop/prestashop) your installation, by example
+
+```yaml
+version: "3.2"
+
+services:
+  # This service is shutdown
+  database:
+    entrypoint: "echo true"
+
+  prestashop:
+    environment:
+      # IP Address or name from database to use
+      DB_SERVER: my_db
+```

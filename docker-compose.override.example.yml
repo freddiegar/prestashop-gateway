@@ -1,0 +1,27 @@
+version: "3.2"
+
+services:
+  # This service is shutdown
+  database:
+    entrypoint: "echo true"
+
+  prestashop:
+    volumes:
+        # If is necessary add another sources
+        - /var/www/prestashop:/var/www/html
+    environment:
+      # IP Address from database to use
+      DB_SERVER: 192.168.33.10
+      # Is possible replace another values by default.
+      # DB_USER: Override default MySQL user (default value: root)
+      # DB_PASSWD: Override default MySQL password (default value: admin)
+      # DB_PREFIX: Override default tables prefix (default value: ps_)
+      # Another vars in: https://store.docker.com/community/images/prestashop/prestashop
+    networks:
+      development:
+        ipv4_address: 192.168.33.30
+
+# If is necessary add another network in container
+networks:
+  development:
+    external: true

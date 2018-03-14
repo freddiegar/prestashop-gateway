@@ -3,7 +3,7 @@
 ## [3.1.1] - 2018-03-14
 
 ### Fixed
-- Fix bug in Windows Sustem with Apache Server installed (Separator)
+- Fix bug in Windows System with Apache Server installed (Separator)
 
 ## [3.1.0] - 2018-03-11
 
