@@ -8,18 +8,35 @@ if (!function_exists('getPathCMS')) {
     function getPathCMS($filename)
     {
         $option = 'Default';
-        $pathCMS = dirname(dirname(getcwd()));
+        $pathUsed = getcwd();
+        $pathCMS = dirname(dirname($pathUsed));
 
         if (isset($_SERVER['PWD']) && is_link($_SERVER['PWD'])) {
             $option = 'PWD';
-            $pathCMS = dirname(dirname($_SERVER['PWD']));
+            $pathUsed = $_SERVER['PWD'];
+            $pathCMS = dirname(dirname($pathUsed));
         } elseif (isset($_SERVER['SCRIPT_FILENAME'])) {
             $option = 'File';
-            $pathCMS = str_replace(DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . getModuleName() . DIRECTORY_SEPARATOR . $filename, '', $_SERVER['SCRIPT_FILENAME']);
+            $pathUsed = $_SERVER['SCRIPT_FILENAME'];
+
+            // Case:
+            // Windows: \ IIS:    \
+            // Windows: \ Apache: /
+            // Linux:   / Apache: /
+            $separator = (strpos($pathUsed, '/'))
+                ? '/'
+                : '\\';
+
+            $pathCMS = str_replace($separator . 'modules' . $separator . getModuleName() . $separator . $filename, '', $pathUsed);
         }
 
         if (!file_exists($pathCMS . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.inc.php')) {
-            die("Miss-configuration in Server [{$filename}]. Option [{$option}] Path [{$pathCMS}].");
+            $message = "Miss-configuration in Server [{$filename}]" . breakLine();
+            $message .= "Option [{$option}]" . breakLine();
+            $message .= "PathUsed [{$pathUsed}]" . breakLine();
+            $message .= "Path [{$pathCMS}]" . breakLine();
+
+            die($message);
         }
 
         return $pathCMS;
