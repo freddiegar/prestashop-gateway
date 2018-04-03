@@ -91,7 +91,7 @@ $_MODULE['<{placetopaypayment}prestashop>response_91a1bd08a417cbd1ce9ee50d8c67ba
 $_MODULE['<{placetopaypayment}prestashop>setting_2bcdd5a206374839d97c190b1c4d8c42'] = 'This module allows you to accept payments by PlacetoPay.';
 $_MODULE['<{placetopaypayment}prestashop>setting_5f9bcc2ef174c7ea566242ff9036dc7d'] = 'You need to configure your PlacetoPay account before using this module';
 $_MODULE['<{placetopaypayment}prestashop>setting_2adbc667e322f521a39e68543f7bed38'] = 'URL Notification';
-$_MODULE['<{placetopaypayment}prestashop>setting_9f77b01739fb783836e178d420b6eff3'] = 'Return URL where Place t oPay will send status payment\'s to Prestashop';
+$_MODULE['<{placetopaypayment}prestashop>setting_9f77b01739fb783836e178d420b6eff3'] = 'Return URL where PlacetoPay will send status payment\'s to Prestashop';
 $_MODULE['<{placetopaypayment}prestashop>setting_d619c18531564949fc16d17eac8f0e84'] = 'Path schudele task';
 $_MODULE['<{placetopaypayment}prestashop>setting_a36440d8769df9e632d0c27ff77e65b7'] = 'Set this task to validate payments with pending status in your site';
 $_MODULE['<{placetopaypayment}prestashop>message_payment_7f432fd9dab12810bf868e0915e308f6'] = 'Anyone who make a purchase on the site';
