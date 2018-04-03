@@ -34,6 +34,9 @@
 {l s='Production' mod='placetopaypayment'}
 {l s='Test' mod='placetopaypayment'}
 {l s='Development' mod='placetopaypayment'}
+{l s='Custom' mod='placetopaypayment'}
+{l s='Custom connection URL' mod='placetopaypayment'}
+{l s='By example: "https://alternative.placetopay.com/redirection". This value only is required when you select' mod='placetopaypayment'}
 {l s='Login' mod='placetopaypayment'}
 {l s='Trankey' mod='placetopaypayment'}
 {l s='Connection type' mod='placetopaypayment'}

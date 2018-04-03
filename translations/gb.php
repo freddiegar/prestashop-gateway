@@ -39,6 +39,9 @@ $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_0ba29c6a1afacf586b03a
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_756d97bb256b8580d4d71ee0c547804e'] = 'Production';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_0cbc6611f5540bd0809a388dc95a615b'] = 'Test';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_330f49df8243756a8a4dc7f7f7ee6dfe'] = 'Development';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_90589c47f06eb971d548591f23c285af'] = 'Custom';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_4850de8e1473d6fdff990513019892a4'] = 'Custom connection URL';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_493dd466db7a5801ac705ec8b7c1f453'] = 'By example: "https://alternative.placetopay.com/redirection". This value only is required when you select';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_99dea78007133396a7b8ed70578ac6ae'] = 'Login';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_6332f3778e6c3ae54d794cc851ce95c0'] = 'TranKey';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_d0afed67605524c7117536fe92ce3da8'] = 'Connection type';

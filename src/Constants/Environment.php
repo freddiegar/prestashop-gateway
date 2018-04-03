@@ -21,4 +21,9 @@ interface Environment
      * Environment Development
      */
     const DEVELOPMENT = 'DEVELOPMENT';
+
+    /**
+     * Environment Custom
+     */
+    const CUSTOM = 'CUSTOM';
 }

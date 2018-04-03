@@ -1,5 +1,8 @@
 # Changelog
 
+### Added
+- Allowed set a Custom Connection URL to connect to payment service in PlacetoPay
+
 ### Fixed
 - Fix bug in Windows System with Apache Server installed (Separator)
 - Fix bug in English translations files

@@ -59,6 +59,7 @@ class PaymentMethod extends PaymentModule
 
     const COUNTRY = 'PLACETOPAY_COUNTRY';
     const ENVIRONMENT = 'PLACETOPAY_ENVIRONMENT';
+    const CUSTOM_CONNECTION_URL = 'PLACETOPAY_CUSTOM_CONNECTION_URL';
     const LOGIN = 'PLACETOPAY_LOGIN';
     const TRAN_KEY = 'PLACETOPAY_TRANKEY';
     const CONNECTION_TYPE = 'PLACETOPAY_CONNECTION_TYPE';
@@ -103,7 +104,7 @@ class PaymentMethod extends PaymentModule
         $this->tableOrder = _DB_PREFIX_ . 'orders';
 
         $this->name = getModuleName();
-        $this->version = '3.1.1';
+        $this->version = '3.2.2';
         $this->author = 'EGM Ingeniería sin Fronteras S.A.S';
         $this->tab = 'payments_gateways';
         $this->limited_countries = array('us', CountryCode::COLOMBIA, CountryCode::ECUADOR);
@@ -206,6 +207,7 @@ class PaymentMethod extends PaymentModule
 
         Configuration::updateValue(self::COUNTRY, CountryCode::COLOMBIA);
         Configuration::updateValue(self::ENVIRONMENT, Environment::TEST);
+        Configuration::updateValue(self::CUSTOM_CONNECTION_URL, '');
         Configuration::updateValue(self::LOGIN, '');
         Configuration::updateValue(self::TRAN_KEY, '');
         Configuration::updateValue(self::CONNECTION_TYPE, self::CONNECTION_TYPE_REST);
@@ -238,6 +240,7 @@ class PaymentMethod extends PaymentModule
 
             || !Configuration::deleteByName(self::COUNTRY)
             || !Configuration::deleteByName(self::ENVIRONMENT)
+            || !Configuration::deleteByName(self::CUSTOM_CONNECTION_URL)
             || !Configuration::deleteByName(self::LOGIN)
             || !Configuration::deleteByName(self::TRAN_KEY)
             || !Configuration::deleteByName(self::CONNECTION_TYPE)
@@ -478,6 +481,9 @@ class PaymentMethod extends PaymentModule
             }
             if (!Tools::getValue(self::ENVIRONMENT)) {
                 $this->_postErrors[] = sprintf('%s %s', $this->ll('Environment'), $this->ll('is required.'));
+            } elseif (Tools::getValue(self::ENVIRONMENT) === Environment::CUSTOM
+                && filter_var(Tools::getValue(self::CUSTOM_CONNECTION_URL), FILTER_VALIDATE_URL) === false) {
+                $this->_postErrors[] = sprintf('%s %s', $this->ll('Custom connection URL'), $this->ll('is not valid.'));
             }
             if (!Tools::getValue(self::LOGIN)) {
                 $this->_postErrors[] = sprintf('%s %s', $this->ll('Login'), $this->ll('is required.'));
@@ -519,6 +525,14 @@ class PaymentMethod extends PaymentModule
             // Configuration Connection
             Configuration::updateValue(self::COUNTRY, Tools::getValue(self::COUNTRY));
             Configuration::updateValue(self::ENVIRONMENT, Tools::getValue(self::ENVIRONMENT));
+            if ($this->isCustomEnvironment()) {
+                // Set Custom URL
+                Configuration::updateValue(self::CUSTOM_CONNECTION_URL, Tools::getValue(self::CUSTOM_CONNECTION_URL));
+            } else {
+                // Clean custom URL in form
+                unset($_POST[self::CUSTOM_CONNECTION_URL]);
+                Configuration::updateValue(self::CUSTOM_CONNECTION_URL, '');
+            }
             Configuration::updateValue(self::LOGIN, Tools::getValue(self::LOGIN));
             if (Tools::getValue(self::TRAN_KEY)) {
                 // Value changed
@@ -625,6 +639,7 @@ class PaymentMethod extends PaymentModule
 
             self::COUNTRY => $this->getCountry(),
             self::ENVIRONMENT => $this->getEnvironment(),
+            self::CUSTOM_CONNECTION_URL => $this->getCustomConnectionUrl(),
             self::LOGIN => $this->getLogin(),
             self::TRAN_KEY => $this->getTranKey(),
             self::CONNECTION_TYPE => $this->getConnectionType(),
@@ -811,8 +826,24 @@ class PaymentMethod extends PaymentModule
                                     'value' => Environment::DEVELOPMENT,
                                     'label' => $this->ll('Development'),
                                 ),
+                                array(
+                                    'value' => Environment::CUSTOM,
+                                    'label' => $this->ll('Custom'),
+                                ),
                             ),
                         ),
+                    ),
+                    array(
+                        'type' => 'text',
+                        'label' => $this->ll('Custom connection URL'),
+                        'desc' => sprintf('%s %s: %s',
+                            $this->ll('By example: "https://alternative.placetopay.com/redirection". This value only is required when you select'),
+                            $this->ll('Environment'),
+                            $this->ll('Custom')
+                        ),
+                        'name' => self::CUSTOM_CONNECTION_URL,
+                        'required' => Tools::getValue(self::ENVIRONMENT) === Environment::CUSTOM,
+                        'autocomplete' => 'off',
                     ),
                     array(
                         'type' => 'text',
@@ -1034,7 +1065,9 @@ class PaymentMethod extends PaymentModule
         $uri = null;
         $endpoints = PaymentUrl::getEndpointsTo($this->getCountry());
 
-        if (!empty($endpoints[$this->getEnvironment()])) {
+        if ($this->isCustomEnvironment()) {
+            $uri = $this->getCustomConnectionUrl();
+        } elseif (!empty($endpoints[$this->getEnvironment()])) {
             $uri = $endpoints[$this->getEnvironment()];
         }
 
@@ -1058,11 +1091,23 @@ class PaymentMethod extends PaymentModule
      */
     private function getEnvironment()
     {
-        $env = $this->getCurrentValueOf(self::ENVIRONMENT);
+        $environment = $this->getCurrentValueOf(self::ENVIRONMENT);
 
-        return empty($env)
+        return empty($environment)
             ? Environment::TEST
-            : $env;
+            : $environment;
+    }
+
+    /**
+     * @return string
+     */
+    private function getCustomConnectionUrl()
+    {
+        $customEnvironment = $this->getCurrentValueOf(self::CUSTOM_CONNECTION_URL);
+
+        return empty($customEnvironment)
+            ? null
+            : $customEnvironment;
     }
 
     /**
@@ -1071,6 +1116,14 @@ class PaymentMethod extends PaymentModule
     private function isProduction()
     {
         return $this->getEnvironment() === Environment::PRODUCTION;
+    }
+
+    /**
+     * @return bool
+     */
+    private function isCustomEnvironment()
+    {
+        return $this->getEnvironment() === Environment::CUSTOM;
     }
 
     /**
@@ -2053,7 +2106,7 @@ class PaymentMethod extends PaymentModule
         if (!isConsole() && !isDebugEnable()) {
             $message = 'Only from CLI is available execute this command, aborted';
             PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s SAPI: %s", __FILE__, __LINE__, 0, $message, php_sapi_name()));
-            die($message);
+            Tools::redirect('authentication.php?back=order.php');
         }
 
         echo 'Begins ' . date('Ymd H:i:s') . '.' . breakLine();
@@ -2133,6 +2186,9 @@ class PaymentMethod extends PaymentModule
         $setup .= sprintf('URL Base [%s]', $this->getUrl('')) . breakLine();
         $setup .= sprintf('%s [%s]', $this->ll('Country'), $this->getCountry()) . breakLine();
         $setup .= sprintf('%s [%s]', $this->ll('Environment'), $this->getEnvironment()) . breakLine();
+        if ($this->isCustomEnvironment()) {
+            $setup .= sprintf('%s [%s]', $this->ll('Custom connection URL'), $this->getCustomConnectionUrl()) . breakLine();
+        }
         $setup .= sprintf('%s [%s]', $this->ll('Connection type'), $this->getConnectionType()) . breakLine();
         $setup .= sprintf('%s [%s]', $this->ll('Expiration time to pay'), $this->getExpirationTimeMinutes()) . breakLine();
         $setup .= sprintf('%s [%s]', $this->ll('Allow buy with pending payments?'), $this->getAllowBuyWithPendingPayments()) . breakLine();

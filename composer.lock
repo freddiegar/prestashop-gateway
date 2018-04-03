@@ -54,12 +54,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "ba1bce30baab94dddde21c4ae93872b1762d39fa"
+                "reference": "c9615e7a872f18f63970b558f2555697f03e7803"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/ba1bce30baab94dddde21c4ae93872b1762d39fa",
-                "reference": "ba1bce30baab94dddde21c4ae93872b1762d39fa",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/c9615e7a872f18f63970b558f2555697f03e7803",
+                "reference": "c9615e7a872f18f63970b558f2555697f03e7803",
                 "shasum": ""
             },
             "require": {
@@ -111,7 +111,7 @@
                 "rest",
                 "web service"
             ],
-            "time": "2018-03-11T15:03:34+00:00"
+            "time": "2018-03-29T07:29:08+00:00"
         },
         {
             "name": "guzzlehttp/promises",
@@ -119,12 +119,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/promises.git",
-                "reference": "0940c910fd14a68bd24a8b7c4a5528415a479c42"
+                "reference": "136531aa4e42f9b1971a47fb0faf60da00d2fefa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/promises/zipball/0940c910fd14a68bd24a8b7c4a5528415a479c42",
-                "reference": "0940c910fd14a68bd24a8b7c4a5528415a479c42",
+                "url": "https://api.github.com/repos/guzzle/promises/zipball/136531aa4e42f9b1971a47fb0faf60da00d2fefa",
+                "reference": "136531aa4e42f9b1971a47fb0faf60da00d2fefa",
                 "shasum": ""
             },
             "require": {
@@ -162,7 +162,7 @@
             "keywords": [
                 "promise"
             ],
-            "time": "2018-02-28T07:24:33+00:00"
+            "time": "2018-03-25T01:26:01+00:00"
         },
         {
             "name": "guzzlehttp/psr7",
@@ -170,12 +170,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/psr7.git",
-                "reference": "649e354b657977c312cb6fb95720b1ac485f2092"
+                "reference": "773750151c47189c24f9026620e43ddd55d453a2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/psr7/zipball/649e354b657977c312cb6fb95720b1ac485f2092",
-                "reference": "649e354b657977c312cb6fb95720b1ac485f2092",
+                "url": "https://api.github.com/repos/guzzle/psr7/zipball/773750151c47189c24f9026620e43ddd55d453a2",
+                "reference": "773750151c47189c24f9026620e43ddd55d453a2",
                 "shasum": ""
             },
             "require": {
@@ -227,7 +227,7 @@
                 "uri",
                 "url"
             ],
-            "time": "2018-02-28T07:24:56+00:00"
+            "time": "2018-03-29T00:18:34+00:00"
         },
         {
             "name": "psr/http-message",
