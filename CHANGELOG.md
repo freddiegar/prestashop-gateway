@@ -7,6 +7,9 @@
 - Fix bug in Windows System with Apache Server installed (Separator)
 - Fix bug in English translations files
 
+### Updated
+- Update message trace on development and improve code typehint and vars name
+
 ## [3.1.0] - 2018-03-11
 
 ### Added
@@ -19,7 +22,7 @@
 
 ### Fixed
 - Fix bug in way to get URL base
-- Fix bug when transacction not is approved not update reason and reaso…
+- Fix bug when transaction not is approved not update reason and reaso…
 - Fix bug updating description in payments rejected (error in bd)
 - Fix bug in value assigned of stock reinject on update
 - Fix errors when module is re-install, catch error generate by rename columns
@@ -28,7 +31,7 @@
 - Fix Skip class when some are not found in PS 1.7 loader
 
 ### Updated
-- Update dependecy redirection from 0.4.1 to 0.4.2
+- Update dependency redirection from 0.4.1 to 0.4.2
 - Update dependencies guzzle from 6.2 to 6.3
 - Update message trace on development
 - Update translation changing Place to Pay -> PlacetoPay
