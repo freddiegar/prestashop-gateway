@@ -54,11 +54,6 @@ $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_5d5c4a24285e79624af97
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_08fc2add263dba5610ca59b67ec43346'] = 'Failed payment';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_842defa666a224eda21bb1a0e9800bef'] = 'Rejected payment';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_8a644475a8ff34cd3e78f91386fbcecb'] = 'No information';
-$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_640fd0cc0ffa0316ae087652871f4486'] = 'minutes';
-$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_01e16aa827d5caa063c1acaeed5a608f'] = 'hour(s)';
-$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_225e75c29d32392d311f5dc94c792384'] = 'day(s)';
-$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_b9ac6d4cfd0e2c80dddcaa66089b9dfe'] = 'week(s)';
-$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_6eb15db009c9c6488d73157ff2c03b9b'] = 'month(s)';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_c9cc8cce247e49bae79f15173ce97354'] = 'Save';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_93cba07454f06a4a960172bbd6e2a435'] = 'Yes';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_bafd7322c6e97d25b6299b5d6fe8920b'] = 'No';

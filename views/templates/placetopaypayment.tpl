@@ -55,11 +55,6 @@
 {l s='Environment' mod='placetopaypayment'}
 {l s='Connection type' mod='placetopaypayment'}
 {l s='Allow buy with pending payments?' mod='placetopaypayment'}
-{l s='minutes' mod='placetopaypayment'}
-{l s='hour(s)' mod='placetopaypayment'}
-{l s='day(s)' mod='placetopaypayment'}
-{l s='week(s)' mod='placetopaypayment'}
-{l s='month(s)' mod='placetopaypayment'}
 {l s='Save' mod='placetopaypayment'}
 {l s='Yes' mod='placetopaypayment'}
 {l s='No' mod='placetopaypayment'}
