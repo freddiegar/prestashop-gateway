@@ -9,6 +9,7 @@
 
 ### Updated
 - Update message trace on development and improve code typehint and vars name
+- Remove translations not used
 
 ## [3.1.0] - 2018-03-11
 
