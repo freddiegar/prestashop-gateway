@@ -10,6 +10,12 @@
 ### Updated
 - Update message trace on development and improve code typehint and vars name
 - Remove translations not used
+- Update dependencies to stable versions, thus:
+    psr/http-message (1.0.1)
+    guzzlehttp/psr7 (1.4.2)
+    guzzlehttp/promises (v1.3.1)
+    guzzlehttp/guzzle (6.3.3)
+    dnetix/redirection (0.4.3)
 
 ## [3.1.0] - 2018-03-11
 
