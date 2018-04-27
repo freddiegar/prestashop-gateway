@@ -1825,12 +1825,12 @@ class PaymentMethod extends PaymentModule
         $payerEmail = '';
 
         if (!empty($payment = $response->lastTransaction())
-            && !empty($status = $payment->status())
-            && ($status->isApproved() || $status->isRejected())) {
+            && !empty($paymentStatus = $payment->status())
+            && ($paymentStatus->isApproved() || $paymentStatus->isRejected())) {
 
-            $date = pSQL($payment->status()->date());
-            $reason = pSQL($payment->status()->reason());
-            $reasonDescription = pSQL($payment->status()->message());
+            $date = pSQL($paymentStatus->date());
+            $reason = pSQL($paymentStatus->reason());
+            $reasonDescription = pSQL($paymentStatus->message());
 
             $bank = pSQL($payment->issuerName());
             $franchise = pSQL($payment->paymentMethod());

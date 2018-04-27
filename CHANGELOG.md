@@ -1,5 +1,7 @@
 # Changelog
 
+## [3.2.4] - 2018-04-27
+
 ### Added
 - Allowed set a Custom Connection URL to connect to payment service in PlacetoPay
 
