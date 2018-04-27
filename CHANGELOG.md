@@ -6,9 +6,10 @@
 ### Fixed
 - Fix bug in Windows System with Apache Server installed (Separator)
 - Fix bug in English translations files
+- Fix bug on update status, add validation to request object
 
 ### Updated
-- Update message trace on development and improve code typehint and vars name
+- Update message trace on development and improve code type hint and vars name
 - Remove translations not used
 - Update dependencies to stable versions, thus:
     psr/http-message (1.0.1)

@@ -104,7 +104,7 @@ class PaymentMethod extends PaymentModule
         $this->tableOrder = _DB_PREFIX_ . 'orders';
 
         $this->name = getModuleName();
-        $this->version = '3.2.3';
+        $this->version = '3.2.4';
         $this->author = 'EGM Ingeniería sin Fronteras S.A.S';
         $this->tab = 'payments_gateways';
         $this->limited_countries = ['us', CountryCode::COLOMBIA, CountryCode::ECUADOR];
@@ -1824,9 +1824,9 @@ class PaymentMethod extends PaymentModule
         $conversion = '';
         $payerEmail = '';
 
-        if (!empty($response->lastTransaction()) &&
-            ($response->lastTransaction()->status()->isApproved() || $response->lastTransaction()->status()->isRejected())) {
-            $payment = $response->lastTransaction();
+        if (!empty($payment = $response->lastTransaction())
+            && !empty($status = $payment->status())
+            && ($status->isApproved() || $status->isRejected())) {
 
             $date = pSQL($payment->status()->date());
             $reason = pSQL($payment->status()->reason());
@@ -1840,8 +1840,10 @@ class PaymentMethod extends PaymentModule
             $conversion = pSQL($payment->amount()->factor());
         }
 
-        if (!empty($response->request()->payer()) && !empty($response->request()->payer()->email())) {
-            $payerEmail = pSQL($response->request()->payer()->email());
+        if (!empty($request = $response->request())
+            && !empty($payer = $request->payer())
+            && !empty($email = $payer->email())) {
+            $payerEmail = pSQL($email);
         }
 
         $sql = "
