@@ -1,5 +1,10 @@
 # Changelog
 
+## [3.2.5] - 2018-05-15
+
+### Fixed
+- Fix return page, now it depends of status payment
+
 ## [3.2.4] - 2018-04-27
 
 ### Added

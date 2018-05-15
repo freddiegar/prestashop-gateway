@@ -79,6 +79,10 @@ class PaymentMethod extends PaymentModule
 
     const ORDER_STATE = 'PS_OS_PLACETOPAY';
 
+    const PAGE_ORDER_CONFIRMATION = 'order-confirmation.php';
+    const PAGE_ORDER_HISTORY = 'history.php';
+    const PAGE_ORDER_DETAILS = 'index.php?controller=order-detail';
+
     private $_html = '';
     private $_postErrors = [];
 
@@ -104,7 +108,7 @@ class PaymentMethod extends PaymentModule
         $this->tableOrder = _DB_PREFIX_ . 'orders';
 
         $this->name = getModuleName();
-        $this->version = '3.2.4';
+        $this->version = '3.2.5';
         $this->author = 'EGM Ingeniería sin Fronteras S.A.S';
         $this->tab = 'payments_gateways';
         $this->limited_countries = ['us', CountryCode::COLOMBIA, CountryCode::ECUADOR];
@@ -1204,11 +1208,19 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     private function getShowOnReturn()
     {
         return $this->getCurrentValueOf(self::SHOW_ON_RETURN);
+    }
+
+    /**
+     * @return bool
+     */
+    private function isShowOnReturnDetails()
+    {
+        return in_array($this->getShowOnReturn(), [self::SHOW_ON_RETURN_DEFAULT, self::SHOW_ON_RETURN_DETAILS]);
     }
 
     /**
@@ -1373,7 +1385,8 @@ class PaymentMethod extends PaymentModule
             $deliveryState = new State((int)($deliveryAddress->id_state));
         }
 
-        $urlOrderStatus = __PS_BASE_URI__ . 'order-confirmation.php'
+        $urlOrderStatus = __PS_BASE_URI__
+            . $this->getRedirectPageFromStatus(PaymentStatus::PENDING)
             . '?id_cart=' . $cart->id
             . '&id_module=' . $this->id
             . '&id_order=' . $this->currentOrder;
@@ -1671,13 +1684,20 @@ class PaymentMethod extends PaymentModule
                 ));
             }
 
-            // Redirect to confirmation page
-            Tools::redirectLink(__PS_BASE_URI__ . 'order-confirmation.php'
+            $redirectTo = __PS_BASE_URI__
+                . $this->getRedirectPageFromStatus($newStatus)
                 . '?id_cart=' . $cartId
                 . '&id_module=' . $this->id
                 . '&id_order=' . $order->id
-                . '&key=' . $order->secure_key
-            );
+                . '&key=' . $order->secure_key;
+
+            if (isDebugEnable()) {
+                $message = sprintf('Redirecting flow to: [%s]', $redirectTo);
+                PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, $message));
+            }
+
+            // Redirect to confirmation page
+            Tools::redirectLink($redirectTo);
         } elseif (!$paymentRedirection->isSuccessful()) {
             throw new PaymentException($paymentRedirection->status()->message(), 502);
         } elseif (!$order) {
@@ -1685,6 +1705,23 @@ class PaymentMethod extends PaymentModule
         } else {
             throw new PaymentException('Un-know error in process payment', 504);
         }
+    }
+
+    /**
+     * @param $status
+     * @return string
+     */
+    private function getRedirectPageFromStatus($status)
+    {
+        if ($status == PaymentStatus::APPROVED) {
+            $redirectTo = self::PAGE_ORDER_CONFIRMATION;
+        } else {
+            $redirectTo = $this->isShowOnReturnDetails()
+                ? self::PAGE_ORDER_DETAILS
+                : self::PAGE_ORDER_HISTORY;
+        }
+
+        return $redirectTo;
     }
 
     /**
