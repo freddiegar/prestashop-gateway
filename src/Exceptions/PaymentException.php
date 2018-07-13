@@ -14,7 +14,14 @@ class PaymentException extends Exception
 {
     public function __construct($message = '', $code = 0, Throwable $previous = null)
     {
-        PaymentLogger::log(sprintf("Error on [%s:%d] => [%d]\n %s", $this->getFile(), $this->getLine(), $code, $message));
+        PaymentLogger::log(sprintf(
+            "Error on [%s:%d] => [%d]\n %s",
+            $this->getFile(),
+            $this->getLine(),
+            $code,
+            $message
+        ));
+
         parent::__construct($message, $code, $previous);
     }
 }

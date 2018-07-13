@@ -11,7 +11,7 @@ abstract class PaymentUrl
     /**
      * @return array
      */
-    static public function getDefaultEndpoints()
+    public static function getDefaultEndpoints()
     {
         return [
             Environment::PRODUCTION => 'https://secure.placetopay.com/redirection',
@@ -24,7 +24,7 @@ abstract class PaymentUrl
      * @param string $countryCode Value of Constants\CountryCode
      * @return array
      */
-    static public function getEndpointsTo($countryCode)
+    public static function getEndpointsTo($countryCode)
     {
         switch ($countryCode) {
             case CountryCode::ECUADOR:

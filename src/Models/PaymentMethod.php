@@ -83,8 +83,8 @@ class PaymentMethod extends PaymentModule
     const PAGE_ORDER_HISTORY = 'history.php';
     const PAGE_ORDER_DETAILS = 'index.php?controller=order-detail';
 
-    private $_html = '';
-    private $_postErrors = [];
+    private $formHtml = '';
+    private $formErrors = [];
 
     /**
      * @var string
@@ -161,22 +161,23 @@ class PaymentMethod extends PaymentModule
                 throw new PaymentException('Error on install', 101);
             case !$this->createPaymentTable():
                 throw new PaymentException('Error on install creating table', 102);
-            case !$this->createOrderState();
+            case !$this->createOrderState():
                 throw new PaymentException('Error on install creating status', 103);
-            case !$this->alterColumnIpAddress();
+            case !$this->alterColumnIpAddress():
                 throw new PaymentException('Error on install adding IP Address column', 104);
-            case !$this->addColumnEmail();
+            case !$this->addColumnEmail():
                 throw new PaymentException('Error on install adding email column', 105);
-            case !$this->addColumnRequestId();
+            case !$this->addColumnRequestId():
                 throw new PaymentException('Error on install adding request id column', 106);
-            case !$this->addColumnReference();
+            case !$this->addColumnReference():
                 throw new PaymentException('Error on install adding reference column', 107);
-            case !$this->registerHook('paymentReturn');
+            case !$this->registerHook('paymentReturn'):
                 throw new PaymentException('Error on install registering paymentReturn hook', 108);
                 break;
         }
 
         $hookPaymentName = 'payment';
+
         if (versionComparePlaceToPay('1.7.0.0', '>=')) {
             $hookPaymentName = 'paymentOptions';
         }
@@ -227,8 +228,7 @@ class PaymentMethod extends PaymentModule
      */
     public function uninstall()
     {
-        if (
-            !Configuration::deleteByName(self::COMPANY_DOCUMENT)
+        if (!Configuration::deleteByName(self::COMPANY_DOCUMENT)
             || !Configuration::deleteByName(self::COMPANY_NAME)
             || !Configuration::deleteByName(self::EMAIL_CONTACT)
             || !Configuration::deleteByName(self::TELEPHONE_CONTACT)
@@ -391,20 +391,24 @@ class PaymentMethod extends PaymentModule
         if (!$this->getOrderState()) {
             $orderState = new OrderState();
             $orderState->name = [];
-            foreach (Language::getLanguages() AS $language) {
+
+            foreach (Language::getLanguages() as $language) {
+                $lang = $language['id_lang'];
+
                 switch (strtolower($language['iso_code'])) {
                     case 'en':
-                        $orderState->name[$language['id_lang']] = 'Awaiting ' . $this->displayName . ' payment confirmation';
+                        $orderState->name[$lang] = 'Awaiting ' . $this->displayName . ' payment confirmation';
                         break;
                     case 'fr':
-                        $orderState->name[$language['id_lang']] = 'En attente du paiement par ' . $this->displayName;
+                        $orderState->name[$lang] = 'En attente du paiement par ' . $this->displayName;
                         break;
                     case 'es':
                     default:
-                        $orderState->name[$language['id_lang']] = 'En espera de confirmación de pago por ' . $this->displayName;
+                        $orderState->name[$lang] = 'En espera de confirmación de pago por ' . $this->displayName;
                         break;
                 }
             }
+
             $orderState->color = 'lightblue';
             $orderState->hidden = false;
             $orderState->logable = false;
@@ -415,7 +419,10 @@ class PaymentMethod extends PaymentModule
 
             if ($orderState->save()) {
                 Configuration::updateValue(self::ORDER_STATE, $orderState->id);
-                copy($this->getPathThisModule() . DIRECTORY_SEPARATOR . 'logo.png', _PS_IMG_DIR_ . 'os' . DIRECTORY_SEPARATOR . $orderState->id . '.gif');
+                copy(
+                    $this->getPathThisModule() . DIRECTORY_SEPARATOR . 'logo.png',
+                    _PS_IMG_DIR_ . 'os' . DIRECTORY_SEPARATOR . $orderState->id . '.gif'
+                );
             } else {
                 return false;
             }
@@ -429,74 +436,87 @@ class PaymentMethod extends PaymentModule
      */
     public function getContent()
     {
-        $this->_html .= $this->displayConfiguration();
+        $this->formHtml .= $this->displayConfiguration();
 
         if (Tools::isSubmit('submitPlacetoPayConfiguration')) {
-            $this->_postValidation();
-            if (count($this->_postErrors) == 0) {
-                $this->_postProcess();
+            $this->formValidation();
+            if (count($this->formErrors) == 0) {
+                $this->formProcess();
             } else {
-                $this->_html .= $this->showError($this->_postErrors);
+                $this->formHtml .= $this->showError($this->formErrors);
             }
         } else {
-            $this->_html .= '<br />';
+            $this->formHtml .= '<br />';
         }
 
-        $this->_html .= $this->renderForm();
+        $this->formHtml .= $this->renderForm();
 
-        return $this->_html;
+        return $this->formHtml;
     }
 
     /**
      * Validation data from post settings form
      */
-    protected function _postValidation()
+    protected function formValidation()
     {
         if (Tools::isSubmit('submitPlacetoPayConfiguration')) {
             // Company data
             if (!Tools::getValue(self::COMPANY_DOCUMENT)) {
-                $this->_postErrors[] = sprintf('%s %s', $this->ll('Merchant ID'), $this->ll('is required.'));
+                $this->formErrors[] = sprintf('%s %s', $this->ll('Merchant ID'), $this->ll('is required.'));
             }
+
             if (!Tools::getValue(self::COMPANY_NAME)) {
-                $this->_postErrors[] = sprintf('%s %s', $this->ll('Legal Name'), $this->ll('is required.'));
+                $this->formErrors[] = sprintf('%s %s', $this->ll('Legal Name'), $this->ll('is required.'));
             }
+
             if (!Tools::getValue(self::EMAIL_CONTACT)) {
-                $this->_postErrors[] = sprintf('%s %s', $this->ll('Email contact'), $this->ll('is required.'));
+                $this->formErrors[] = sprintf('%s %s', $this->ll('Email contact'), $this->ll('is required.'));
             } elseif (filter_var(Tools::getValue(self::EMAIL_CONTACT), FILTER_VALIDATE_EMAIL) === false) {
-                $this->_postErrors[] = sprintf('%s %s', $this->ll('Email contact'), $this->ll('is not valid.'));
+                $this->formErrors[] = sprintf('%s %s', $this->ll('Email contact'), $this->ll('is not valid.'));
             }
+
             if (!Tools::getValue(self::TELEPHONE_CONTACT)) {
-                $this->_postErrors[] = sprintf('%s %s', $this->ll('Telephone contact'), $this->ll('is required.'));
+                $this->formErrors[] = sprintf('%s %s', $this->ll('Telephone contact'), $this->ll('is required.'));
             }
+
             if (!Tools::getValue(self::DESCRIPTION)) {
-                $this->_postErrors[] = sprintf('%s %s', $this->ll('Payment description'), $this->ll('is required.'));
+                $this->formErrors[] = sprintf('%s %s', $this->ll('Payment description'), $this->ll('is required.'));
             }
 
             if (!Tools::getValue(self::EXPIRATION_TIME_MINUTES)) {
-                $this->_postErrors[] = sprintf('%s %s', $this->ll('Expiration time to pay'), $this->ll('is required.'));
+                $this->formErrors[] = sprintf('%s %s', $this->ll('Expiration time to pay'), $this->ll('is required.'));
             } elseif (filter_var(Tools::getValue(self::EXPIRATION_TIME_MINUTES), FILTER_VALIDATE_INT) === false
                 || Tools::getValue(self::EXPIRATION_TIME_MINUTES) < self::EXPIRATION_TIME_MINUTES_MIN) {
-                $this->_postErrors[] = sprintf('%s %s (min %d)', $this->ll('Expiration time to pay'), $this->ll('is not valid.'), self::EXPIRATION_TIME_MINUTES_MIN);
+                $this->formErrors[] = sprintf(
+                    '%s %s (min %d)',
+                    $this->ll('Expiration time to pay'),
+                    $this->ll('is not valid.'),
+                    self::EXPIRATION_TIME_MINUTES_MIN
+                );
             }
 
             // Configuration Connection
             if (!Tools::getValue(self::COUNTRY)) {
-                $this->_postErrors[] = sprintf('%s %s', $this->ll('Country'), $this->ll('is required.'));
+                $this->formErrors[] = sprintf('%s %s', $this->ll('Country'), $this->ll('is required.'));
             }
+
             if (!Tools::getValue(self::ENVIRONMENT)) {
-                $this->_postErrors[] = sprintf('%s %s', $this->ll('Environment'), $this->ll('is required.'));
+                $this->formErrors[] = sprintf('%s %s', $this->ll('Environment'), $this->ll('is required.'));
             } elseif (Tools::getValue(self::ENVIRONMENT) === Environment::CUSTOM
                 && filter_var(Tools::getValue(self::CUSTOM_CONNECTION_URL), FILTER_VALIDATE_URL) === false) {
-                $this->_postErrors[] = sprintf('%s %s', $this->ll('Custom connection URL'), $this->ll('is not valid.'));
+                $this->formErrors[] = sprintf('%s %s', $this->ll('Custom connection URL'), $this->ll('is not valid.'));
             }
+
             if (!Tools::getValue(self::LOGIN)) {
-                $this->_postErrors[] = sprintf('%s %s', $this->ll('Login'), $this->ll('is required.'));
+                $this->formErrors[] = sprintf('%s %s', $this->ll('Login'), $this->ll('is required.'));
             }
+
             if (empty($this->getCurrentValueOf(self::TRAN_KEY)) && !Tools::getValue(self::TRAN_KEY)) {
-                $this->_postErrors[] = sprintf('%s %s', $this->ll('Trankey'), $this->ll('is required.'));
+                $this->formErrors[] = sprintf('%s %s', $this->ll('Trankey'), $this->ll('is required.'));
             }
+
             if (!Tools::getValue(self::CONNECTION_TYPE)) {
-                $this->_postErrors[] = sprintf('%s %s', $this->ll('Connection type'), $this->ll('is required.'));
+                $this->formErrors[] = sprintf('%s %s', $this->ll('Connection type'), $this->ll('is required.'));
             }
         }
     }
@@ -504,7 +524,7 @@ class PaymentMethod extends PaymentModule
     /**
      * Update configuration vars
      */
-    private function _postProcess()
+    private function formProcess()
     {
         if (Tools::isSubmit('submitPlacetoPayConfiguration')) {
             // Company data
@@ -517,7 +537,10 @@ class PaymentMethod extends PaymentModule
             Configuration::updateValue(self::EXPIRATION_TIME_MINUTES, Tools::getValue(self::EXPIRATION_TIME_MINUTES));
             Configuration::updateValue(self::SHOW_ON_RETURN, Tools::getValue(self::SHOW_ON_RETURN));
             Configuration::updateValue(self::CIFIN_MESSAGE, Tools::getValue(self::CIFIN_MESSAGE));
-            Configuration::updateValue(self::ALLOW_BUY_WITH_PENDING_PAYMENTS, Tools::getValue(self::ALLOW_BUY_WITH_PENDING_PAYMENTS));
+            Configuration::updateValue(
+                self::ALLOW_BUY_WITH_PENDING_PAYMENTS,
+                Tools::getValue(self::ALLOW_BUY_WITH_PENDING_PAYMENTS)
+            );
             Configuration::updateValue(self::FILL_TAX_INFORMATION, Tools::getValue(self::FILL_TAX_INFORMATION));
             Configuration::updateValue(self::FILL_BUYER_INFORMATION, Tools::getValue(self::FILL_BUYER_INFORMATION));
             Configuration::updateValue(self::SKIP_RESULT, Tools::getValue(self::SKIP_RESULT));
@@ -534,14 +557,16 @@ class PaymentMethod extends PaymentModule
                 ? Configuration::updateValue(self::CUSTOM_CONNECTION_URL, Tools::getValue(self::CUSTOM_CONNECTION_URL))
                 : Configuration::updateValue(self::CUSTOM_CONNECTION_URL, '');
             Configuration::updateValue(self::LOGIN, Tools::getValue(self::LOGIN));
+
             if (Tools::getValue(self::TRAN_KEY)) {
                 // Value changed
                 Configuration::updateValue(self::TRAN_KEY, Tools::getValue(self::TRAN_KEY));
             }
+
             Configuration::updateValue(self::CONNECTION_TYPE, Tools::getValue(self::CONNECTION_TYPE));
         }
 
-        $this->_html .= $this->displayConfirmation($this->ll('PlacetoPay settings updated'));
+        $this->formHtml .= $this->displayConfirmation($this->ll('PlacetoPay settings updated'));
     }
 
     /**
@@ -560,7 +585,13 @@ class PaymentMethod extends PaymentModule
             ]
         );
 
-        return $this->display($this->getPathThisModule(), DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'front' . DIRECTORY_SEPARATOR . 'setting.tpl');
+        return $this->display(
+            $this->getPathThisModule(),
+            DIRECTORY_SEPARATOR . 'views' .
+            DIRECTORY_SEPARATOR . 'templates' .
+            DIRECTORY_SEPARATOR . 'front' .
+            DIRECTORY_SEPARATOR . 'setting.tpl'
+        );
     }
 
     /**
@@ -571,17 +602,25 @@ class PaymentMethod extends PaymentModule
      */
     private function displayPendingPaymentMessage($lastPendingTransaction)
     {
-        $this->smarty->assign(
-            [
-                'last_order' => isset($lastPendingTransaction['reference']) ? $lastPendingTransaction['reference'] : '########',
-                'last_authorization' => isset($lastPendingTransaction['authcode']) ? $lastPendingTransaction['authcode'] : null,
-                'telephone_contact' => $this->getTelephoneContact(),
-                'email_contact' => $this->getEmailContact(),
-                'allow_payment' => $this->getAllowBuyWithPendingPayments(),
-            ]
-        );
+        $this->smarty->assign([
+            'last_order' => isset($lastPendingTransaction['reference'])
+                ? $lastPendingTransaction['reference']
+                : '########',
+            'last_authorization' => isset($lastPendingTransaction['authcode'])
+                ? $lastPendingTransaction['authcode']
+                : null,
+            'telephone_contact' => $this->getTelephoneContact(),
+            'email_contact' => $this->getEmailContact(),
+            'allow_payment' => $this->getAllowBuyWithPendingPayments(),
+        ]);
 
-        return $this->display($this->getPathThisModule(), DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'hook' . DIRECTORY_SEPARATOR . 'pending_payment.tpl');
+        return $this->display(
+            $this->getPathThisModule(),
+            DIRECTORY_SEPARATOR . 'views' .
+            DIRECTORY_SEPARATOR . 'templates' .
+            DIRECTORY_SEPARATOR . 'hook' .
+            DIRECTORY_SEPARATOR . 'pending_payment.tpl'
+        );
     }
 
     /**
@@ -591,14 +630,18 @@ class PaymentMethod extends PaymentModule
      */
     private function displayTransUnionMessage()
     {
-        $this->smarty->assign(
-            [
-                'site_name' => Configuration::get('PS_SHOP_NAME'),
-                'company_name' => $this->getCompanyName(),
-            ]
-        );
+        $this->smarty->assign([
+            'site_name' => Configuration::get('PS_SHOP_NAME'),
+            'company_name' => $this->getCompanyName(),
+        ]);
 
-        return $this->display($this->getPathThisModule(), DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'hook' . DIRECTORY_SEPARATOR . 'message_payment.tpl');
+        return $this->display(
+            $this->getPathThisModule(),
+            DIRECTORY_SEPARATOR . 'views' .
+            DIRECTORY_SEPARATOR . 'templates' .
+            DIRECTORY_SEPARATOR . 'hook' .
+            DIRECTORY_SEPARATOR . 'message_payment.tpl'
+        );
     }
 
     /**
@@ -608,7 +651,13 @@ class PaymentMethod extends PaymentModule
      */
     private function displayBrandMessage()
     {
-        return $this->display($this->getPathThisModule(), DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'hook' . DIRECTORY_SEPARATOR . 'brand_payment.tpl');
+        return $this->display(
+            $this->getPathThisModule(),
+            DIRECTORY_SEPARATOR . 'views' .
+            DIRECTORY_SEPARATOR . 'templates' .
+            DIRECTORY_SEPARATOR . 'hook' .
+            DIRECTORY_SEPARATOR . 'brand_payment.tpl'
+        );
     }
 
     /**
@@ -711,6 +760,7 @@ class PaymentMethod extends PaymentModule
                 ]
             ],
         ];
+
         $fieldsFormSetup = [
             'form' => [
                 'legend' => [
@@ -778,6 +828,7 @@ class PaymentMethod extends PaymentModule
                 ]
             ],
         ];
+
         $fieldsFormConnection = [
             'form' => [
                 'legend' => [
@@ -836,7 +887,9 @@ class PaymentMethod extends PaymentModule
                     [
                         'type' => 'text',
                         'label' => $this->ll('Custom connection URL'),
-                        'desc' => sprintf('%s %s: %s',
+                        'desc' => sprintf(
+                            '%s %s: %s',
+                            // @codingStandardsIgnoreLine
                             $this->ll('By example: "https://alternative.placetopay.com/redirection". This value only is required when you select'),
                             $this->ll('Environment'),
                             $this->ll('Custom')
@@ -917,7 +970,13 @@ class PaymentMethod extends PaymentModule
     public function hookPayment($params)
     {
         if (isDebugEnable()) {
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, 'Trigger ' . __METHOD__ . ' en PS vr. ' . _PS_VERSION_));
+            PaymentLogger::log(sprintf(
+                "[%s:%d] => [%d]\n %s",
+                __FILE__,
+                __LINE__,
+                0,
+                'Trigger ' . __METHOD__ . ' en PS vr. ' . _PS_VERSION_
+            ));
         }
 
         if (!$this->active) {
@@ -925,38 +984,55 @@ class PaymentMethod extends PaymentModule
         }
 
         if (!$this->isSetCredentials()) {
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, 'Error, set your credentials to used PlacetoPay Payment Module'));
+            PaymentLogger::log(sprintf(
+                "[%s:%d] => [%d]\n %s",
+                __FILE__,
+                __LINE__,
+                0,
+                'Error, set your credentials to used PlacetoPay Payment Module'
+            ));
+
             return null;
         }
 
         $lastPendingTransaction = $this->getLastPendingTransaction($params['cart']->id_customer);
 
         if (!empty($lastPendingTransaction)) {
-            $has_pending = true;
+            $hasPendingTransaction = true;
+
             $this->context->smarty->assign([
                 'last_order' => $lastPendingTransaction['reference'],
                 'last_authorization' => (string)$lastPendingTransaction['authcode'],
                 'store_email' => $this->getEmailContact(),
                 'store_phone' => $this->getTelephoneContact()
             ]);
-            $this->context->smarty->assign('payment_url', (
 
-            $this->getAllowBuyWithPendingPayments() == self::OPTION_ENABLED
+            $paymentUrl = $this->getAllowBuyWithPendingPayments() == self::OPTION_ENABLED
                 ? $this->getUrl('redirect.php')
-                : 'javascript:;')
-            );
+                : 'javascript:;';
+
+            $this->context->smarty->assign('payment_url', $paymentUrl);
         } else {
-            $has_pending = false;
+            $hasPendingTransaction = false;
+
             $this->context->smarty->assign('payment_url', $this->getUrl('redirect.php'));
         }
 
-        $this->context->smarty->assign('has_pending', $has_pending);
+        $allowPayment = $this->getAllowBuyWithPendingPayments() == self::OPTION_ENABLED || !$hasPendingTransaction;
+
+        $this->context->smarty->assign('has_pending', $hasPendingTransaction);
         $this->context->smarty->assign('site_name', Configuration::get('PS_SHOP_NAME'));
         $this->context->smarty->assign('cifin_message', $this->getTransUnionMessage());
         $this->context->smarty->assign('company_name', $this->getCompanyName());
-        $this->context->smarty->assign('allow_payment', ($this->getAllowBuyWithPendingPayments() == self::OPTION_ENABLED || !$has_pending));
+        $this->context->smarty->assign('allow_payment', $allowPayment);
 
-        return $this->display($this->getPathThisModule(), DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'hook_1_6' . DIRECTORY_SEPARATOR . 'payment.tpl');
+        return $this->display(
+            $this->getPathThisModule(),
+            DIRECTORY_SEPARATOR . 'views' .
+            DIRECTORY_SEPARATOR . 'templates' .
+            DIRECTORY_SEPARATOR . 'hook_1_6' .
+            DIRECTORY_SEPARATOR . 'payment.tpl'
+        );
     }
 
     /**
@@ -968,7 +1044,13 @@ class PaymentMethod extends PaymentModule
     public function hookPaymentOptions($params)
     {
         if (isDebugEnable()) {
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, 'Trigger ' . __METHOD__ . ' en PS vr. ' . _PS_VERSION_));
+            PaymentLogger::log(sprintf(
+                "[%s:%d] => [%d]\n %s",
+                __FILE__,
+                __LINE__,
+                0,
+                'Trigger ' . __METHOD__ . ' en PS vr. ' . _PS_VERSION_
+            ));
         }
 
         if (!$this->active) {
@@ -980,7 +1062,14 @@ class PaymentMethod extends PaymentModule
         }
 
         if (!$this->isSetCredentials()) {
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, 'Error, set your credentials to used PlacetoPay Payment Module'));
+            PaymentLogger::log(sprintf(
+                "[%s:%d] => [%d]\n %s",
+                __FILE__,
+                __LINE__,
+                0,
+                'Error, set your credentials to used PlacetoPay Payment Module'
+            ));
+
             return null;
         }
 
@@ -999,7 +1088,7 @@ class PaymentMethod extends PaymentModule
             $content .= $this->displayTransUnionMessage();
         }
 
-        $form = $this->_generateForm($action, $content);
+        $form = $this->generateForm($action, $content);
 
         $newOption = new PaymentOption();
         $newOption->setCallToActionText($this->ll('Pay by PlacetoPay'))
@@ -1014,13 +1103,11 @@ class PaymentMethod extends PaymentModule
      * @param $content
      * @return string
      */
-    private function _generateForm($action, $content)
+    private function generateForm($action, $content)
     {
-        if (is_null($action)) {
-            $action = "onsubmit='return false;'";
-        } else {
-            $action = "action='{$action}'";
-        }
+        $action = is_null($action)
+            ? "onsubmit='return false;'"
+            : "action='{$action}'";
 
         $content = mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8');
 
@@ -1258,7 +1345,10 @@ class PaymentMethod extends PaymentModule
     {
         $connectionType = $this->getCurrentValueOf(self::CONNECTION_TYPE);
 
-        return empty($connectionType) || !in_array($connectionType, [self::CONNECTION_TYPE_SOAP, self::CONNECTION_TYPE_REST])
+        return empty($connectionType) || !in_array($connectionType, [
+            self::CONNECTION_TYPE_SOAP,
+            self::CONNECTION_TYPE_REST
+        ])
             ? self::CONNECTION_TYPE_REST
             : $connectionType;
     }
@@ -1358,6 +1448,7 @@ class PaymentMethod extends PaymentModule
         $lastPendingTransaction = $this->getLastPendingTransaction($cart->id_customer);
 
         if (!empty($lastPendingTransaction) && $this->getAllowBuyWithPendingPayments() == self::OPTION_DISABLED) {
+            // @codingStandardsIgnoreLine
             $message = 'Payment not allowed, customer has payment pending and not allowed but with payment pending is disable';
             PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 501, $message));
             Tools::redirect('authentication.php?back=order.php');
@@ -1413,7 +1504,7 @@ class PaymentMethod extends PaymentModule
 
             // After order create in validateOrder
             $reference = $this->currentOrderReference;
-            $returnUrl = $this->getUrl('process.php', '?_=' . $this->_reference($reference));
+            $returnUrl = $this->getUrl('process.php', '?_=' . $this->reference($reference));
 
             // Request payment
             $request = [
@@ -1428,7 +1519,9 @@ class PaymentMethod extends PaymentModule
                     'name' => $deliveryAddress->firstname,
                     'surname' => $deliveryAddress->lastname,
                     'email' => $customer->email,
-                    'mobile' => (!empty($deliveryAddress->phone_mobile) ? $deliveryAddress->phone_mobile : $deliveryAddress->phone),
+                    'mobile' => (!empty($deliveryAddress->phone_mobile)
+                        ? $deliveryAddress->phone_mobile
+                        : $deliveryAddress->phone),
                     'address' => [
                         'country' => $deliveryCountry->iso_code,
                         'state' => (empty($deliveryState) ? null : $deliveryState->name),
@@ -1458,13 +1551,30 @@ class PaymentMethod extends PaymentModule
             }
 
             if (isDebugEnable()) {
-                PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, print_r($request, true)));
+                PaymentLogger::log(sprintf(
+                    "[%s:%d] => [%d]\n %s",
+                    __FILE__,
+                    __LINE__,
+                    0,
+                    print_r($request, true)
+                ));
             }
 
-            $paymentRedirection = (new PaymentRedirection($this->getLogin(), $this->getTranKey(), $this->getUri(), $this->getConnectionType()))->request($request);
+            $paymentRedirection = (new PaymentRedirection(
+                $this->getLogin(),
+                $this->getTranKey(),
+                $this->getUri(),
+                $this->getConnectionType()
+            ))->request($request);
 
             if (isDebugEnable()) {
-                PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, print_r($paymentRedirection, true)));
+                PaymentLogger::log(sprintf(
+                    "[%s:%d] => [%d]\n %s",
+                    __FILE__,
+                    __LINE__,
+                    0,
+                    print_r($paymentRedirection, true)
+                ));
             }
 
             $connectionIsOk = !empty($paymentRedirection->status());
@@ -1484,11 +1594,22 @@ class PaymentMethod extends PaymentModule
             }
 
             $orderMessage = !$connectionIsOk
-                ? sprintf('Error in connection with %s service, please you check this URL is valid and exist', $this->getUri())
-                : $paymentRedirection->status()->message();
+                ? sprintf(
+                    'Error in connection with %s service, please you check this URL is valid and exist',
+                    $this->getUri()
+                ) : $paymentRedirection->status()->message();
 
             // Register payment request
-            $this->insertPaymentPlaceToPay($requestId, $cart->id, $cart->id_currency, $totalAmount, $status, $orderMessage, $ipAddress, $reference);
+            $this->insertPaymentPlaceToPay(
+                $requestId,
+                $cart->id,
+                $cart->id_currency,
+                $totalAmount,
+                $status,
+                $orderMessage,
+                $ipAddress,
+                $reference
+            );
 
             if (!$connectionIsOk || isDebugEnable()) {
                 $message = sprintf('[%d => %s] Redirecting flow to: %s', $status, $orderMessage, $redirectTo);
@@ -1500,6 +1621,7 @@ class PaymentMethod extends PaymentModule
         } catch (Exception $e) {
             $message = $e->getMessage();
             PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, $message));
+
             Tools::redirect($urlOrderStatus);
         }
     }
@@ -1518,8 +1640,16 @@ class PaymentMethod extends PaymentModule
      * @return bool
      * @throws PaymentException
      */
-    private function insertPaymentPlaceToPay($requestId, $orderId, $currencyId, $amount, $status, $message, $ipAddress, $reference)
-    {
+    private function insertPaymentPlaceToPay(
+        $requestId,
+        $orderId,
+        $currencyId,
+        $amount,
+        $status,
+        $message,
+        $ipAddress,
+        $reference
+    ) {
         // Default values
         $reason = '';
         $date = date('Y-m-d H:i:s');
@@ -1579,7 +1709,7 @@ class PaymentMethod extends PaymentModule
 
         if (!is_null($_reference)) {
             // On returnUrl from redirection process
-            $reference = $this->_reference($_reference, true);
+            $reference = $this->reference($_reference, true);
             $paymentPlaceToPay = $this->getPaymentPlaceToPayBy('reference', $reference);
         } elseif (!empty(file_get_contents("php://input"))) {
             // On resolve function called process
@@ -1592,7 +1722,7 @@ class PaymentMethod extends PaymentModule
                     die('Change signature value in your request to: ' . $notification->makeSignature());
                 }
 
-                $message = 'Notification is not valid, process canceled. Input request: ' . PHP_EOL . print_r($input, 1);
+                $message = 'Notification is not valid, process canceled. Input request:' . PHP_EOL . print_r($input, 1);
 
                 throw new PaymentException($message, 507);
             }
@@ -1631,15 +1761,23 @@ class PaymentMethod extends PaymentModule
         $order = $this->getOrderByCartId($cartId);
 
         if (isDebugEnable()) {
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, print_r($paymentPlaceToPay, true)));
+            PaymentLogger::log(sprintf(
+                "[%s:%d] => [%d]\n %s",
+                __FILE__,
+                __LINE__,
+                0,
+                print_r($paymentPlaceToPay, true)
+            ));
         }
 
         if (!isDebugEnable() && $oldStatus != PaymentStatus::PENDING) {
-            $message = sprintf('Payment with reference: [%s] not is pending, current status is [%d=%s]',
+            $message = sprintf(
+                'Payment with reference: [%s] not is pending, current status is [%d=%s]',
                 $order->reference,
                 $oldStatus,
                 implode('->', $this->getStatusDescription($oldStatus))
             );
+
             PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, $message));
 
             if (!empty($input)) {
@@ -1650,23 +1788,36 @@ class PaymentMethod extends PaymentModule
             Tools::redirect('authentication.php?back=order.php');
         }
 
-        $paymentRedirection = (new PaymentRedirection($this->getLogin(), $this->getTranKey(), $this->getUri(), $this->getConnectionType()))->query($requestId);
+        $paymentRedirection = (new PaymentRedirection(
+            $this->getLogin(),
+            $this->getTranKey(),
+            $this->getUri(),
+            $this->getConnectionType()
+        ))->query($requestId);
 
         if (isDebugEnable()) {
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, print_r($paymentRedirection, true)));
+            PaymentLogger::log(sprintf(
+                "[%s:%d] => [%d]\n %s",
+                __FILE__,
+                __LINE__,
+                0,
+                print_r($paymentRedirection, true)
+            ));
         }
 
         if ($paymentRedirection->isSuccessful() && $order) {
             $newStatus = $this->getStatusPayment($paymentRedirection);
 
             if (isDebugEnable()) {
-                $message = sprintf('Updating status to payment with reference: [%s] from [%d=%s] to [%d=%s]',
+                $message = sprintf(
+                    'Updating status to payment with reference: [%s] from [%d=%s] to [%d=%s]',
                     $order->reference,
                     $oldStatus,
                     implode('->', $this->getStatusDescription($oldStatus)),
                     $newStatus,
                     implode('->', $this->getStatusDescription($newStatus))
                 );
+
                 PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, $message));
             }
 
@@ -1675,7 +1826,8 @@ class PaymentMethod extends PaymentModule
 
             if (!empty($input)) {
                 // Show status to reference in console
-                die(sprintf('Payment with reference: [%s] status change from [%d=%s] to [%d=%s]',
+                die(sprintf(
+                    'Payment with reference: [%s] status change from [%d=%s] to [%d=%s]',
                     $order->reference,
                     $oldStatus,
                     implode('->', $this->getStatusDescription($oldStatus)),
@@ -1790,15 +1942,10 @@ class PaymentMethod extends PaymentModule
             switch ($status) {
                 case PaymentStatus::FAILED:
                 case PaymentStatus::REJECTED:
-                    if (
-                    in_array(
-                        $order->getCurrentState(),
-                        [
-                            Configuration::get('PS_OS_ERROR'),
-                            Configuration::get('PS_OS_CANCELED')
-                        ]
-                    )
-                    ) {
+                    if (in_array($order->getCurrentState(), [
+                        Configuration::get('PS_OS_ERROR'),
+                        Configuration::get('PS_OS_CANCELED')
+                    ])) {
                         break;
                     }
 
@@ -1811,6 +1958,7 @@ class PaymentMethod extends PaymentModule
                     } elseif ($status == PaymentStatus::REJECTED) {
                         $history->changeIdOrderState(Configuration::get('PS_OS_CANCELED'), $history->id_order);
                     }
+
                     $history->addWithemail();
                     $history->save();
 
@@ -1863,8 +2011,8 @@ class PaymentMethod extends PaymentModule
 
         if (!empty($payment = $response->lastTransaction())
             && !empty($paymentStatus = $payment->status())
-            && ($paymentStatus->isApproved() || $paymentStatus->isRejected())) {
-
+            && ($paymentStatus->isApproved() || $paymentStatus->isRejected())
+        ) {
             $date = pSQL($paymentStatus->date());
             $reason = pSQL($paymentStatus->reason());
             $reasonDescription = pSQL($paymentStatus->message());
@@ -1918,14 +2066,22 @@ class PaymentMethod extends PaymentModule
     public function hookPaymentReturn($params)
     {
         if (isDebugEnable()) {
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, 'Trigger ' . __METHOD__ . ' en PS vr. ' . _PS_VERSION_));
+            PaymentLogger::log(sprintf(
+                "[%s:%d] => [%d]\n %s",
+                __FILE__,
+                __LINE__,
+                0,
+                'Trigger ' . __METHOD__ . ' en PS vr. ' . _PS_VERSION_
+            ));
         }
 
         if (!$this->active) {
             return null;
         }
 
-        $order = isset($params['objOrder']) ? $params['objOrder'] : $params['order'];
+        $order = isset($params['objOrder'])
+            ? $params['objOrder']
+            : $params['order'];
 
         if ($order->module != getModuleName()) {
             return null;
@@ -1988,7 +2144,13 @@ class PaymentMethod extends PaymentModule
 
         $this->context->smarty->assign($attributes);
 
-        return $this->display($this->getPathThisModule(), DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'front' . DIRECTORY_SEPARATOR . 'response.tpl');
+        return $this->display(
+            $this->getPathThisModule(),
+            DIRECTORY_SEPARATOR . 'views' .
+            DIRECTORY_SEPARATOR . 'templates' .
+            DIRECTORY_SEPARATOR . 'front' .
+            DIRECTORY_SEPARATOR . 'response.tpl'
+        );
     }
 
     /**
@@ -2051,7 +2213,13 @@ class PaymentMethod extends PaymentModule
             'slowValidation' => Tools::isSubmit('slowvalidation')
         ]);
 
-        return $this->display($this->getPathThisModule(), DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'front' . DIRECTORY_SEPARATOR . 'history.tpl');
+        return $this->display(
+            $this->getPathThisModule(),
+            DIRECTORY_SEPARATOR . 'views' .
+            DIRECTORY_SEPARATOR . 'templates' .
+            DIRECTORY_SEPARATOR . 'front' .
+            DIRECTORY_SEPARATOR . 'history.tpl'
+        );
     }
 
     /**
@@ -2068,7 +2236,11 @@ class PaymentMethod extends PaymentModule
             $context = Context::getContext();
         }
 
-        $sql = 'SELECT o.`id_order`, o.`id_currency`, o.`payment`, o.`invoice_number`, pp.`date` date_add, pp.`reference`, pp.`amount` total_paid, pp.`authcode` cus, (SELECT SUM(od.`product_quantity`) FROM `' . _DB_PREFIX_ . 'order_detail` od WHERE od.`id_order` = o.`id_order`) nb_products
+        $sql = 'SELECT o.`id_order`, o.`id_currency`, o.`payment`, o.`invoice_number`, pp.`date` date_add, 
+                      pp.`reference`, pp.`amount` total_paid, pp.`authcode` cus, 
+                      (SELECT SUM(od.`product_quantity`) 
+                      FROM `' . _DB_PREFIX_ . 'order_detail` od 
+                      WHERE od.`id_order` = o.`id_order`) nb_products
         FROM `' . $this->tableOrder . '` o
             JOIN `' . $this->tablePayment . '` pp ON pp.id_order = o.id_cart
         WHERE o.`id_customer` = ' . (int)$id_customer .
@@ -2086,9 +2258,11 @@ class PaymentMethod extends PaymentModule
                 SELECT os.`id_order_state`, osl.`name` AS order_state, os.`invoice`, os.`color` AS order_state_color
                 FROM `' . _DB_PREFIX_ . 'order_history` oh
                 LEFT JOIN `' . _DB_PREFIX_ . 'order_state` os ON (os.`id_order_state` = oh.`id_order_state`)
-                INNER JOIN `' . _DB_PREFIX_ . 'order_state_lang` osl ON (os.`id_order_state` = osl.`id_order_state` AND osl.`id_lang` = ' . (int)$context->language->id . ')
+                INNER JOIN `' . _DB_PREFIX_ . 'order_state_lang` osl ON (
+                    os.`id_order_state` = osl.`id_order_state` AND osl.`id_lang` = ' . (int)$context->language->id . '
+                )
             WHERE oh.`id_order` = ' . (int)$val['id_order'] . (!$show_hidden_status ? ' AND os.`hidden` != 1' : '') . '
-                ORDER BY oh.`date_add` DESC, oh.`id_order_history` DESC
+            ORDER BY oh.`date_add` DESC, oh.`id_order_history` DESC
             LIMIT 1');
 
             if ($res2) {
@@ -2107,13 +2281,14 @@ class PaymentMethod extends PaymentModule
      */
     private function getTransactionInformation($cartId, $orderId = null)
     {
-
         $id_order = (empty($cartId)
             ? "(SELECT `id_cart` FROM `{$this->tableOrder}` WHERE `id_order` = {$orderId})"
             : $cartId);
 
         try {
-            $result = Db::getInstance()->ExecuteS("SELECT * FROM `{$this->tablePayment}` WHERE `id_order` = {$id_order}");
+            $result = Db::getInstance()->ExecuteS(
+                "SELECT * FROM `{$this->tablePayment}` WHERE `id_order` = {$id_order}"
+            );
         } catch (Exception $e) {
             throw new PaymentException($e->getMessage(), 801);
         }
@@ -2122,11 +2297,15 @@ class PaymentMethod extends PaymentModule
             $result = $result[0];
 
             if (empty($result['reason_description'])) {
-                $result['reason_description'] = ($result['reason'] == '?-') ? $this->ll('Processing transaction') : $this->ll('No information');
+                $result['reason_description'] = ($result['reason'] == '?-')
+                    ? $this->ll('Processing transaction')
+                    : $this->ll('No information');
             }
 
             if (empty($result['status'])) {
-                $result['status_description'] = ($result['status'] == '') ? $this->ll('Processing transaction') : $this->ll('No information');
+                $result['status_description'] = ($result['status'] == '')
+                    ? $this->ll('Processing transaction')
+                    : $this->ll('No information');
             }
         }
 
@@ -2146,7 +2325,16 @@ class PaymentMethod extends PaymentModule
 
         if (!isConsole() && !isDebugEnable()) {
             $message = sprintf('Only from CLI is available execute this command: %s, aborted', __METHOD__);
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s SAPI: %s", __FILE__, __LINE__, 0, $message, php_sapi_name()));
+
+            PaymentLogger::log(sprintf(
+                "[%s:%d] => [%d]\n %s SAPI: %s",
+                __FILE__,
+                __LINE__,
+                0,
+                $message,
+                php_sapi_name()
+            ));
+
             Tools::redirect('authentication.php?back=order.php');
         }
 
@@ -2166,7 +2354,12 @@ class PaymentMethod extends PaymentModule
             if ($result = Db::getInstance()->ExecuteS($sql)) {
                 echo "Found (" . count($result) . ") payments pending." . breakLine(2);
 
-                $paymentRedirection = new PaymentRedirection($this->getLogin(), $this->getTranKey(), $this->getUri(), $this->getConnectionType());
+                $paymentRedirection = new PaymentRedirection(
+                    $this->getLogin(),
+                    $this->getTranKey(),
+                    $this->getUri(),
+                    $this->getConnectionType()
+                );
 
                 foreach ($result as $row) {
                     $reference = $row['reference'];
@@ -2184,7 +2377,12 @@ class PaymentMethod extends PaymentModule
                         $this->settleTransaction($paymentId, $status, $order, $response);
                     }
 
-                    echo sprintf('Payment with reference: [%s] is [%d=%s]', $order->reference, $status, implode('->', $this->getStatusDescription($status))) . breakLine(2);
+                    echo sprintf(
+                        'Payment with reference: [%s] is [%d=%s]' . breakLine(2),
+                        $order->reference,
+                        $status,
+                        implode('->', $this->getStatusDescription($status))
+                    );
                 }
             } else {
                 echo 'Not exists payments pending.' . breakLine();
@@ -2207,10 +2405,10 @@ class PaymentMethod extends PaymentModule
     {
         $force = Tools::getValue('f', null);
 
-        return (!$this->isProduction()
-            && !empty($force)
-            && strlen($force) === 5
-            && substr($this->getLogin(), -5) === $force)
+        return !$this->isProduction()
+        && !empty($force)
+        && strlen($force) === 5
+        && substr($this->getLogin(), -5) === $force
             ? true
             : false;
     }
@@ -2227,12 +2425,30 @@ class PaymentMethod extends PaymentModule
         $setup .= sprintf('URL Base [%s]', $this->getUrl('')) . breakLine();
         $setup .= sprintf('%s [%s]', $this->ll('Country'), $this->getCountry()) . breakLine();
         $setup .= sprintf('%s [%s]', $this->ll('Environment'), $this->getEnvironment()) . breakLine();
+
         if ($this->isCustomEnvironment()) {
-            $setup .= sprintf('%s [%s]', $this->ll('Custom connection URL'), $this->getCustomConnectionUrl()) . breakLine();
+            $setup .= sprintf(
+                '%s [%s]' . breakLine(),
+                $this->ll('Custom connection URL'),
+                $this->getCustomConnectionUrl()
+            );
         }
-        $setup .= sprintf('%s [%s]', $this->ll('Connection type'), $this->getConnectionType()) . breakLine();
-        $setup .= sprintf('%s [%s]', $this->ll('Expiration time to pay'), $this->getExpirationTimeMinutes()) . breakLine();
-        $setup .= sprintf('%s [%s]', $this->ll('Allow buy with pending payments?'), $this->getAllowBuyWithPendingPayments()) . breakLine();
+
+        $setup .= sprintf(
+            '%s [%s]' . breakLine(),
+            $this->ll('Connection type'),
+            $this->getConnectionType()
+        );
+        $setup .= sprintf(
+            '%s [%s]' . breakLine(),
+            $this->ll('Expiration time to pay'),
+            $this->getExpirationTimeMinutes()
+        );
+        $setup .= sprintf(
+            '%s [%s]' . breakLine(),
+            $this->ll('Allow buy with pending payments?'),
+            $this->getAllowBuyWithPendingPayments()
+        );
         $setup .= sprintf('%s [%s]', $this->ll('Skip result?'), $this->getSkipResult()) . breakLine();
         $setup .= breakLine();
 
@@ -2315,7 +2531,7 @@ class PaymentMethod extends PaymentModule
      * @param bool $rollBack
      * @return string
      */
-    private function _reference($string, $rollBack = false)
+    private function reference($string, $rollBack = false)
     {
         return !$rollBack
             ? base64_encode($string)
