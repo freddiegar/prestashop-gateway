@@ -1560,12 +1560,7 @@ class PaymentMethod extends PaymentModule
                 ));
             }
 
-            $paymentRedirection = (new PaymentRedirection(
-                $this->getLogin(),
-                $this->getTranKey(),
-                $this->getUri(),
-                $this->getConnectionType()
-            ))->request($request);
+            $paymentRedirection = $this->instanceRedirection()->request($request);
 
             if (isDebugEnable()) {
                 PaymentLogger::log(sprintf(
@@ -1788,12 +1783,7 @@ class PaymentMethod extends PaymentModule
             Tools::redirect('authentication.php?back=order.php');
         }
 
-        $paymentRedirection = (new PaymentRedirection(
-            $this->getLogin(),
-            $this->getTranKey(),
-            $this->getUri(),
-            $this->getConnectionType()
-        ))->query($requestId);
+        $paymentRedirection = $this->instanceRedirection()->query($requestId);
 
         if (isDebugEnable()) {
             PaymentLogger::log(sprintf(
@@ -2354,12 +2344,7 @@ class PaymentMethod extends PaymentModule
             if ($result = Db::getInstance()->ExecuteS($sql)) {
                 echo "Found (" . count($result) . ") payments pending." . breakLine(2);
 
-                $paymentRedirection = new PaymentRedirection(
-                    $this->getLogin(),
-                    $this->getTranKey(),
-                    $this->getUri(),
-                    $this->getConnectionType()
-                );
+                $paymentRedirection = $this->instanceRedirection();
 
                 foreach ($result as $row) {
                     $reference = $row['reference'];
@@ -2575,5 +2560,19 @@ class PaymentMethod extends PaymentModule
         $history->id_order = $this->currentOrder;
         $history->changeIdOrderState(Configuration::get('PS_OS_ERROR'), $history->id_order);
         $history->save();
+    }
+
+    /**
+     * @return PaymentRedirection
+     * @throws \Dnetix\Redirection\Exceptions\PlacetoPayException
+     */
+    private function instanceRedirection()
+    {
+        return new PaymentRedirection(
+            $this->getLogin(),
+            $this->getTranKey(),
+            $this->getUri(),
+            $this->getConnectionType()
+        );
     }
 }
