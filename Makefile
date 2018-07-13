@@ -1,6 +1,5 @@
 CONTAINER_PS=plugin_ps_prestashop
 CONTAINER_DB=plugin_ps_database
-FOLDER_PATH=/var/www/html/modules/prestashop-gateway
 CURRENT_FOLDER=$(shell pwd)
 UID=$(shell id -u)
 
