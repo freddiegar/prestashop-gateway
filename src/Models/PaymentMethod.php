@@ -108,7 +108,7 @@ class PaymentMethod extends PaymentModule
         $this->tableOrder = _DB_PREFIX_ . 'orders';
 
         $this->name = getModuleName();
-        $this->version = '3.2.5';
+        $this->version = '3.2.6';
         $this->author = 'EGM Ingeniería sin Fronteras S.A.S';
         $this->tab = 'payments_gateways';
         $this->limited_countries = ['us', CountryCode::COLOMBIA, CountryCode::ECUADOR];
@@ -2001,18 +2001,20 @@ class PaymentMethod extends PaymentModule
 
         if (!empty($payment = $response->lastTransaction())
             && !empty($paymentStatus = $payment->status())
-            && ($paymentStatus->isApproved() || $paymentStatus->isRejected())
+            && ($paymentStatus->isApproved() || $paymentStatus->isRejected() || $paymentStatus->isFailed())
         ) {
             $date = pSQL($paymentStatus->date());
             $reason = pSQL($paymentStatus->reason());
             $reasonDescription = pSQL($paymentStatus->message());
 
-            $bank = pSQL($payment->issuerName());
-            $franchise = pSQL($payment->paymentMethod());
-            $franchiseName = pSQL($payment->paymentMethodName());
-            $authCode = pSQL($payment->authorization());
-            $receipt = pSQL($payment->receipt());
-            $conversion = pSQL($payment->amount()->factor());
+            if (!$paymentStatus->isFailed()) {
+                $bank = pSQL($payment->issuerName());
+                $franchise = pSQL($payment->paymentMethod());
+                $franchiseName = pSQL($payment->paymentMethodName());
+                $authCode = pSQL($payment->authorization());
+                $receipt = pSQL($payment->receipt());
+                $conversion = pSQL($payment->amount()->factor());
+            }
         }
 
         if (!empty($request = $response->request())
