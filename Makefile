@@ -53,6 +53,7 @@ compile:
         && sudo rm -Rf ~/Downloads/placetopaypayment* \
         && sudo cp $(CURRENT_FOLDER) ~/Downloads/placetopaypayment -R \
         && sudo find ~/Downloads/placetopaypayment/ -type d -name ".git*" -exec rm -Rf {} + \
+        && sudo find ~/Downloads/placetopaypayment/ -type d -name "squizlabs" -exec rm -Rf {} + \
         && sudo rm -Rf ~/Downloads/placetopaypayment/.git* \
         && sudo rm -Rf ~/Downloads/placetopaypayment/.idea \
         && sudo rm -Rf ~/Downloads/placetopaypayment/config* \
