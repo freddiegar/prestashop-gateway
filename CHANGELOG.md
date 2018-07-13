@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.2.3] - 2018-07-13
+
+### Fixed
+- Fix message error (in database) on failed transaction, before it is not was updated
+- Fix translations, index error in files
+
+### Updated
+- Update dependencies dnetix/redirection from 0.4.3 => 0.4.5 (Add extra currencies)
+- Added code sniffer validations
+
 ## [3.2.5] - 2018-05-15
 
 ### Fixed
