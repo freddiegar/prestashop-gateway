@@ -21,11 +21,17 @@ if (!function_exists('getPathCMS')) {
             // IIS:     \ (backslash)
             // Apache:  / (slash)
             $pathUsed = str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, $_SERVER['SCRIPT_FILENAME']);
-            $pathCMS = str_replace(DIRECTORY_SEPARATOR . 'modules' . DIRECTORY_SEPARATOR . getModuleName() . DIRECTORY_SEPARATOR . $filename, '', $pathUsed);
+            $pathCMS = str_replace(
+                DIRECTORY_SEPARATOR . 'modules' .
+                DIRECTORY_SEPARATOR . getModuleName() .
+                DIRECTORY_SEPARATOR . $filename,
+                '',
+                $pathUsed
+            );
         }
 
         if (!file_exists($pathCMS . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.inc.php')) {
-            $message = "Miss-configuration in Server [{$filename}]" . breakLine();
+            $message = "Miss-configuration in Server [mode: " . php_sapi_name() . "] [{$filename}]" . breakLine();
             $message .= "Option [{$option}]" . breakLine();
             $message .= "Used [{$pathUsed}]" . breakLine();
             $message .= "Path [{$pathCMS}]" . breakLine();

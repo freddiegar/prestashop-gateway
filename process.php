@@ -11,7 +11,9 @@ try {
     require _PS_MODULE_DIR_ . DIRECTORY_SEPARATOR . getModuleName() . DIRECTORY_SEPARATOR . getModuleName() . '.php';
 
     // Authentication error
-    if (!Context::getContext()->customer->isLogged() && !Context::getContext()->customer->is_guest && empty(file_get_contents("php://input"))) {
+    if (!Context::getContext()->customer->isLogged()
+        && !Context::getContext()->customer->is_guest
+        && empty(file_get_contents("php://input"))) {
         Tools::redirect('authentication.php?back=order.php');
     }
 
