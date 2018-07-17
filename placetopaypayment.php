@@ -21,7 +21,11 @@ if (versionComparePlaceToPay('1.7.0.0', '<')) {
                 $class = str_replace('PlacetoPay\\', '', $className);
                 break;
             case substr($className, 0, 6) === 'Dnetix':
-                $src = __DIR__ . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'dnetix' . DIRECTORY_SEPARATOR . 'redirection' . DIRECTORY_SEPARATOR . 'src';
+                $src = __DIR__ .
+                    DIRECTORY_SEPARATOR . 'vendor' .
+                    DIRECTORY_SEPARATOR . 'dnetix' .
+                    DIRECTORY_SEPARATOR . 'redirection' .
+                    DIRECTORY_SEPARATOR . 'src';
                 $class = str_replace('Dnetix\\Redirection\\', '', $className);
                 break;
             default:
@@ -39,6 +43,6 @@ if (versionComparePlaceToPay('1.7.0.0', '<')) {
     });
 }
 
-class PlaceToPayPayment extends PlacetoPay\Models\PaymentMethod
+class PlacetoPayPayment extends PlacetoPay\Models\PaymentMethod
 {
 }
