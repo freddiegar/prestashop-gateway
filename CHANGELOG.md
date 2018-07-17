@@ -1,9 +1,16 @@
 # Changelog
 
-## Next Release
+## [3.2.7] - 2018-07-17
+
+### Updated
+- Simple fix path applied, improve support
+- Not overwrite default country in docker installation
+- Allow installation in default country (gb)
 
 ### Fixed
 - Fix cs
+- Fix log path in PS >= 1.7.4.0
+- Fix guzzle in PS >= 1.7.4.0, downgrade from 6.3.3 to 5.3.2
 
 ## [3.2.6] - 2018-07-13
 
