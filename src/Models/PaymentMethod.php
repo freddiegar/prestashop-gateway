@@ -111,7 +111,12 @@ class PaymentMethod extends PaymentModule
         $this->version = '3.2.6';
         $this->author = 'EGM Ingeniería sin Fronteras S.A.S';
         $this->tab = 'payments_gateways';
-        $this->limited_countries = ['us', CountryCode::COLOMBIA, CountryCode::ECUADOR];
+        $this->limited_countries = [
+            'gb',
+            'us',
+            CountryCode::COLOMBIA,
+            CountryCode::ECUADOR
+        ];
         $this->ps_versions_compliancy = ['min' => '1.6.0.0', 'max' => _PS_VERSION_];
 
         $this->controllers = ['validation'];
