@@ -107,3 +107,14 @@ if (!function_exists('getModuleName')) {
         return 'placetopaypayment';
     }
 }
+
+if (!function_exists('fixPath')) {
+    /**
+     * @param string $path
+     * @return string
+     */
+    function fixPath($path)
+    {
+        return str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, $path);
+    }
+}
