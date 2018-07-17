@@ -3,7 +3,8 @@
   "description": "Plugin for integration PlacetoPay gateway with PrestaShop CMS",
   "type": "plugin",
   "require": {
-    "php": ">=5.5",
+    "php": ">=5.6.0",
+    "guzzlehttp/guzzle": "~5.3",
     "dnetix/redirection": "^0.4"
   },
   "license": "MIT",
