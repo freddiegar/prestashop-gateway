@@ -24,7 +24,6 @@ services:
       PS_DEV_MODE: 1
       PS_INSTALL_AUTO: 1
       PS_DOMAIN: localhost:${WEB_PORT:-8787}
-      PS_COUNTRY: co
       PS_FOLDER_ADMIN: adminstore
       PS_FOLDER_INSTALL: xinstall
       PS_HANDLE_DYNAMIC_DOMAIN: 1
