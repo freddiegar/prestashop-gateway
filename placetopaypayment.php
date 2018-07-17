@@ -29,7 +29,7 @@ if (versionComparePlaceToPay('1.7.0.0', '<')) {
                 return true;
         }
 
-        $filename = sprintf('%s/%s.php', $src, $class);
+        $filename = fixPath(sprintf('%s/%s.php', $src, $class));
 
         if (!file_exists($filename)) {
             throw new Exception(sprintf('File %s with class [%s] not found', $filename, $className));
