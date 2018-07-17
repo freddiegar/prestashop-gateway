@@ -17,15 +17,11 @@ if (versionComparePlaceToPay('1.7.0.0', '<')) {
     spl_autoload_register(function ($className) {
         switch (true) {
             case substr($className, 0, 10) === 'PlacetoPay':
-                $src = __DIR__ . DIRECTORY_SEPARATOR . 'src';
+                $src = __DIR__ . '/src';
                 $class = str_replace('PlacetoPay\\', '', $className);
                 break;
             case substr($className, 0, 6) === 'Dnetix':
-                $src = __DIR__ .
-                    DIRECTORY_SEPARATOR . 'vendor' .
-                    DIRECTORY_SEPARATOR . 'dnetix' .
-                    DIRECTORY_SEPARATOR . 'redirection' .
-                    DIRECTORY_SEPARATOR . 'src';
+                $src = __DIR__ . '/vendor/dnetix/redirection/src';
                 $class = str_replace('Dnetix\\Redirection\\', '', $className);
                 break;
             default:
@@ -33,7 +29,7 @@ if (versionComparePlaceToPay('1.7.0.0', '<')) {
                 return true;
         }
 
-        $filename = $src . DIRECTORY_SEPARATOR . str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
+        $filename = sprintf('%s/%s.php', $src, $class);
 
         if (!file_exists($filename)) {
             throw new Exception(sprintf('File %s with class [%s] not found', $filename, $className));

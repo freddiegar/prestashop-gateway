@@ -17,20 +17,15 @@ if (!function_exists('getPathCMS')) {
             $pathCMS = dirname(dirname($pathUsed));
         } elseif (isset($_SERVER['SCRIPT_FILENAME'])) {
             $option = 'File';
-            // Case:
-            // IIS:     \ (backslash)
-            // Apache:  / (slash)
-            $pathUsed = str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, $_SERVER['SCRIPT_FILENAME']);
+            $pathUsed = fixPath($_SERVER['SCRIPT_FILENAME']);
             $pathCMS = str_replace(
-                DIRECTORY_SEPARATOR . 'modules' .
-                DIRECTORY_SEPARATOR . getModuleName() .
-                DIRECTORY_SEPARATOR . $filename,
+                fixPath(sprintf('/modules/%s/%s', getModuleName(), $filename)),
                 '',
                 $pathUsed
             );
         }
 
-        if (!file_exists($pathCMS . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.inc.php')) {
+        if (!file_exists(fixPath($pathCMS . '/config/config.inc.php'))) {
             $message = "Miss-configuration in Server [mode: " . php_sapi_name() . "] [{$filename}]" . breakLine();
             $message .= "Option [{$option}]" . breakLine();
             $message .= "Used [{$pathUsed}]" . breakLine();
@@ -115,6 +110,9 @@ if (!function_exists('fixPath')) {
      */
     function fixPath($path)
     {
+        // Case:
+        // IIS:     \ (backslash)
+        // Apache:  / (slash)
         return str_replace(array('\\', '/'), DIRECTORY_SEPARATOR, $path);
     }
 }

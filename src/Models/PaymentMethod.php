@@ -420,8 +420,8 @@ class PaymentMethod extends PaymentModule
             if ($orderState->save()) {
                 Configuration::updateValue(self::ORDER_STATE, $orderState->id);
                 copy(
-                    $this->getPathThisModule() . DIRECTORY_SEPARATOR . 'logo.png',
-                    _PS_IMG_DIR_ . 'os' . DIRECTORY_SEPARATOR . $orderState->id . '.gif'
+                    fixPath($this->getPathThisModule() . '/logo.png'),
+                    fixPath(_PS_IMG_DIR_ . 'os/' . $orderState->id . '.gif')
                 );
             } else {
                 return false;
@@ -585,13 +585,7 @@ class PaymentMethod extends PaymentModule
             ]
         );
 
-        return $this->display(
-            $this->getPathThisModule(),
-            DIRECTORY_SEPARATOR . 'views' .
-            DIRECTORY_SEPARATOR . 'templates' .
-            DIRECTORY_SEPARATOR . 'front' .
-            DIRECTORY_SEPARATOR . 'setting.tpl'
-        );
+        return $this->display($this->getPathThisModule(), fixPath('/views/templates/front/setting.tpl'));
     }
 
     /**
@@ -614,13 +608,7 @@ class PaymentMethod extends PaymentModule
             'allow_payment' => $this->getAllowBuyWithPendingPayments(),
         ]);
 
-        return $this->display(
-            $this->getPathThisModule(),
-            DIRECTORY_SEPARATOR . 'views' .
-            DIRECTORY_SEPARATOR . 'templates' .
-            DIRECTORY_SEPARATOR . 'hook' .
-            DIRECTORY_SEPARATOR . 'pending_payment.tpl'
-        );
+        return $this->display($this->getPathThisModule(), fixPath('/views/templates/hook/pending_payment.tpl'));
     }
 
     /**
@@ -635,13 +623,7 @@ class PaymentMethod extends PaymentModule
             'company_name' => $this->getCompanyName(),
         ]);
 
-        return $this->display(
-            $this->getPathThisModule(),
-            DIRECTORY_SEPARATOR . 'views' .
-            DIRECTORY_SEPARATOR . 'templates' .
-            DIRECTORY_SEPARATOR . 'hook' .
-            DIRECTORY_SEPARATOR . 'message_payment.tpl'
-        );
+        return $this->display($this->getPathThisModule(), fixPath('/views/templates/hook/message_payment.tpl'));
     }
 
     /**
@@ -651,13 +633,7 @@ class PaymentMethod extends PaymentModule
      */
     private function displayBrandMessage()
     {
-        return $this->display(
-            $this->getPathThisModule(),
-            DIRECTORY_SEPARATOR . 'views' .
-            DIRECTORY_SEPARATOR . 'templates' .
-            DIRECTORY_SEPARATOR . 'hook' .
-            DIRECTORY_SEPARATOR . 'brand_payment.tpl'
-        );
+        return $this->display($this->getPathThisModule(), fixPath('/views/templates/hook/brand_payment.tpl'));
     }
 
     /**
@@ -1026,13 +1002,7 @@ class PaymentMethod extends PaymentModule
         $this->context->smarty->assign('company_name', $this->getCompanyName());
         $this->context->smarty->assign('allow_payment', $allowPayment);
 
-        return $this->display(
-            $this->getPathThisModule(),
-            DIRECTORY_SEPARATOR . 'views' .
-            DIRECTORY_SEPARATOR . 'templates' .
-            DIRECTORY_SEPARATOR . 'hook_1_6' .
-            DIRECTORY_SEPARATOR . 'payment.tpl'
-        );
+        return $this->display($this->getPathThisModule(), fixPath('/views/templates/hook_1_6/payment.tpl'));
     }
 
     /**
@@ -1400,7 +1370,7 @@ class PaymentMethod extends PaymentModule
      */
     private function getPathScheduleTask()
     {
-        return $this->getPathThisModule() . DIRECTORY_SEPARATOR . 'sonda.php';
+        return fixPath($this->getPathThisModule() . '/sonda.php');
     }
 
     /**
@@ -2136,13 +2106,7 @@ class PaymentMethod extends PaymentModule
 
         $this->context->smarty->assign($attributes);
 
-        return $this->display(
-            $this->getPathThisModule(),
-            DIRECTORY_SEPARATOR . 'views' .
-            DIRECTORY_SEPARATOR . 'templates' .
-            DIRECTORY_SEPARATOR . 'front' .
-            DIRECTORY_SEPARATOR . 'response.tpl'
-        );
+        return $this->display($this->getPathThisModule(), fixPath('/views/templates/front/response.tpl'));
     }
 
     /**
@@ -2205,13 +2169,7 @@ class PaymentMethod extends PaymentModule
             'slowValidation' => Tools::isSubmit('slowvalidation')
         ]);
 
-        return $this->display(
-            $this->getPathThisModule(),
-            DIRECTORY_SEPARATOR . 'views' .
-            DIRECTORY_SEPARATOR . 'templates' .
-            DIRECTORY_SEPARATOR . 'front' .
-            DIRECTORY_SEPARATOR . 'history.tpl'
-        );
+        return $this->display($this->getPathThisModule(), fixPath('/views/templates/front/history.tpl'));
     }
 
     /**
