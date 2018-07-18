@@ -16,8 +16,22 @@ class PaymentLogger
      */
     public static function log($message = '')
     {
+        $logger = new FileLogger(0);
+        $logger->setFilename(self::getLogFilename());
+        $logger->logDebug(print_r($message, 1));
+
+        return true;
+    }
+
+    /**
+     * @return string
+     */
+    public static function getLogFilename()
+    {
+        $logfile = sprintf('%s_%s.log', getModuleName(), date('Y-m-d'));
+
+        // PS < 1.7.0.0
         $pathLogs = '/log/';
-        $logfile = 'placetopaypayment_' . date('Y-m-d') . '.log';
 
         if (version_compare(_PS_VERSION_, '1.7.4.0', '>=')) {
             $pathLogs = '/var/logs/';
@@ -25,10 +39,6 @@ class PaymentLogger
             $pathLogs = '/app/logs/';
         }
 
-        $logger = new FileLogger(0);
-        $logger->setFilename(fixPath(_PS_ROOT_DIR_ . $pathLogs . $logfile));
-        $logger->logDebug(print_r($message, 1));
-
-        return true;
+        return fixPath(_PS_ROOT_DIR_ . $pathLogs . $logfile);
     }
 }
