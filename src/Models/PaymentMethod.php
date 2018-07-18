@@ -36,6 +36,28 @@ use PrestaShopDatabaseException;
 /**
  * Class PlaceToPayPaymentMethod
  * @property string currentOrderReference
+ * @property string name
+ * @property string version
+ * @property bool active
+ * @property int id
+ * @property mixed context
+ * @property mixed currentOrder
+ * @property int identifier
+ * @property string table
+ * @property mixed smarty
+ * @property string warning
+ * @property string confirmUninstall
+ * @property string description
+ * @property string displayName
+ * @property bool bootstrap
+ * @property string currencies_mode
+ * @property bool currencies
+ * @property int is_eu_compatible
+ * @property array controllers
+ * @property array ps_versions_compliancy
+ * @property array limited_countries
+ * @property string tab
+ * @property string author
  */
 class PaymentMethod extends PaymentModule
 {
@@ -83,6 +105,8 @@ class PaymentMethod extends PaymentModule
     const PAGE_ORDER_HISTORY = 'history.php';
     const PAGE_ORDER_DETAILS = 'index.php?controller=order-detail';
 
+    const MIN_VERSION_PS = '1.6.0.5';
+
     private $formHtml = '';
     private $formErrors = [];
 
@@ -111,13 +135,18 @@ class PaymentMethod extends PaymentModule
         $this->version = '3.2.7';
         $this->author = 'EGM Ingeniería sin Fronteras S.A.S';
         $this->tab = 'payments_gateways';
+
         $this->limited_countries = [
             'gb',
             'us',
             CountryCode::COLOMBIA,
             CountryCode::ECUADOR
         ];
-        $this->ps_versions_compliancy = ['min' => '1.6.0.0', 'max' => _PS_VERSION_];
+
+        $this->ps_versions_compliancy = [
+            'min' => self::MIN_VERSION_PS,
+            'max' => _PS_VERSION_
+        ];
 
         $this->controllers = ['validation'];
         $this->is_eu_compatible = 1;
