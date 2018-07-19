@@ -1,6 +1,6 @@
 # PlacetoPay Gateway on Prestashop
 
-Plugin Payment for Prestashop 1.5 to 1.7
+[PlacetoPay](https://www.placetopay.com) Plugin Payment for [Prestashop](https://www.prestashop.com) 1.5 to 1.7 Stable
 
 ## Compatibility Version
 

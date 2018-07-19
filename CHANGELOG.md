@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.3.0] - 2018-07-19
+
+### Added
+- Exception and any others errors are visible from PS back-office System Logs
+- Added object type in errors save in logs prestashop
+
+### Updated
+- Minimum version support now is PS 1.6.0.5
+- Change PaymentLogger::log function
+- Update error code, catalog table create
+
 ## [3.2.7] - 2018-07-17
 
 ### Updated
