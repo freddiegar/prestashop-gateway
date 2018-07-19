@@ -51,7 +51,7 @@ class PaymentLogger
      */
     public static function logInDatabase($message, $severity = self::INFO, $errorCode = null)
     {
-        PrestaShopLogger::addLog($message, $severity, $errorCode);
+        PrestaShopLogger::addLog($message, $severity, $errorCode, getModuleName(), 999);
 
         return true;
     }

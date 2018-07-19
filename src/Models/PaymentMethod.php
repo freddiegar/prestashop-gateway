@@ -2286,7 +2286,7 @@ class PaymentMethod extends PaymentModule
             $message = sprintf(
                 'Only from CLI (used SAPI: %s) is available execute this command: %s, aborted',
                 php_sapi_name(),
-                __METHOD__
+                __FUNCTION__
             );
 
             PaymentLogger::log($message, PaymentLogger::WARNING, 16, __FILE__, __LINE__);
