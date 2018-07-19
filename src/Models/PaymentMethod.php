@@ -222,7 +222,7 @@ class PaymentMethod extends PaymentModule
 
         if (isDebugEnable()) {
             $message = sprintf('Hook %s was register on PS vr %s', $hookPaymentName, _PS_VERSION_);
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, $message));
+            PaymentLogger::log($message, PaymentLogger::DEBUG, 0, __FILE__, __LINE__);
         }
 
         // Default values
@@ -323,7 +323,7 @@ class PaymentMethod extends PaymentModule
         try {
             Db::getInstance()->Execute($sql);
         } catch (Exception $e) {
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 601, $e->getMessage()));
+            PaymentLogger::log($e->getMessage(), PaymentLogger::WARNING, 1, $e->getFile(), $e->getLine());
             return false;
         }
 
@@ -341,10 +341,10 @@ class PaymentMethod extends PaymentModule
             Db::getInstance()->Execute($sql);
         } catch (PrestaShopDatabaseException $e) {
             // Column had been to change before
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 601, $e->getMessage()));
+            PaymentLogger::log($e->getMessage(), PaymentLogger::INFO, 0, $e->getFile(), $e->getLine());
             return true;
         } catch (Exception $e) {
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 601, $e->getMessage()));
+            PaymentLogger::log($e->getMessage(), PaymentLogger::WARNING, 2, $e->getFile(), $e->getLine());
             return false;
         }
 
@@ -362,10 +362,10 @@ class PaymentMethod extends PaymentModule
             Db::getInstance()->Execute($sql);
         } catch (PrestaShopDatabaseException $e) {
             // Column had been to change before
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 601, $e->getMessage()));
+            PaymentLogger::log($e->getMessage(), PaymentLogger::INFO, 0, $e->getFile(), $e->getLine());
             return true;
         } catch (Exception $e) {
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 601, $e->getMessage()));
+            PaymentLogger::log($e->getMessage(), PaymentLogger::WARNING, 3, $e->getFile(), $e->getLine());
             return false;
         }
 
@@ -383,10 +383,10 @@ class PaymentMethod extends PaymentModule
             Db::getInstance()->Execute($sql);
         } catch (PrestaShopDatabaseException $e) {
             // Column had been to change before
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 601, $e->getMessage()));
+            PaymentLogger::log($e->getMessage(), PaymentLogger::INFO, 0, $e->getFile(), $e->getLine());
             return true;
         } catch (Exception $e) {
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 601, $e->getMessage()));
+            PaymentLogger::log($e->getMessage(), PaymentLogger::WARNING, 4, $e->getFile(), $e->getLine());
             return false;
         }
 
@@ -405,10 +405,10 @@ class PaymentMethod extends PaymentModule
             Db::getInstance()->Execute($sql);
         } catch (PrestaShopDatabaseException $e) {
             // Column had been to change before
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 601, $e->getMessage()));
+            PaymentLogger::log($e->getMessage(), PaymentLogger::INFO, 0, $e->getFile(), $e->getLine());
             return true;
         } catch (Exception $e) {
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 601, $e->getMessage()));
+            PaymentLogger::log($e->getMessage(), PaymentLogger::WARNING, 5, $e->getFile(), $e->getLine());
             return false;
         }
 
@@ -980,13 +980,13 @@ class PaymentMethod extends PaymentModule
     public function hookPayment($params)
     {
         if (isDebugEnable()) {
-            PaymentLogger::log(sprintf(
-                "[%s:%d] => [%d]\n %s",
-                __FILE__,
-                __LINE__,
+            PaymentLogger::log(
+                'Trigger ' . __METHOD__ . ' en PS vr. ' . _PS_VERSION_,
+                PaymentLogger::DEBUG,
                 0,
-                'Trigger ' . __METHOD__ . ' en PS vr. ' . _PS_VERSION_
-            ));
+                __FILE__,
+                __LINE__
+            );
         }
 
         if (!$this->active) {
@@ -994,13 +994,13 @@ class PaymentMethod extends PaymentModule
         }
 
         if (!$this->isSetCredentials()) {
-            PaymentLogger::log(sprintf(
-                "[%s:%d] => [%d]\n %s",
+            PaymentLogger::log(
+                'Error, set your credentials to used PlacetoPay Payment Module',
+                PaymentLogger::WARNING,
+                6,
                 __FILE__,
-                __LINE__,
-                0,
-                'Error, set your credentials to used PlacetoPay Payment Module'
-            ));
+                __LINE__
+            );
 
             return null;
         }
@@ -1048,13 +1048,13 @@ class PaymentMethod extends PaymentModule
     public function hookPaymentOptions($params)
     {
         if (isDebugEnable()) {
-            PaymentLogger::log(sprintf(
-                "[%s:%d] => [%d]\n %s",
-                __FILE__,
-                __LINE__,
+            PaymentLogger::log(
+                'Trigger ' . __METHOD__ . ' en PS vr. ' . _PS_VERSION_,
+                PaymentLogger::DEBUG,
                 0,
-                'Trigger ' . __METHOD__ . ' en PS vr. ' . _PS_VERSION_
-            ));
+                __FILE__,
+                __LINE__
+            );
         }
 
         if (!$this->active) {
@@ -1066,13 +1066,13 @@ class PaymentMethod extends PaymentModule
         }
 
         if (!$this->isSetCredentials()) {
-            PaymentLogger::log(sprintf(
-                "[%s:%d] => [%d]\n %s",
+            PaymentLogger::log(
+                'Error, set your credentials to used PlacetoPay Payment Module',
+                PaymentLogger::WARNING,
+                6,
                 __FILE__,
-                __LINE__,
-                0,
-                'Error, set your credentials to used PlacetoPay Payment Module'
-            ));
+                __LINE__
+            );
 
             return null;
         }
@@ -1392,8 +1392,7 @@ class PaymentMethod extends PaymentModule
         $url = $baseUrl . 'modules/' . getModuleName() . '/' . $page . $params;
 
         if (isDebugEnable()) {
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n Base URL %s", __FILE__, __LINE__, 0, $baseUrl));
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n All URL %s", __FILE__, __LINE__, 0, $url));
+            PaymentLogger::log('Full URL: ' . $baseUrl, PaymentLogger::DEBUG, 0, __FILE__, __LINE__);
         }
 
         return $url;
@@ -1454,7 +1453,7 @@ class PaymentMethod extends PaymentModule
         if (!empty($lastPendingTransaction) && $this->getAllowBuyWithPendingPayments() == self::OPTION_DISABLED) {
             // @codingStandardsIgnoreLine
             $message = 'Payment not allowed, customer has payment pending and not allowed but with payment pending is disable';
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 501, $message));
+            PaymentLogger::log($message, PaymentLogger::ERROR, 7, __FILE__, __LINE__);
             Tools::redirect('authentication.php?back=order.php');
         }
 
@@ -1555,25 +1554,13 @@ class PaymentMethod extends PaymentModule
             }
 
             if (isDebugEnable()) {
-                PaymentLogger::log(sprintf(
-                    "[%s:%d] => [%d]\n %s",
-                    __FILE__,
-                    __LINE__,
-                    0,
-                    print_r($request, true)
-                ));
+                PaymentLogger::log(print_r($request, true), PaymentLogger::DEBUG, 0, __FILE__, __LINE__);
             }
 
             $paymentRedirection = $this->instanceRedirection()->request($request);
 
             if (isDebugEnable()) {
-                PaymentLogger::log(sprintf(
-                    "[%s:%d] => [%d]\n %s",
-                    __FILE__,
-                    __LINE__,
-                    0,
-                    print_r($paymentRedirection, true)
-                ));
+                PaymentLogger::log(print_r($paymentRedirection, true), PaymentLogger::DEBUG, 0, __FILE__, __LINE__);
             }
 
             $connectionIsOk = !empty($paymentRedirection->status());
@@ -1612,14 +1599,14 @@ class PaymentMethod extends PaymentModule
 
             if (!$connectionIsOk || isDebugEnable()) {
                 $message = sprintf('[%d => %s] Redirecting flow to: %s', $status, $orderMessage, $redirectTo);
-                PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, $message));
+                PaymentLogger::log($message, PaymentLogger::INFO, 0, __FILE__, __LINE__);
             }
 
             // Redirect flow
             Tools::redirectLink($redirectTo);
         } catch (Exception $e) {
             $message = $e->getMessage();
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, $message));
+            PaymentLogger::log($message, PaymentLogger::WARNING, 8, __FILE__, __LINE__);
 
             Tools::redirect($urlOrderStatus);
         }
@@ -1731,18 +1718,18 @@ class PaymentMethod extends PaymentModule
         }
 
         if (empty($paymentPlaceToPay)) {
-            $error = 501;
+            $error = 9;
             $message = sprintf('Payment _reference: [%s] not found', $_reference);
 
             if (isset($reference)) {
-                $error = 505;
+                $error = 10;
                 $message = sprintf('Payment with reference: [%s] not found', $reference);
             } elseif (isset($requestId)) {
-                $error = 506;
+                $error = 11;
                 $message = sprintf('Payment with id_request: [%s] not found', $requestId);
             }
 
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, $error, $message));
+            PaymentLogger::log($message, PaymentLogger::WARNING, $error, __FILE__, __LINE__);
 
             if (!empty($input)) {
                 // Show status to reference in console
@@ -1760,13 +1747,7 @@ class PaymentMethod extends PaymentModule
         $order = $this->getOrderByCartId($cartId);
 
         if (isDebugEnable()) {
-            PaymentLogger::log(sprintf(
-                "[%s:%d] => [%d]\n %s",
-                __FILE__,
-                __LINE__,
-                0,
-                print_r($paymentPlaceToPay, true)
-            ));
+            PaymentLogger::log(print_r($paymentPlaceToPay, true), PaymentLogger::DEBUG, 0, __FILE__, __LINE__);
         }
 
         if (!isDebugEnable() && $oldStatus != PaymentStatus::PENDING) {
@@ -1777,7 +1758,7 @@ class PaymentMethod extends PaymentModule
                 implode('->', $this->getStatusDescription($oldStatus))
             );
 
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, $message));
+            PaymentLogger::log($message, PaymentLogger::WARNING, 12, __FILE__, __LINE__);
 
             if (!empty($input)) {
                 // Show status to reference in console
@@ -1790,13 +1771,7 @@ class PaymentMethod extends PaymentModule
         $paymentRedirection = $this->instanceRedirection()->query($requestId);
 
         if (isDebugEnable()) {
-            PaymentLogger::log(sprintf(
-                "[%s:%d] => [%d]\n %s",
-                __FILE__,
-                __LINE__,
-                0,
-                print_r($paymentRedirection, true)
-            ));
+            PaymentLogger::log(print_r($paymentRedirection, true), PaymentLogger::DEBUG, 0, __FILE__, __LINE__);
         }
 
         if ($paymentRedirection->isSuccessful() && $order) {
@@ -1812,7 +1787,7 @@ class PaymentMethod extends PaymentModule
                     implode('->', $this->getStatusDescription($newStatus))
                 );
 
-                PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, $message));
+                PaymentLogger::log($message, PaymentLogger::DEBUG, 0, __FILE__, __LINE__);
             }
 
             // Set status order in CMS
@@ -1839,17 +1814,17 @@ class PaymentMethod extends PaymentModule
 
             if (isDebugEnable()) {
                 $message = sprintf('Redirecting flow to: [%s]', $redirectTo);
-                PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, $message));
+                PaymentLogger::log($message, PaymentLogger::DEBUG, 0, __FILE__, __LINE__);
             }
 
             // Redirect to confirmation page
             Tools::redirectLink($redirectTo);
         } elseif (!$paymentRedirection->isSuccessful()) {
-            throw new PaymentException($paymentRedirection->status()->message(), 502);
+            throw new PaymentException($paymentRedirection->status()->message(), 13);
         } elseif (!$order) {
-            throw new PaymentException('Order not found: ' . $cartId, 503);
+            throw new PaymentException('Order not found: ' . $cartId, 14);
         } else {
-            throw new PaymentException('Un-know error in process payment', 504);
+            throw new PaymentException('Un-know error in process payment', 99);
         }
     }
 
@@ -1886,7 +1861,7 @@ class PaymentMethod extends PaymentModule
             ");
             }
         } catch (Exception $e) {
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 701, $e->getMessage()));
+            PaymentLogger::log($e->getMessage(), PaymentLogger::WARNING, 15, $e->getFile(), $e->getLine());
         }
 
         return !empty($rows[0]) ? $rows[0] : false;
@@ -2062,13 +2037,13 @@ class PaymentMethod extends PaymentModule
     public function hookPaymentReturn($params)
     {
         if (isDebugEnable()) {
-            PaymentLogger::log(sprintf(
-                "[%s:%d] => [%d]\n %s",
-                __FILE__,
-                __LINE__,
+            PaymentLogger::log(
+                'Trigger ' . __METHOD__ . ' en PS vr. ' . _PS_VERSION_,
+                PaymentLogger::DEBUG,
                 0,
-                'Trigger ' . __METHOD__ . ' en PS vr. ' . _PS_VERSION_
-            ));
+                __FILE__,
+                __LINE__
+            );
         }
 
         if (!$this->active) {
@@ -2308,16 +2283,13 @@ class PaymentMethod extends PaymentModule
         }
 
         if (!isConsole() && !isDebugEnable()) {
-            $message = sprintf('Only from CLI is available execute this command: %s, aborted', __METHOD__);
+            $message = sprintf(
+                'Only from CLI (used SAPI: %s) is available execute this command: %s, aborted',
+                php_sapi_name(),
+                __METHOD__
+            );
 
-            PaymentLogger::log(sprintf(
-                "[%s:%d] => [%d]\n %s SAPI: %s",
-                __FILE__,
-                __LINE__,
-                0,
-                $message,
-                php_sapi_name()
-            ));
+            PaymentLogger::log($message, PaymentLogger::WARNING, 16, __FILE__, __LINE__);
 
             Tools::redirect('authentication.php?back=order.php');
         }
@@ -2331,7 +2303,7 @@ class PaymentMethod extends PaymentModule
               AND `status` = " . PaymentStatus::PENDING;
 
         if (isDebugEnable()) {
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 0, $sql));
+            PaymentLogger::log($sql, PaymentLogger::DEBUG, 0, __FILE__, __LINE__);
         }
 
         try {
@@ -2367,10 +2339,10 @@ class PaymentMethod extends PaymentModule
                 echo 'Not exists payments pending.' . breakLine();
             }
         } catch (PrestaShopDatabaseException $e) {
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 998, $e->getMessage()));
+            PaymentLogger::log($e->getMessage(), PaymentLogger::ERROR, 99, $e->getFile(), $e->getLine());
             echo 'Error: Module not installed' . breakLine();
         } catch (Exception $e) {
-            PaymentLogger::log(sprintf("[%s:%d] => [%d]\n %s", __FILE__, __LINE__, 999, $e->getMessage()));
+            PaymentLogger::log($e->getMessage(), PaymentLogger::ERROR, 99, $e->getFile(), $e->getLine());
             echo 'Error: ' . $e->getMessage() . breakLine();
         }
 
