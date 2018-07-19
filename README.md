@@ -136,3 +136,25 @@ services:
       # IP Address or name from database to use
       DB_SERVER: my_db
 ```
+
+## Error Code
+
+| Code | Description                                  |
+|------|----------------------------------------------|
+| 1    | Create payments table fail                   |
+| 2    | Add email column fail                        |
+| 3    | Add id_request column fail                   |
+| 4    | Add reference column fail                    |
+| 5    | Update ipaddres column fail                  |
+| 6    | Login and TranKey not is set                 |
+| 7    | Payment not allowed by pending transactions  |
+| 8    | Payment process fail                         |
+| 9    | Reference (encrypt) not found                |
+| 10   | Reference (decrypt) not found                |
+| 11   | Id Request (decrypt) not found               |
+| 12   | Try to change payment without status PENDING |
+| 13   | PlacetoPay connection fail                   |
+| 14   | Order related with payment not found         |
+| 15   | Get payment in payment table fail            |
+| 16   | Command not available in this context        |
+| 99   | Un-known error, module not installed?        |
