@@ -2371,7 +2371,11 @@ class PaymentMethod extends PaymentModule
     {
         $setup = $this->ll('Configuration') . breakLine();
         $setup .= sprintf('PHP [%s]', PHP_VERSION) . breakLine();
-        $setup .= sprintf('PrestaShop [%s]', _PS_VERSION_) . breakLine();
+        $setup .= sprintf(
+            'PrestaShop [%s] in %s mode' . breakLine(),
+            _PS_VERSION_,
+            isDebugEnable() ? 'DEBUG' : 'PRODUCTION'
+        );
         $setup .= sprintf('Plugin [%s]', $this->getPluginVersion()) . breakLine();
         $setup .= sprintf('URL Base [%s]', $this->getUrl('')) . breakLine();
         $setup .= sprintf('%s [%s]', $this->ll('Country'), $this->getCountry()) . breakLine();
@@ -2398,9 +2402,24 @@ class PaymentMethod extends PaymentModule
         $setup .= sprintf(
             '%s [%s]' . breakLine(),
             $this->ll('Allow buy with pending payments?'),
-            $this->getAllowBuyWithPendingPayments()
+            $this->getAllowBuyWithPendingPayments() ? $this->ll('Yes') : $this->ll('No')
         );
-        $setup .= sprintf('%s [%s]', $this->ll('Skip result?'), $this->getSkipResult()) . breakLine();
+        $setup .= sprintf(
+            '%s [%s]' . breakLine(),
+            $this->ll('Fill TAX information?'),
+            $this->getFillTaxInformation() ? $this->ll('Yes') : $this->ll('No')
+        );
+        $setup .= sprintf(
+            '%s [%s]' . breakLine(),
+            $this->ll('Fill buyer information?'),
+            $this->getFillTaxInformation() ? $this->ll('Yes') : $this->ll('No')
+        );
+        $setup .= sprintf(
+            '%s [%s]' . breakLine(),
+            $this->ll('Skip result?'),
+            $this->getSkipResult() ? $this->ll('Yes') : $this->ll('No')
+        );
+
         $setup .= breakLine();
 
         return $setup;
