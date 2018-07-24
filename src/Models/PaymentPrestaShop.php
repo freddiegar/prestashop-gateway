@@ -1507,7 +1507,7 @@ class PaymentPrestaShop extends PaymentModule
         }
 
         if (!CurrencyValidator::isValidCurrency($currency->iso_code)) {
-            $message = sprintf('Currency ISO Code %s is not supported by PlacetoPay', $currency->iso_code);
+            $message = sprintf('Currency ISO Code [%s] is not supported by PlacetoPay', $currency->iso_code);
             throw new PaymentException($message, 304);
         }
 
