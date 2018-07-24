@@ -13,6 +13,7 @@ use Customer;
 use Db;
 use Dnetix\Redirection\Message\Notification;
 use Dnetix\Redirection\Message\RedirectInformation;
+use Dnetix\Redirection\Validators\Currency as CurrencyValidator;
 use Exception;
 use HelperForm;
 use Language;
@@ -837,6 +838,7 @@ class PaymentPrestaShop extends PaymentModule
                         'multiple' => true,
                         'label' => $this->ll('Payment methods enabled'),
                         'name' => $this->getNameInMultipleFormat(self::PAYMENT_METHODS_ENABLED),
+                        'id' => self::PAYMENT_METHODS_ENABLED,
                         // @codingStandardsIgnoreLine
                         'desc' => $this->ll('IMPORTANT: Payment methods in PlacetoPay will restrict by this selection. [Ctrl + Clic] to select several'),
                         'options' => [
@@ -1502,6 +1504,11 @@ class PaymentPrestaShop extends PaymentModule
 
         if (!Validate::isLoadedObject($currency)) {
             throw new PaymentException('Invalid currency', 303);
+        }
+
+        if (!CurrencyValidator::isValidCurrency($currency->iso_code)) {
+            $message = sprintf('Currency ISO Code %s is not supported by PlacetoPay', $currency->iso_code);
+            throw new PaymentException($message, 304);
         }
 
         $deliveryCountry = new Country((int)($deliveryAddress->id_country));

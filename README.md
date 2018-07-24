@@ -164,6 +164,7 @@ services:
 | 301  | Customer is not loaded                         |
 | 302  | Address is not loaded                          |
 | 303  | Currency is not loaded                         |
+| 304  | Currency is not supported by PlacetoPay        |
 | 401  | Create payment PlacetoPay is failed            |
 | 501  | Payload notification PlacetoPay not is valid   |
 | 601  | Update status payment PlacetoPay fail          |
