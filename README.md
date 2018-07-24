@@ -137,24 +137,36 @@ services:
       DB_SERVER: my_db
 ```
 
-## Error Code
+## Error Codes
 
-| Code | Description                                  |
-|------|----------------------------------------------|
-| 1    | Create payments table fail                   |
-| 2    | Add email column fail                        |
-| 3    | Add id_request column fail                   |
-| 4    | Add reference column fail                    |
-| 5    | Update ipaddres column fail                  |
-| 6    | Login and TranKey not is set                 |
-| 7    | Payment not allowed by pending transactions  |
-| 8    | Payment process fail                         |
-| 9    | Reference (encrypt) not found                |
-| 10   | Reference (decrypt) not found                |
-| 11   | Id Request (decrypt) not found               |
-| 12   | Try to change payment without status PENDING |
-| 13   | PlacetoPay connection fail                   |
-| 14   | Order related with payment not found         |
-| 15   | Get payment in payment table fail            |
-| 16   | Command not available in this context        |
-| 99   | Un-known error, module not installed?        |
+| Code | Description                                    |
+|------|------------------------------------------------|
+| 1    | Create payments table is failed                |
+| 2    | Add email column is failed                     |
+| 3    | Add id_request column is failed                |
+| 4    | Add reference column is failed                 |
+| 5    | Update ipaddres column is failed               |
+| 6    | Login and TranKey is not set                   |
+| 7    | Payment is not allowed by pending transactions |
+| 8    | Payment process is failed                      |
+| 9    | Reference (encrypt) is not found               |
+| 10   | Reference (decrypt) is not found               |
+| 11   | Id Request (decrypt) is not found              |
+| 12   | Try to change payment without status PENDING   |
+| 13   | PlacetoPay connection is failed                |
+| 14   | Order related with payment not found           |
+| 15   | Get payment in payment table is failed         |
+| 16   | Command not available in this context          |
+| 99   | Un-known error, module not installed?          |
+| 100  | Install process is failed                      |
+| 201  | Order id is not found                          |
+| 202  | Order id is not loaded                         |
+| 301  | Customer is not loaded                         |
+| 302  | Address is not loaded                          |
+| 303  | Currency is not loaded                         |
+| 304  | Currency is not supported by PlacetoPay        |
+| 401  | Create payment PlacetoPay is failed            |
+| 501  | Payload notification PlacetoPay not is valid   |
+| 601  | Update status payment PlacetoPay fail          |
+| 801  | Get order by id is failed                      |
+| 901  | Get last pending transaction is failed         |

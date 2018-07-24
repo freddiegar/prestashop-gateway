@@ -34,7 +34,7 @@ class PaymentLogger
     ) {
         $format = sprintf("[%s:%d] => [%d]\n %s", $file, $line, $errorCode, $message);
 
-        self::getLogInstance()->log($format, $severity);
+        self::getLogInstance()->log($format, $severity, $errorCode);
 
         if ($severity >= self::WARNING) {
             self::logInDatabase($message, $severity, $errorCode);
@@ -51,7 +51,7 @@ class PaymentLogger
      */
     public static function logInDatabase($message, $severity = self::INFO, $errorCode = null)
     {
-        PrestaShopLogger::addLog($message, $severity, $errorCode, getModuleName(), 999);
+        PrestaShopLogger::addLog($message, $severity, $errorCode, getModuleName(), $errorCode > 0 ? $errorCode : 999);
 
         return true;
     }

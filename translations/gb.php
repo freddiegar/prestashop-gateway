@@ -54,6 +54,9 @@ $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_5d5c4a24285e79624af97
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_08fc2add263dba5610ca59b67ec43346'] = 'Failed payment';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_842defa666a224eda21bb1a0e9800bef'] = 'Rejected payment';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_8a644475a8ff34cd3e78f91386fbcecb'] = 'No information';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_b09f3a4de8a82e9b5779561e30cdce69'] = 'Payment methods enabled';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_4acada81dbd1d69e35f77da728da419c'] = 'IMPORTANT: Payment methods in PlacetoPay will restrict by this selection. [Ctrl + Clic] to select several';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_b1c94ca2fbc3e78fc30069c8d0f01680'] = 'All';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_c9cc8cce247e49bae79f15173ce97354'] = 'Save';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_93cba07454f06a4a960172bbd6e2a435'] = 'Yes';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_bafd7322c6e97d25b6299b5d6fe8920b'] = 'No';
@@ -134,5 +137,6 @@ $_MODULE['<{placetopaypayment}prestashop>payment_2de28d215e20c116e73d869aa84a2e0
 $_MODULE['<{placetopaypayment}prestashop>payment_c4ebf5f6191ec97d7a281f4c301c8656'] = 'TRANSUNION S.A';
 $_MODULE['<{placetopaypayment}prestashop>payment_7dd7734f1843fede04855fe5039ed1bd'] = ', generating a';
 $_MODULE['<{placetopaypayment}prestashop>payment_2830ccf15fbef7fa3077e861dfc58b7c'] = 'consultation trace.';
+// PS <= 1.7
 $_MODULE['<{placetopaypayment}prestashop>brand_payment_bca22c1fc0054ffe1b1fef823dbb2318'] = 'Pay with PlacetoPay';
 $_MODULE['<{placetopaypayment}prestashop>brand_payment_f77653895afd18bd2b51465e1304e7ed'] = 'PlacetoPay secure web site will be displayed when you select this payment method.';
