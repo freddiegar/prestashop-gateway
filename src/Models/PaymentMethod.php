@@ -1391,10 +1391,6 @@ class PaymentMethod extends PaymentModule
         $baseUrl = Context::getContext()->shop->getBaseURL(true);
         $url = $baseUrl . 'modules/' . getModuleName() . '/' . $page . $params;
 
-        if (isDebugEnable()) {
-            PaymentLogger::log('Full URL: ' . $baseUrl, PaymentLogger::DEBUG, 0, __FILE__, __LINE__);
-        }
-
         return $url;
     }
 
@@ -1563,27 +1559,24 @@ class PaymentMethod extends PaymentModule
                 PaymentLogger::log(print_r($paymentRedirection, true), PaymentLogger::DEBUG, 0, __FILE__, __LINE__);
             }
 
-            $connectionIsOk = !empty($paymentRedirection->status());
+            $orderMessage = $paymentRedirection->status()->message();
 
-            if ($connectionIsOk && $paymentRedirection->isSuccessful()) {
+            if ($paymentRedirection->isSuccessful()) {
                 $requestId = $paymentRedirection->requestId();
                 $status = PaymentStatus::PENDING;
                 // Redirect to payment:
                 $redirectTo = $paymentRedirection->processUrl();
             } else {
-                $status = PaymentStatus::FAILED;
                 $totalAmount = 0;
+                $status = PaymentStatus::FAILED;
                 // Redirect to error:
                 $redirectTo = $urlOrderStatus;
 
                 $this->updateCurrentOrderWithError();
+
+                PaymentLogger::log($orderMessage, PaymentLogger::WARNING, 0, __FILE__, __LINE__);
             }
 
-            $orderMessage = !$connectionIsOk
-                ? sprintf(
-                    'Error in connection with %s service, please you check this URL is valid and exist',
-                    $this->getUri()
-                ) : $paymentRedirection->status()->message();
 
             // Register payment request
             $this->insertPaymentPlaceToPay(
@@ -1597,7 +1590,7 @@ class PaymentMethod extends PaymentModule
                 $reference
             );
 
-            if (!$connectionIsOk || isDebugEnable()) {
+            if (isDebugEnable()) {
                 $message = sprintf('[%d => %s] Redirecting flow to: %s', $status, $orderMessage, $redirectTo);
                 PaymentLogger::log($message, PaymentLogger::INFO, 0, __FILE__, __LINE__);
             }
@@ -1606,7 +1599,7 @@ class PaymentMethod extends PaymentModule
             Tools::redirectLink($redirectTo);
         } catch (Exception $e) {
             $message = $e->getMessage();
-            PaymentLogger::log($message, PaymentLogger::WARNING, 8, __FILE__, __LINE__);
+            PaymentLogger::log($message, PaymentLogger::WARNING, 8, $e->getFile(), $e->getLine());
 
             Tools::redirect($urlOrderStatus);
         }
