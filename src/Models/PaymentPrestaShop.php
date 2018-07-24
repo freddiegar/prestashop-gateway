@@ -111,9 +111,6 @@ class PaymentPrestaShop extends PaymentModule
 
     const MIN_VERSION_PS = '1.6.0.5';
 
-    private $formHtml = '';
-    private $formErrors = [];
-
     /**
      * @var string
      */
@@ -476,59 +473,61 @@ class PaymentPrestaShop extends PaymentModule
      */
     public function getContent()
     {
-        $this->formHtml .= $this->displayConfiguration();
+        $contentExtra = '';
 
         if (Tools::isSubmit('submitPlacetoPayConfiguration')) {
-            $this->formValidation();
-            if (count($this->formErrors) == 0) {
+            $formErrors = $this->formValidation();
+
+            if (count($formErrors) == 0) {
                 $this->formProcess();
+
+                $contentExtra = $this->displayConfirmation($this->ll('PlacetoPay settings updated'));
             } else {
-                $this->formHtml .= $this->showError($this->formErrors);
+                $contentExtra = $this->showError($formErrors);
             }
-        } else {
-            $this->formHtml .= '<br />';
         }
 
-        $this->formHtml .= $this->renderForm();
-
-        return $this->formHtml;
+        return $contentExtra . $this->displayConfiguration() . $this->renderForm();
     }
 
     /**
      * Validation data from post settings form
+     * @return array
      */
     protected function formValidation()
     {
+        $formErrors = [];
+
         if (Tools::isSubmit('submitPlacetoPayConfiguration')) {
             // Company data
             if (!Tools::getValue(self::COMPANY_DOCUMENT)) {
-                $this->formErrors[] = sprintf('%s %s', $this->ll('Merchant ID'), $this->ll('is required.'));
+                $formErrors[] = sprintf('%s %s', $this->ll('Merchant ID'), $this->ll('is required.'));
             }
 
             if (!Tools::getValue(self::COMPANY_NAME)) {
-                $this->formErrors[] = sprintf('%s %s', $this->ll('Legal Name'), $this->ll('is required.'));
+                $formErrors[] = sprintf('%s %s', $this->ll('Legal Name'), $this->ll('is required.'));
             }
 
             if (!Tools::getValue(self::EMAIL_CONTACT)) {
-                $this->formErrors[] = sprintf('%s %s', $this->ll('Email contact'), $this->ll('is required.'));
+                $formErrors[] = sprintf('%s %s', $this->ll('Email contact'), $this->ll('is required.'));
             } elseif (filter_var(Tools::getValue(self::EMAIL_CONTACT), FILTER_VALIDATE_EMAIL) === false) {
-                $this->formErrors[] = sprintf('%s %s', $this->ll('Email contact'), $this->ll('is not valid.'));
+                $formErrors[] = sprintf('%s %s', $this->ll('Email contact'), $this->ll('is not valid.'));
             }
 
             if (!Tools::getValue(self::TELEPHONE_CONTACT)) {
-                $this->formErrors[] = sprintf('%s %s', $this->ll('Telephone contact'), $this->ll('is required.'));
+                $formErrors[] = sprintf('%s %s', $this->ll('Telephone contact'), $this->ll('is required.'));
             }
 
             if (!Tools::getValue(self::DESCRIPTION)) {
-                $this->formErrors[] = sprintf('%s %s', $this->ll('Payment description'), $this->ll('is required.'));
+                $formErrors[] = sprintf('%s %s', $this->ll('Payment description'), $this->ll('is required.'));
             }
 
             // Configuration Connection
             if (!Tools::getValue(self::EXPIRATION_TIME_MINUTES)) {
-                $this->formErrors[] = sprintf('%s %s', $this->ll('Expiration time to pay'), $this->ll('is required.'));
+                $formErrors[] = sprintf('%s %s', $this->ll('Expiration time to pay'), $this->ll('is required.'));
             } elseif (filter_var(Tools::getValue(self::EXPIRATION_TIME_MINUTES), FILTER_VALIDATE_INT) === false
                 || Tools::getValue(self::EXPIRATION_TIME_MINUTES) < self::EXPIRATION_TIME_MINUTES_MIN) {
-                $this->formErrors[] = sprintf(
+                $formErrors[] = sprintf(
                     '%s %s (min %d)',
                     $this->ll('Expiration time to pay'),
                     $this->ll('is not valid.'),
@@ -537,28 +536,30 @@ class PaymentPrestaShop extends PaymentModule
             }
 
             if (!Tools::getValue(self::COUNTRY)) {
-                $this->formErrors[] = sprintf('%s %s', $this->ll('Country'), $this->ll('is required.'));
+                $formErrors[] = sprintf('%s %s', $this->ll('Country'), $this->ll('is required.'));
             }
 
             if (!Tools::getValue(self::ENVIRONMENT)) {
-                $this->formErrors[] = sprintf('%s %s', $this->ll('Environment'), $this->ll('is required.'));
+                $formErrors[] = sprintf('%s %s', $this->ll('Environment'), $this->ll('is required.'));
             } elseif (Tools::getValue(self::ENVIRONMENT) === Environment::CUSTOM
                 && filter_var(Tools::getValue(self::CUSTOM_CONNECTION_URL), FILTER_VALIDATE_URL) === false) {
-                $this->formErrors[] = sprintf('%s %s', $this->ll('Custom connection URL'), $this->ll('is not valid.'));
+                $formErrors[] = sprintf('%s %s', $this->ll('Custom connection URL'), $this->ll('is not valid.'));
             }
 
             if (!Tools::getValue(self::LOGIN)) {
-                $this->formErrors[] = sprintf('%s %s', $this->ll('Login'), $this->ll('is required.'));
+                $formErrors[] = sprintf('%s %s', $this->ll('Login'), $this->ll('is required.'));
             }
 
             if (empty($this->getCurrentValueOf(self::TRAN_KEY)) && !Tools::getValue(self::TRAN_KEY)) {
-                $this->formErrors[] = sprintf('%s %s', $this->ll('Trankey'), $this->ll('is required.'));
+                $formErrors[] = sprintf('%s %s', $this->ll('Trankey'), $this->ll('is required.'));
             }
 
             if (!Tools::getValue(self::CONNECTION_TYPE)) {
-                $this->formErrors[] = sprintf('%s %s', $this->ll('Connection type'), $this->ll('is required.'));
+                $formErrors[] = sprintf('%s %s', $this->ll('Connection type'), $this->ll('is required.'));
             }
         }
+
+        return $formErrors;
     }
 
     /**
@@ -609,8 +610,6 @@ class PaymentPrestaShop extends PaymentModule
 
             Configuration::updateValue(self::CONNECTION_TYPE, Tools::getValue(self::CONNECTION_TYPE));
         }
-
-        $this->formHtml .= $this->displayConfirmation($this->ll('PlacetoPay settings updated'));
     }
 
     /**
@@ -1021,7 +1020,7 @@ class PaymentPrestaShop extends PaymentModule
 
         if (!$this->isSetCredentials()) {
             PaymentLogger::log(
-                'Error, set your credentials to used PlacetoPay Payment Module',
+                $this->ll('You need to configure your PlacetoPay account before using this module.'),
                 PaymentLogger::WARNING,
                 6,
                 __FILE__,
@@ -1093,7 +1092,7 @@ class PaymentPrestaShop extends PaymentModule
 
         if (!$this->isSetCredentials()) {
             PaymentLogger::log(
-                'Error, set your credentials to used PlacetoPay Payment Module',
+                $this->ll('You need to configure your PlacetoPay account before using this module.'),
                 PaymentLogger::WARNING,
                 6,
                 __FILE__,
@@ -2538,7 +2537,7 @@ class PaymentPrestaShop extends PaymentModule
     }
 
     /**
-     * @param $name
+     * @param string $name
      * @return mixed|string
      */
     private function getCurrentValueOf($name)
@@ -2556,6 +2555,7 @@ class PaymentPrestaShop extends PaymentModule
     {
         $currency_order = new Currency($cart->id_currency);
         $currencies_module = $this->getCurrency($cart->id_currency);
+
         if (is_array($currencies_module)) {
             foreach ($currencies_module as $currency_module) {
                 if ($currency_order->id == $currency_module['id_currency']) {
@@ -2563,6 +2563,7 @@ class PaymentPrestaShop extends PaymentModule
                 }
             }
         }
+
         return false;
     }
 
