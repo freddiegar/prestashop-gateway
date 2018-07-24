@@ -22,16 +22,17 @@ use OrderState;
 use PaymentModule;
 use PlacetoPay\Constants\CountryCode;
 use PlacetoPay\Constants\Environment;
+use PlacetoPay\Constants\PaymentMethod;
 use PlacetoPay\Constants\PaymentStatus;
 use PlacetoPay\Constants\PaymentUrl;
 use PlacetoPay\Exceptions\PaymentException;
 use PlacetoPay\Loggers\PaymentLogger;
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
+use PrestaShopDatabaseException;
 use Shop;
 use State;
 use Tools;
 use Validate;
-use PrestaShopDatabaseException;
 
 /**
  * Class PlaceToPayPaymentMethod
@@ -59,7 +60,7 @@ use PrestaShopDatabaseException;
  * @property string tab
  * @property string author
  */
-class PaymentMethod extends PaymentModule
+class PaymentPrestaShop extends PaymentModule
 {
     /**
      * Configuration module vars
@@ -77,6 +78,7 @@ class PaymentMethod extends PaymentModule
     const FILL_TAX_INFORMATION = 'PLACETOPAY_FILL_TAX_INFORMATION';
     const FILL_BUYER_INFORMATION = 'PLACETOPAY_FILL_BUYER_INFORMATION';
     const SKIP_RESULT = 'PLACETOPAY_SKIP_RESULT';
+    const PAYMENT_METHODS_ENABLED = 'PLACETOPAY_PAYMENT_METHODS_ENABLED';
     const STOCK_REINJECT = 'PLACETOPAY_STOCKREINJECT';
 
     const COUNTRY = 'PLACETOPAY_COUNTRY';
@@ -98,6 +100,8 @@ class PaymentMethod extends PaymentModule
 
     const OPTION_ENABLED = '1';
     const OPTION_DISABLED = '0';
+
+    const PAYMENT_METHODS_ENABLED_DEFAULT = 'ALL';
 
     const ORDER_STATE = 'PS_OS_PLACETOPAY';
 
@@ -239,6 +243,7 @@ class PaymentMethod extends PaymentModule
         Configuration::updateValue(self::FILL_TAX_INFORMATION, self::OPTION_ENABLED);
         Configuration::updateValue(self::FILL_BUYER_INFORMATION, self::OPTION_ENABLED);
         Configuration::updateValue(self::SKIP_RESULT, self::OPTION_DISABLED);
+        Configuration::updateValue(self::PAYMENT_METHODS_ENABLED, self::PAYMENT_METHODS_ENABLED_DEFAULT);
 
         if (versionComparePlaceToPay('1.7.0.0', '<')) {
             Configuration::updateValue(self::STOCK_REINJECT, self::OPTION_ENABLED);
@@ -275,6 +280,7 @@ class PaymentMethod extends PaymentModule
             || !Configuration::deleteByName(self::FILL_TAX_INFORMATION)
             || !Configuration::deleteByName(self::FILL_BUYER_INFORMATION)
             || !Configuration::deleteByName(self::SKIP_RESULT)
+            || !Configuration::deleteByName(self::PAYMENT_METHODS_ENABLED)
 
             || !Configuration::deleteByName(self::COUNTRY)
             || !Configuration::deleteByName(self::ENVIRONMENT)
@@ -517,6 +523,7 @@ class PaymentMethod extends PaymentModule
                 $this->formErrors[] = sprintf('%s %s', $this->ll('Payment description'), $this->ll('is required.'));
             }
 
+            // Configuration Connection
             if (!Tools::getValue(self::EXPIRATION_TIME_MINUTES)) {
                 $this->formErrors[] = sprintf('%s %s', $this->ll('Expiration time to pay'), $this->ll('is required.'));
             } elseif (filter_var(Tools::getValue(self::EXPIRATION_TIME_MINUTES), FILTER_VALIDATE_INT) === false
@@ -529,7 +536,6 @@ class PaymentMethod extends PaymentModule
                 );
             }
 
-            // Configuration Connection
             if (!Tools::getValue(self::COUNTRY)) {
                 $this->formErrors[] = sprintf('%s %s', $this->ll('Country'), $this->ll('is required.'));
             }
@@ -578,6 +584,10 @@ class PaymentMethod extends PaymentModule
             Configuration::updateValue(self::FILL_TAX_INFORMATION, Tools::getValue(self::FILL_TAX_INFORMATION));
             Configuration::updateValue(self::FILL_BUYER_INFORMATION, Tools::getValue(self::FILL_BUYER_INFORMATION));
             Configuration::updateValue(self::SKIP_RESULT, Tools::getValue(self::SKIP_RESULT));
+            Configuration::updateValue(self::PAYMENT_METHODS_ENABLED, PaymentMethod::getPaymentMethodsSelected(
+                Tools::getValue(self::PAYMENT_METHODS_ENABLED),
+                Tools::getValue(self::COUNTRY)
+            ));
 
             if (versionComparePlaceToPay('1.7.0.0', '<')) {
                 Configuration::updateValue(self::STOCK_REINJECT, Tools::getValue(self::STOCK_REINJECT));
@@ -695,6 +705,9 @@ class PaymentMethod extends PaymentModule
             self::FILL_TAX_INFORMATION => $this->getFillTaxInformation(),
             self::FILL_BUYER_INFORMATION => $this->getFillBuyerInformation(),
             self::SKIP_RESULT => $this->getSkipResult(),
+            $this->getNameInMultipleFormat(self::PAYMENT_METHODS_ENABLED) => PaymentMethod::toArray(
+                $this->getPaymentMethodsEnabled()
+            ),
 
             self::COUNTRY => $this->getCountry(),
             self::ENVIRONMENT => $this->getEnvironment(),
@@ -830,6 +843,19 @@ class PaymentMethod extends PaymentModule
                         'name' => self::SKIP_RESULT,
                         'is_bool' => true,
                         'values' => $this->getListOptionSwitch(),
+                    ],
+                    [
+                        'type' => 'select',
+                        'multiple' => true,
+                        'label' => $this->ll('Payment methods enabled'),
+                        'name' => $this->getNameInMultipleFormat(self::PAYMENT_METHODS_ENABLED),
+                        // @codingStandardsIgnoreLine
+                        'desc' => $this->ll('IMPORTANT: Payment methods in PlacetoPay will restrict by this selection. [Ctrl + Clic] to select several'),
+                        'options' => [
+                            'id' => 'value',
+                            'name' => 'label',
+                            'query' => $this->getListOptionPaymentMethods(),
+                        ]
                     ],
                     $compatibility_1_6,
                 ],
@@ -1374,6 +1400,22 @@ class PaymentMethod extends PaymentModule
     }
 
     /**
+     * @return string
+     */
+    private function getPaymentMethodsEnabled()
+    {
+        $paymentMethods = $this->getCurrentValueOf(self::PAYMENT_METHODS_ENABLED);
+
+        if (is_array($paymentMethods)) {
+            $paymentMethods = PaymentMethod::toString($paymentMethods);
+        }
+
+        return empty($paymentMethods)
+            ? self::PAYMENT_METHODS_ENABLED_DEFAULT
+            : $paymentMethods;
+    }
+
+    /**
      * @return mixed
      */
     private function getOrderState()
@@ -1547,6 +1589,13 @@ class PaymentMethod extends PaymentModule
                         'base' => $totalAmount - $taxAmount,
                     ]
                 ];
+            }
+
+            $paymentMethods = $this->getPaymentMethodsEnabled();
+
+            if (!empty($paymentMethods) && $paymentMethods != self::PAYMENT_METHODS_ENABLED_DEFAULT) {
+                // Disable payment method except
+                $request['paymentMethod'] = $paymentMethods;
             }
 
             if (isDebugEnable()) {
@@ -2412,6 +2461,11 @@ class PaymentMethod extends PaymentModule
             $this->ll('Skip result?'),
             $this->getSkipResult() ? $this->ll('Yes') : $this->ll('No')
         );
+        $setup .= sprintf(
+            '%s [%s]' . breakLine(),
+            $this->ll('Payment methods enabled'),
+            $this->getPaymentMethodsEnabled()
+        );
 
         $setup .= breakLine();
 
@@ -2458,6 +2512,29 @@ class PaymentMethod extends PaymentModule
                 'label' => $this->ll('No'),
             ]
         ];
+    }
+
+    /**
+     * Options payment methods
+     * @return array
+     */
+    private function getListOptionPaymentMethods()
+    {
+        $options = [];
+
+        $options[] = [
+            'value' => self::PAYMENT_METHODS_ENABLED_DEFAULT,
+            'label' => $this->ll('All'),
+        ];
+
+        foreach (PaymentMethod::getPaymentMethodsAvailable($this->getCountry()) as $code => $name) {
+            $options[] = [
+                'value' => $code,
+                'label' => $name,
+            ];
+        }
+
+        return $options;
     }
 
     /**
@@ -2552,5 +2629,14 @@ class PaymentMethod extends PaymentModule
             $this->getUri(),
             $this->getConnectionType()
         );
+    }
+
+    /**
+     * @param $name
+     * @return string
+     */
+    private function getNameInMultipleFormat($name)
+    {
+        return sprintf('%s[]', $name);
     }
 }
