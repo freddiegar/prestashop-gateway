@@ -24,6 +24,7 @@
 {l s='Allow buy with pending payments?' mod='placetopaypayment'}
 {l s='Fill TAX information?' mod='placetopaypayment'}
 {l s='Fill buyer information?' mod='placetopaypayment'}
+{l s='Skip result?' mod='placetopaypayment'}
 {l s='Configuration Connection' mod='placetopaypayment'}
 {l s='Country' mod='placetopaypayment'}
 {l s='Colombia' mod='placetopaypayment'}
@@ -55,6 +56,9 @@
 {l s='Environment' mod='placetopaypayment'}
 {l s='Connection type' mod='placetopaypayment'}
 {l s='Allow buy with pending payments?' mod='placetopaypayment'}
+{l s='Payment methods enabled' mod='placetopaypayment'}
+{l s='IMPORTANT: Payment methods in PlacetoPay will restrict by this selection. [Ctrl + Clic] to select several' mod='placetopaypayment'}
+{l s='All' mod='placetopaypayment'}
 {l s='Save' mod='placetopaypayment'}
 {l s='Yes' mod='placetopaypayment'}
 {l s='No' mod='placetopaypayment'}

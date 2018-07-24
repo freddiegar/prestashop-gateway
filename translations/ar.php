@@ -54,6 +54,9 @@ $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_5d5c4a24285e79624af97
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_08fc2add263dba5610ca59b67ec43346'] = 'Pago fallido';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_842defa666a224eda21bb1a0e9800bef'] = 'Pago rechazado';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_8a644475a8ff34cd3e78f91386fbcecb'] = 'Sin información';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_b09f3a4de8a82e9b5779561e30cdce69'] = 'Métodos de pago habilitados';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_4acada81dbd1d69e35f77da728da419c'] = 'IMPORTANTE: Los métodos de pago en PlacetoPay serán restringidos por esta selección. Usa [Ctrl + Clic] para seleccionar varios';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_b1c94ca2fbc3e78fc30069c8d0f01680'] = 'Todos';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_c9cc8cce247e49bae79f15173ce97354'] = 'Guardar';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_93cba07454f06a4a960172bbd6e2a435'] = 'Si';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_bafd7322c6e97d25b6299b5d6fe8920b'] = 'No';
@@ -134,5 +137,6 @@ $_MODULE['<{placetopaypayment}prestashop>payment_2de28d215e20c116e73d869aa84a2e0
 $_MODULE['<{placetopaypayment}prestashop>payment_c4ebf5f6191ec97d7a281f4c301c8656'] = 'TRANSUNION S.A';
 $_MODULE['<{placetopaypayment}prestashop>payment_7dd7734f1843fede04855fe5039ed1bd'] = ', generándose';
 $_MODULE['<{placetopaypayment}prestashop>payment_2830ccf15fbef7fa3077e861dfc58b7c'] = 'una huella de la consulta.';
+// PS <= 1.7
 $_MODULE['<{placetopaypayment}prestashop>brand_payment_bca22c1fc0054ffe1b1fef823dbb2318'] = 'Paga con PlacetoPay';
 $_MODULE['<{placetopaypayment}prestashop>brand_payment_f77653895afd18bd2b51465e1304e7ed'] = 'Puedes pagar usando tus tarjetas crédito o débito de forma rápida y segura.';
