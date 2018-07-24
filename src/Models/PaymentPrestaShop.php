@@ -187,73 +187,66 @@ class PaymentPrestaShop extends PaymentModule
      * Create payments table and status order
      *
      * @return bool
-     * @throws PaymentException
      */
     public function install()
     {
-        switch (true) {
-            case !parent::install():
-                throw new PaymentException('Error on install', 101);
-            case !$this->createPaymentTable():
-                throw new PaymentException('Error on install creating table', 102);
-            case !$this->createOrderState():
-                throw new PaymentException('Error on install creating status', 103);
-            case !$this->alterColumnIpAddress():
-                throw new PaymentException('Error on install adding IP Address column', 104);
-            case !$this->addColumnEmail():
-                throw new PaymentException('Error on install adding email column', 105);
-            case !$this->addColumnRequestId():
-                throw new PaymentException('Error on install adding request id column', 106);
-            case !$this->addColumnReference():
-                throw new PaymentException('Error on install adding reference column', 107);
-            case !$this->registerHook('paymentReturn'):
-                throw new PaymentException('Error on install registering paymentReturn hook', 108);
-                break;
+        $error = '';
+
+        if (!parent::install()
+            || !$this->createPaymentTable()
+            || !$this->createOrderState()
+            || !$this->alterColumnIpAddress()
+            || !$this->addColumnEmail()
+            || !$this->addColumnRequestId()
+            || !$this->addColumnReference()
+        ) {
+            $error = 'Error on install module';
         }
 
-        $hookPaymentName = 'payment';
-
-        if (versionComparePlaceToPay('1.7.0.0', '>=')) {
-            $hookPaymentName = 'paymentOptions';
+        if (empty($error) && !$this->registerHook('paymentReturn')) {
+            $error = 'Error registering paymentReturn hook';
         }
 
-        if (!$this->registerHook($hookPaymentName)) {
-            throw new PaymentException(sprintf('Error on install registering %s hook', $hookPaymentName), 109);
+        $hookPaymentName = versionComparePlaceToPay('1.7.0.0', '>=') ? 'paymentOptions' : 'payment';
+
+        if (empty($error) && !$this->registerHook($hookPaymentName)) {
+            $error = sprintf('Error on install registering %s hook', $hookPaymentName);
         }
 
-        if (isDebugEnable()) {
-            $message = sprintf('Hook %s was register on PS vr %s', $hookPaymentName, _PS_VERSION_);
-            PaymentLogger::log($message, PaymentLogger::DEBUG, 0, __FILE__, __LINE__);
+        if (empty($error)) {
+            // Default values
+            Configuration::updateValue(self::COMPANY_DOCUMENT, '');
+            Configuration::updateValue(self::COMPANY_NAME, '');
+            Configuration::updateValue(self::EMAIL_CONTACT, '');
+            Configuration::updateValue(self::TELEPHONE_CONTACT, '');
+            Configuration::updateValue(self::DESCRIPTION, 'Pago en PlacetoPay No: %s');
+
+            Configuration::updateValue(self::EXPIRATION_TIME_MINUTES, self::EXPIRATION_TIME_MINUTES_DEFAULT);
+            Configuration::updateValue(self::SHOW_ON_RETURN, self::SHOW_ON_RETURN_PSE_LIST);
+            Configuration::updateValue(self::CIFIN_MESSAGE, self::OPTION_DISABLED);
+            Configuration::updateValue(self::ALLOW_BUY_WITH_PENDING_PAYMENTS, self::OPTION_ENABLED);
+            Configuration::updateValue(self::FILL_TAX_INFORMATION, self::OPTION_ENABLED);
+            Configuration::updateValue(self::FILL_BUYER_INFORMATION, self::OPTION_ENABLED);
+            Configuration::updateValue(self::SKIP_RESULT, self::OPTION_DISABLED);
+            Configuration::updateValue(self::PAYMENT_METHODS_ENABLED, self::PAYMENT_METHODS_ENABLED_DEFAULT);
+
+            if (versionComparePlaceToPay('1.7.0.0', '<')) {
+                Configuration::updateValue(self::STOCK_REINJECT, self::OPTION_ENABLED);
+            }
+
+            Configuration::updateValue(self::COUNTRY, CountryCode::COLOMBIA);
+            Configuration::updateValue(self::ENVIRONMENT, Environment::TEST);
+            Configuration::updateValue(self::CUSTOM_CONNECTION_URL, '');
+            Configuration::updateValue(self::LOGIN, '');
+            Configuration::updateValue(self::TRAN_KEY, '');
+            Configuration::updateValue(self::CONNECTION_TYPE, self::CONNECTION_TYPE_REST);
+
+            return true;
+        } else {
+            PaymentLogger::log($error, PaymentLogger::ERROR, 100, __FILE__, __LINE__);
+
+            return false;
         }
-
-        // Default values
-        Configuration::updateValue(self::COMPANY_DOCUMENT, '');
-        Configuration::updateValue(self::COMPANY_NAME, '');
-        Configuration::updateValue(self::EMAIL_CONTACT, '');
-        Configuration::updateValue(self::TELEPHONE_CONTACT, '');
-        Configuration::updateValue(self::DESCRIPTION, 'Pago en PlacetoPay No: %s');
-
-        Configuration::updateValue(self::EXPIRATION_TIME_MINUTES, self::EXPIRATION_TIME_MINUTES_DEFAULT);
-        Configuration::updateValue(self::SHOW_ON_RETURN, self::SHOW_ON_RETURN_PSE_LIST);
-        Configuration::updateValue(self::CIFIN_MESSAGE, self::OPTION_DISABLED);
-        Configuration::updateValue(self::ALLOW_BUY_WITH_PENDING_PAYMENTS, self::OPTION_ENABLED);
-        Configuration::updateValue(self::FILL_TAX_INFORMATION, self::OPTION_ENABLED);
-        Configuration::updateValue(self::FILL_BUYER_INFORMATION, self::OPTION_ENABLED);
-        Configuration::updateValue(self::SKIP_RESULT, self::OPTION_DISABLED);
-        Configuration::updateValue(self::PAYMENT_METHODS_ENABLED, self::PAYMENT_METHODS_ENABLED_DEFAULT);
-
-        if (versionComparePlaceToPay('1.7.0.0', '<')) {
-            Configuration::updateValue(self::STOCK_REINJECT, self::OPTION_ENABLED);
-        }
-
-        Configuration::updateValue(self::COUNTRY, CountryCode::COLOMBIA);
-        Configuration::updateValue(self::ENVIRONMENT, Environment::TEST);
-        Configuration::updateValue(self::CUSTOM_CONNECTION_URL, '');
-        Configuration::updateValue(self::LOGIN, '');
-        Configuration::updateValue(self::TRAN_KEY, '');
-        Configuration::updateValue(self::CONNECTION_TYPE, self::CONNECTION_TYPE_REST);
-
-        return true;
     }
 
     /**
@@ -345,7 +338,6 @@ class PaymentPrestaShop extends PaymentModule
         } catch (PrestaShopDatabaseException $e) {
             // Column had been to change before
             PaymentLogger::log($e->getMessage(), PaymentLogger::INFO, 0, $e->getFile(), $e->getLine());
-            return true;
         } catch (Exception $e) {
             PaymentLogger::log($e->getMessage(), PaymentLogger::WARNING, 2, $e->getFile(), $e->getLine());
             return false;
@@ -366,7 +358,6 @@ class PaymentPrestaShop extends PaymentModule
         } catch (PrestaShopDatabaseException $e) {
             // Column had been to change before
             PaymentLogger::log($e->getMessage(), PaymentLogger::INFO, 0, $e->getFile(), $e->getLine());
-            return true;
         } catch (Exception $e) {
             PaymentLogger::log($e->getMessage(), PaymentLogger::WARNING, 3, $e->getFile(), $e->getLine());
             return false;
@@ -387,7 +378,6 @@ class PaymentPrestaShop extends PaymentModule
         } catch (PrestaShopDatabaseException $e) {
             // Column had been to change before
             PaymentLogger::log($e->getMessage(), PaymentLogger::INFO, 0, $e->getFile(), $e->getLine());
-            return true;
         } catch (Exception $e) {
             PaymentLogger::log($e->getMessage(), PaymentLogger::WARNING, 4, $e->getFile(), $e->getLine());
             return false;
@@ -409,7 +399,6 @@ class PaymentPrestaShop extends PaymentModule
         } catch (PrestaShopDatabaseException $e) {
             // Column had been to change before
             PaymentLogger::log($e->getMessage(), PaymentLogger::INFO, 0, $e->getFile(), $e->getLine());
-            return true;
         } catch (Exception $e) {
             PaymentLogger::log($e->getMessage(), PaymentLogger::WARNING, 5, $e->getFile(), $e->getLine());
             return false;
@@ -1502,12 +1491,17 @@ class PaymentPrestaShop extends PaymentModule
         $totalAmount = floatval($cart->getOrderTotal(true));
         $taxAmount = floatval($totalAmount - floatval($cart->getOrderTotal(false)));
 
-        if (!Validate::isLoadedObject($customer)
-            || !Validate::isLoadedObject($invoiceAddress)
-            || !Validate::isLoadedObject($deliveryAddress)
-            || !Validate::isLoadedObject($currency)
-        ) {
-            throw new PaymentException('Invalid address or customer', 301);
+        if (!Validate::isLoadedObject($customer)) {
+            throw new PaymentException('Invalid customer', 301);
+        }
+
+        if (!Validate::isLoadedObject($invoiceAddress)
+            || !Validate::isLoadedObject($deliveryAddress)) {
+            throw new PaymentException('Invalid address', 302);
+        }
+
+        if (!Validate::isLoadedObject($currency)) {
+            throw new PaymentException('Invalid currency', 303);
         }
 
         $deliveryCountry = new Country((int)($deliveryAddress->id_country));
@@ -1640,7 +1634,7 @@ class PaymentPrestaShop extends PaymentModule
 
             if (isDebugEnable()) {
                 $message = sprintf('[%d => %s] Redirecting flow to: %s', $status, $orderMessage, $redirectTo);
-                PaymentLogger::log($message, PaymentLogger::INFO, 0, __FILE__, __LINE__);
+                PaymentLogger::log($message, PaymentLogger::DEBUG, 0, __FILE__, __LINE__);
             }
 
             // Redirect flow
@@ -1751,7 +1745,7 @@ class PaymentPrestaShop extends PaymentModule
 
                 $message = 'Notification is not valid, process canceled. Input request:' . PHP_EOL . print_r($input, 1);
 
-                throw new PaymentException($message, 507);
+                throw new PaymentException($message, 501);
             }
 
             $requestId = (int)$input['requestId'];
