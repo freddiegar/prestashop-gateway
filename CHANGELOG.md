@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.4.0] - 2018-07-25
+
+### Added
+- Add payment method selector to restrict in redirection page
+- Add currency validator before request PlacetoPay
+
+### Updated
+- Change alerts, now are show in top of page
+- Save errorCode in log database as objectId and updated error codes
+- Improve logs when connection to service failed
+- Show more configuration in sonda request
+
 ## [3.3.0] - 2018-07-19
 
 ### Added
