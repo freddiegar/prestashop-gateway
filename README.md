@@ -44,7 +44,7 @@ cd /var/www/html/modules/placetopaypayment \
 Install Prestashop 1.6 with PHP 5.6 (and MySQL 5.7). In folder of project;
  
 ```bash
-make install
+make dev-install
 ```
 
 Then... (Please wait ~8 min, while install ALL and load Apache :D to continue), you can go to

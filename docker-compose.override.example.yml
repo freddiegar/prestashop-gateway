@@ -7,8 +7,8 @@ services:
 
   prestashop:
     volumes:
-        # If is necessary add another sources
-        - /var/www/prestashop:/var/www/html
+    # If is necessary add another sources
+    - /var/www/prestashop:/var/www/html
     environment:
       # IP Address from database to use
       DB_SERVER: db

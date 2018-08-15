@@ -8,26 +8,27 @@ services:
       MYSQL_ROOT_PASSWORD: admin
       MYSQL_DATABASE: prestashop
     ports:
-      - ${MYSQL_PORT:-33060}:3306
+    - ${MYSQL_PORT:-33060}:3306
 
   prestashop:
     container_name: plugin_ps_prestashop
     image: prestashop/prestashop:${PS_VERSION:-1.6}
     links:
-      - database
+    - database
     ports:
-      - ${WEB_PORT:-8787}:80
+    - ${WEB_PORT:-8787}:80
     volumes:
-      - .:/var/www/html/modules/placetopaypayment
+    - .:/var/www/html/modules/placetopaypayment
     environment:
       DB_SERVER: database
       PS_DEV_MODE: 1
       PS_INSTALL_AUTO: 1
       PS_DOMAIN: localhost:${WEB_PORT:-8787}
+      PS_COUNTRY: co
       PS_FOLDER_ADMIN: adminstore
       PS_FOLDER_INSTALL: xinstall
       PS_HANDLE_DYNAMIC_DOMAIN: 1
       ADMIN_MAIL: demo@prestashop.com
       ADMIN_PASSWD: prestashop_demo
     depends_on:
-      - database
+    - database

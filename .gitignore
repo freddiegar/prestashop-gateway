@@ -6,3 +6,4 @@ Homestead.yaml
 config*
 .env
 docker-compose.override.yml
+docker-compose.backup.yml

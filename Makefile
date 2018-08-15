@@ -3,25 +3,59 @@ CONTAINER_DB=plugin_ps_database
 CURRENT_FOLDER=$(shell pwd)
 UID=$(shell id -u)
 
+# Persistence commands
+
 .PHONY: config
-config:
+config: restart-override
 	docker-compose config
 
 .PHONY: up
-up:
+up: restart-override
 	docker-compose up -d
 
 .PHONY: down
-down:
+down: restart-override
 	docker-compose down -v
 
 .PHONY: restart
-restart: down up
+restart: dev-down restart-override down up
 
 .PHONY: rebuild
-rebuild: down
+rebuild: dev-down restart-override down
 	docker-compose up -d --build
 	make install
+
+.PHONY: install
+install: dev-down restart-override down up
+	sudo setfacl -dR -m u:www-data:rwX -m u:`whoami`:rwX `pwd`
+	sudo setfacl -R -m u:www-data:rwX -m u:`whoami`:rwX `pwd`
+	composer update
+	make logs-prestashop
+	@echo "That is all!"
+
+# Development commands
+
+.PHONY: dev-config
+dev-config: move-override
+	docker-compose config
+
+.PHONY: dev-up
+dev-up: move-override
+	docker-compose up -d
+
+.PHONY: dev-down
+dev-down: move-override
+	docker-compose down -v
+
+.PHONY: dev-restart
+dev-restart: down move-override dev-down dev-up
+
+.PHONY: dev-rebuild
+dev-rebuild: down move-override dev-down
+	docker-compose up -d --build
+	make dev-install
+
+# Generic commands
 
 .PHONY: bash-prestashop
 bash-prestashop:
@@ -39,13 +73,21 @@ logs-prestashop:
 logs-database:
 	docker logs $(CONTAINER_DB) -f
 
-.PHONY: install
-install: down up
-	sudo setfacl -dR -m u:www-data:rwX -m u:`whoami`:rwX `pwd`
-	sudo setfacl -R -m u:www-data:rwX -m u:`whoami`:rwX `pwd`
-	composer update
-	make logs-prestashop
-	@echo "That is all!"
+# Utils commands
+
+.PHONY: move-override
+move-override:
+	if [ -e docker-compose.override.yml ];\
+	then \
+		mv docker-compose.override.yml docker-compose.backup.yml; \
+	fi;
+
+.PHONY: restart-override
+restart-override:
+	if [ -e docker-compose.backup.yml ];\
+	then \
+		mv docker-compose.backup.yml docker-compose.override.yml; \
+	fi;
 
 .PHONY: compile
 compile:
