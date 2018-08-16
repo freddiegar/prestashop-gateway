@@ -6,27 +6,27 @@ UID=$(shell id -u)
 # Persistence commands
 
 .PHONY: config
-config: restart-override
+config: restore-override
 	docker-compose config
 
 .PHONY: up
-up: restart-override
+up: restore-override
 	docker-compose up -d
 
 .PHONY: down
-down: restart-override
+down: restore-override
 	docker-compose down -v
 
 .PHONY: restart
-restart: dev-down restart-override down up
+restart: dev-down restore-override down up
 
 .PHONY: rebuild
-rebuild: dev-down restart-override down
+rebuild: dev-down restore-override down
 	docker-compose up -d --build
 	make install
 
 .PHONY: install
-install: dev-down restart-override down up
+install: dev-down restore-override down up
 	sudo setfacl -dR -m u:www-data:rwX -m u:`whoami`:rwX `pwd`
 	sudo setfacl -R -m u:www-data:rwX -m u:`whoami`:rwX `pwd`
 	composer update
@@ -82,8 +82,8 @@ move-override:
 		mv docker-compose.override.yml docker-compose.backup.yml; \
 	fi;
 
-.PHONY: restart-override
-restart-override:
+.PHONY: restore-override
+restore-override:
 	if [ -e docker-compose.backup.yml ];\
 	then \
 		mv docker-compose.backup.yml docker-compose.override.yml; \

@@ -137,6 +137,20 @@ services:
       DB_SERVER: my_db
 ```
 
+## Email
+
+Change email configuration to [mailtrap.io](https://mailtrap.io/)
+
+```mysql
+USE prestashop;
+
+UPDATE ps_configuration SET value='smtp.mailtrap.io' where name = 'PS_MAIL_SERVER';
+UPDATE ps_configuration SET value='user' where name = 'PS_MAIL_USER';
+UPDATE ps_configuration SET value='password' where name = 'PS_MAIL_PASSWD';
+UPDATE ps_configuration SET value='off' where name = 'PS_MAIL_SMTP_ENCRYPTION';
+UPDATE ps_configuration SET value='2525' where name = 'PS_MAIL_SMTP_PORT';
+```
+
 ## Error Codes
 
 | Code | Description                                    |

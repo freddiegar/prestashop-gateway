@@ -1,5 +1,14 @@
 # Changelog
 
+## [Next]
+
+### Added
+- Add dev-* commands in Makefile
+
+### Updated
+- Update dependencies guzzle/guzzle from 5.3.2 => 5.3.3
+- Update README file with [mailtrap.io](https://mailtrap.io/)
+
 ## [3.4.0] - 2018-07-25
 
 ### Added
