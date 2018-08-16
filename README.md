@@ -1,10 +1,15 @@
-# PlacetoPay Gateway on Prestashop
+# Prestashop Gateway to PlacetoPay
 
-[PlacetoPay](https://www.placetopay.com) Plugin Payment for [Prestashop](https://www.prestashop.com) 1.5 to 1.7 Stable
+[PlacetoPay][link-placetopay] Plugin Payment for [Prestashop][link-prestashop] 1.5 to 1.7 Stable
+
+## Prerequisites
+
+- PHP >= 5.6.0
+- `curl` extension
+- `soap` extension
+- `prestashop` >= 1.5
 
 ## Compatibility Version
-
-This library need PHP >= 5.6.0 with curl, soap and mbstring extensions
 
 | Prestashop | Plugin   |
 |------------|----------|
@@ -13,8 +18,6 @@ This library need PHP >= 5.6.0 with curl, soap and mbstring extensions
 | 1.7.x      | 3.*      |
 
 View releases [here][link-releases]
-
-[link-releases]: https://github.com/freddiegar/prestashop-gateway/releases 
 
 ## Manual Installation
 
@@ -47,12 +50,12 @@ Install Prestashop 1.6 with PHP 5.6 (and MySQL 5.7). In folder of project;
 make dev-install
 ```
 
-Then... (Please wait ~8 min, while install ALL and load Apache :D to continue), you can go to
+Then... (Please wait few minutes, while install ALL and load Apache :D to continue), you can go to
  
 - [store](http://localhost:8787)
 - [admin](http://localhost:8787/adminstore)
 
-***ATTENTION:*** If server return error code (400, 404, 500) you can status in docker logs until that installation process end, use:
+> If server return error code (400, 404, 500) you can status in docker logs until that installation process end, use:
 
 ```bash
 make logs-prestashop
@@ -79,7 +82,7 @@ Default versions
 - PHP: 5.6
 - MySQL: 5.7
 
-Others installation options are [here](https://store.docker.com/community/images/prestashop/prestashop/tags), You can change versions in `.env` file
+Others installation options are [here][link-docker-prestashop], You can change versions in `.env` file
 
 ```bash
 # Prestashop 1.7 with PHP 7.0
@@ -117,7 +120,7 @@ make bash-prestashop
 mv xinstall install
 ```
 
-This apply to last versions from Prestashop (> 1.7)
+> This apply to last versions from Prestashop (>= 1.7)
 
 ## Used another database in dockerfile
 
@@ -139,7 +142,7 @@ services:
 
 ## Email
 
-Change email configuration to [mailtrap.io](https://mailtrap.io/)
+Change email configuration to use [mailtrap.io][link-mailtrap] in development
 
 ```mysql
 USE prestashop;
@@ -184,3 +187,25 @@ UPDATE ps_configuration SET value='2525' where name = 'PS_MAIL_SMTP_PORT';
 | 601  | Update status payment PlacetoPay fail          |
 | 801  | Get order by id is failed                      |
 | 901  | Get last pending transaction is failed         |
+
+
+## Quality
+
+During package development I try as best as possible to embrace good design and development practices, to help ensure that this package is as good as it can
+be. My checklist for package development includes:
+
+- Be fully [PSR1][link-psr-1], [PSR2][link-psr-2], and [PSR4][link-psr-1] compliant.
+- Include comprehensive documentation in README.md.
+- Provide an up-to-date CHANGELOG.md which adheres to the format outlined
+    at [keepachangelog][link-keepachangelog].
+- Have no PHPCS warnings throughout all code, use `composer test` command.
+
+[link-placetopay]: https://www.placetopay.com
+[link-prestashop]: https://www.prestashop.com
+[link-releases]: https://github.com/freddiegar/prestashop-gateway/releases
+[link-docker-prestashop]: https://store.docker.com/community/images/prestashop/prestashop/tags
+[link-mailtrap]: https://mailtrap.io/
+[link-psr-1]: https://www.php-fig.org/psr/psr-1/
+[link-psr-2]: https://www.php-fig.org/psr/psr-2/
+[link-psr-4]: https://www.php-fig.org/psr/psr-4/
+[link-keepachangelog]: https://keepachangelog.com
