@@ -55,6 +55,14 @@ dev-rebuild: down move-override dev-down
 	docker-compose up -d --build
 	make dev-install
 
+.PHONY: dev-install
+dev-install: down move-override dev-down dev-up
+	sudo setfacl -dR -m u:www-data:rwX -m u:`whoami`:rwX `pwd`
+	sudo setfacl -R -m u:www-data:rwX -m u:`whoami`:rwX `pwd`
+	composer update
+	make logs-prestashop
+	@echo "That is all!"
+
 # Generic commands
 
 .PHONY: bash-prestashop
