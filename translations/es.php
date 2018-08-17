@@ -61,7 +61,7 @@ $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_c9cc8cce247e49bae79f1
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_93cba07454f06a4a960172bbd6e2a435'] = 'Si';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_bafd7322c6e97d25b6299b5d6fe8920b'] = 'No';
 $_MODULE['<{placetopaypayment}prestashop>response_5d5c4a24285e79624af97a58941965cf'] = 'Pago Completo';
-$_MODULE['<{placetopaypayment}prestashop>response_c1ccca925eb496e3073123ebab2da997'] = 'Perfecto, tu pago fue aprobado, gracias por la compra.';
+$_MODULE['<{placetopaypayment}prestashop>response_5d4f2f541dcbae61aaeebde92e4ade6d'] = 'Perfecto, tu pago ha sido aprobado, gracias por la compra.';
 $_MODULE['<{placetopaypayment}prestashop>response_08fc2add263dba5610ca59b67ec43346'] = 'Pago Fallido';
 $_MODULE['<{placetopaypayment}prestashop>response_d04ac5471730e68a8fbe7a5fc54a762c'] = 'Whoops! Tu pago no ha sido aprobado. Puedes reintentar el pago o escoger otro medio de pago.';
 $_MODULE['<{placetopaypayment}prestashop>response_842defa666a224eda21bb1a0e9800bef'] = 'Pago Rechazado';

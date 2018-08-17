@@ -61,7 +61,7 @@ $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_c9cc8cce247e49bae79f1
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_93cba07454f06a4a960172bbd6e2a435'] = 'Yes';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_bafd7322c6e97d25b6299b5d6fe8920b'] = 'No';
 $_MODULE['<{placetopaypayment}prestashop>response_5d5c4a24285e79624af97a58941965cf'] = 'Completed payment';
-$_MODULE['<{placetopaypayment}prestashop>response_c1ccca925eb496e3073123ebab2da997'] = 'Dear customer, your payment is approved thank you for your purchase.';
+$_MODULE['<{placetopaypayment}prestashop>response_5d4f2f541dcbae61aaeebde92e4ade6d'] = 'Dear customer, your payment has been approved, thank you for your purchase.';
 $_MODULE['<{placetopaypayment}prestashop>response_08fc2add263dba5610ca59b67ec43346'] = 'Failed payment';
 $_MODULE['<{placetopaypayment}prestashop>response_d04ac5471730e68a8fbe7a5fc54a762c'] = 'We\'re sorry. Your payment has not been completed. You can try again or choose another payment method.';
 $_MODULE['<{placetopaypayment}prestashop>response_842defa666a224eda21bb1a0e9800bef'] = 'Rejected payment';
@@ -78,7 +78,7 @@ $_MODULE['<{placetopaypayment}prestashop>response_5b8c99dad1893a85076709b2d3c2d2
 $_MODULE['<{placetopaypayment}prestashop>response_90c72fb653ec1248896ceda559e01328'] = 'Transaction date';
 $_MODULE['<{placetopaypayment}prestashop>response_ec53a8c4f07baed5d8825072c89799be'] = 'Status';
 $_MODULE['<{placetopaypayment}prestashop>response_fffcb4d1e12c96b2f571f77ad25878b8'] = 'Reason';
-$_MODULE['<{placetopaypayment}prestashop>response_bc30768048a7bbfd2d158d722c140c6d'] = 'Total amont';
+$_MODULE['<{placetopaypayment}prestashop>response_bc30768048a7bbfd2d158d722c140c6d'] = 'Total amount';
 $_MODULE['<{placetopaypayment}prestashop>response_4b78ac8eb158840e9638a3aeb26c4a9d'] = 'Tax';
 $_MODULE['<{placetopaypayment}prestashop>response_5f15e6a842d93e3e3f2a4e69d7e06bf5'] = 'Franchise';
 $_MODULE['<{placetopaypayment}prestashop>response_984482eb9ff11e6310fef641d2268a2a'] = 'Bank name';
