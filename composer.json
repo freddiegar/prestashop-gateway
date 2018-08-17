@@ -4,6 +4,9 @@
   "type": "plugin",
   "require": {
     "php": ">=5.6.0",
+    "ext-curl": "*",
+    "ext-soap": "*",
+    "ext-json": "*",
     "guzzlehttp/guzzle": "~5.3",
     "dnetix/redirection": "^0.4"
   },
@@ -29,8 +32,10 @@
   },
   "scripts": {
     "phpcs": "phpcs --standard=PSR2 src/ helpers.php index.php process.php redirect.php sonda.php",
+    "security-checker": "$(which security-checker) security:check composer.lock || exit 0",
     "test": [
-      "@phpcs"
+      "@phpcs",
+      "@security-checker"
     ]
   }
 }
