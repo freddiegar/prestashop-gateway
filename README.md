@@ -147,6 +147,7 @@ Change email configuration to use [mailtrap.io][link-mailtrap] in development
 ```mysql
 USE prestashop;
 
+UPDATE ps_configuration SET value='2' where name = 'PS_MAIL_METHOD';
 UPDATE ps_configuration SET value='smtp.mailtrap.io' where name = 'PS_MAIL_SERVER';
 UPDATE ps_configuration SET value='user' where name = 'PS_MAIL_USER';
 UPDATE ps_configuration SET value='password' where name = 'PS_MAIL_PASSWD';

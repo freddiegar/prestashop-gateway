@@ -35,7 +35,9 @@ class PaymentLogger
     ) {
         $format = sprintf("[%s:%d] => [%d]\n %s", $file, $line, $errorCode, $message);
 
-        @self::getLogInstance()->log($format, $severity, $errorCode);
+        if (self::getLogInstance()) {
+            self::getLogInstance()->log($format, $severity, $errorCode);
+        }
 
         if ($severity >= self::WARNING) {
             return self::logInDatabase(
@@ -72,30 +74,41 @@ class PaymentLogger
      */
     public static function getLogFilename()
     {
-        $logfile = sprintf('%s_%s_%s.log', (isDebugEnable() ? 'dev' : 'prod'), @date('Ymd'), getModuleName());
+        static $logfile = null;
 
-        // PS < 1.7.0.0
-        $pathLogs = '/log/';
+        if (is_null($logfile)) {
+            $filename = sprintf('%s_%s_%s.log', (isDebugEnable() ? 'dev' : 'prod'), date('Ymd'), getModuleName());
 
-        if (version_compare(_PS_VERSION_, '1.7.4.0', '>=')) {
-            $pathLogs = '/var/logs/';
-        } elseif (version_compare(_PS_VERSION_, '1.7.0.0', '>=')) {
-            $pathLogs = '/app/logs/';
+            // PS < 1.7.0.0
+            $pathLogs = '/log/';
+
+            if (version_compare(_PS_VERSION_, '1.7.4.0', '>=')) {
+                $pathLogs = '/var/logs/';
+            } elseif (version_compare(_PS_VERSION_, '1.7.0.0', '>=')) {
+                $pathLogs = '/app/logs/';
+            }
+
+            $logfile = fixPath(_PS_ROOT_DIR_ . $pathLogs . $filename);
         }
 
-        return fixPath(_PS_ROOT_DIR_ . $pathLogs . $logfile);
+        return $logfile;
     }
 
     /**
-     * @return mixed
+     * @return FileLogger|null
      */
     private static function getLogInstance()
     {
         static $logger = null;
 
         if (is_null($logger)) {
-            $logger = new FileLogger(0);
-            $logger->setFilename(self::getLogFilename());
+            $logger = false;
+            $logfile = self::getLogFilename();
+
+            if (is_writable($logfile)) {
+                $logger = new FileLogger(0);
+                $logger->setFilename($logfile);
+            }
         }
 
         return $logger;
