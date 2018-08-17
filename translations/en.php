@@ -91,10 +91,13 @@ $_MODULE['<{placetopaypayment}prestashop>response_5f7ae98bdc36ea2686daed151216ab
 $_MODULE['<{placetopaypayment}prestashop>response_91a1bd08a417cbd1ce9ee50d8c67bab6'] = 'Payment History';
 $_MODULE['<{placetopaypayment}prestashop>setting_84201ad1138bdce8f2e1d3cfdc847139'] = 'This module allows you to accept payments by PlacetoPay.';
 $_MODULE['<{placetopaypayment}prestashop>setting_3200d10a6757589d710a80f82f616f4e'] = 'You need to configure your PlacetoPay account before using this module';
-$_MODULE['<{placetopaypayment}prestashop>setting_2adbc667e322f521a39e68543f7bed38'] = 'URL Notification';
-$_MODULE['<{placetopaypayment}prestashop>setting_9f77b01739fb783836e178d420b6eff3'] = 'Return URL where PlacetoPay will send status payment\'s to Prestashop';
-$_MODULE['<{placetopaypayment}prestashop>setting_d619c18531564949fc16d17eac8f0e84'] = 'Path schudele task';
-$_MODULE['<{placetopaypayment}prestashop>setting_a36440d8769df9e632d0c27ff77e65b7'] = 'Set this task to validate payments with pending status in your site';
+$_MODULE['<{placetopaypayment}prestashop>setting_a2b787ad97ab6f553dded04fc19dab01'] = 'Notification URL';
+$_MODULE['<{placetopaypayment}prestashop>setting_481059542e3d94f3a41dfe33bbf41973'] = 'URL where PlacetoPay will send payment status to Prestashop.';
+$_MODULE['<{placetopaypayment}prestashop>setting_d66be00270dd3d64aad0834d24367dad'] = 'Scheduler task path';
+$_MODULE['<{placetopaypayment}prestashop>setting_3e75e0ca8d410b971074efb89689b85a'] = 'Set this task to validate payments with pending status in your site.';
+$_MODULE['<{placetopaypayment}prestashop>setting_7b722fb4e0ed5b7e2a3b3326be32d3ac'] = 'Logs file path';
+$_MODULE['<{placetopaypayment}prestashop>setting_2a7353c1992f2f3591306676d489c521'] = 'Debug messages are registered here (with debug mode enabled) and warnings and errors messages';
+$_MODULE['<{placetopaypayment}prestashop>setting_8e52de0d4b03d5fe87dc88da09616c7f'] = 'here.';
 $_MODULE['<{placetopaypayment}prestashop>brand_payment_bca22c1fc0054ffe1b1fef823dbb2318'] = 'Pay with PlacetoPay';
 $_MODULE['<{placetopaypayment}prestashop>brand_payment_f77653895afd18bd2b51465e1304e7ed'] = 'PlacetoPay secure web site will be displayed when you select this payment method.';
 $_MODULE['<{placetopaypayment}prestashop>message_payment_7f432fd9dab12810bf868e0915e308f6'] = 'Anyone who make a purchase on the site';
