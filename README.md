@@ -98,7 +98,7 @@ PS_VERSION=latest
 MYSQL_VERSION=5.5
 ```
 
-### Binding Ports
+### Binding ports
 
 Ports by default in this installation are
 
@@ -126,7 +126,7 @@ services:
 ```
 
 
-## Setup module
+## Setup Module
 
 Install and setup you `login` and `trankey` in your [store](http://localhost:8787/adminstore)!
 
@@ -134,18 +134,7 @@ Maybe you need to setup on shipping carriers.
 
 Enjoy development and testing!
 
-## Troubleshooting
-
-If shop is not auto-installed, then rename folder `xinstall` in container and installed from [wizard](http://localhost:8787/install)
-
-```bash
-make bash-prestashop
-mv xinstall install
-```
-
-> This apply to last versions from PrestaShop (>= 1.7)
-
-## SMTP Email
+### SMTP Email
 
 Change email configuration to use [mailtrap.io][link-mailtrap] in development
 
@@ -194,6 +183,17 @@ UPDATE ps_configuration SET value='2525' where name = 'PS_MAIL_SMTP_PORT';
 | 801  | Get order by id is failed                      |
 | 901  | Get last pending transaction is failed         |
 | 999  | Un-know error                                  |
+
+## Troubleshooting
+
+If shop is not auto-installed, then rename folder `xinstall` in container and installed from [wizard](http://localhost:8787/install)
+
+```bash
+make bash-prestashop
+mv xinstall install
+```
+
+> This apply to last versions from PrestaShop (>= 1.7)
 
 ## Quality
 
