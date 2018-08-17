@@ -4,7 +4,7 @@
 
 ## Prerequisites
 
-- `PHP` >= 5.6.0
+- `php` >= 5.6.0
 - `curl-ext`
 - `soap-ext`
 - `prestashop` >= 1.5

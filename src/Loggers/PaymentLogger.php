@@ -34,21 +34,18 @@ class PaymentLogger
         $line = null
     ) {
         $format = sprintf("[%s:%d] => [%d]\n %s", $file, $line, $errorCode, $message);
-        $logSuccess = true;
 
-        try {
-            self::getLogInstance()->log($format, $severity, $errorCode);
-        } catch (Exception $exception) {
-            $logSuccess = false;
+        @self::getLogInstance()->log($format, $severity, $errorCode);
 
-            self::logInDatabase($exception->getMessage(), self::WARNING, $exception->getCode());
+        if ($severity >= self::WARNING) {
+            return self::logInDatabase(
+                preg_replace(['/(\s+)/', '/(<([^>=]+)>)/'], ' ', $message),
+                $severity,
+                $errorCode
+            );
         }
 
-        if ($severity >= self::WARNING || !$logSuccess) {
-            return self::logInDatabase($message, $severity, $errorCode);
-        }
-
-        return $logSuccess;
+        return true;
     }
 
     /**
