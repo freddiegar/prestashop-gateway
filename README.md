@@ -5,8 +5,9 @@
 ## Prerequisites
 
 - `php` >= 5.6.0
-- `curl-ext`
-- `soap-ext`
+- `ext-curl`
+- `ext-soap`
+- `ext-json`
 - `prestashop` >= 1.5
 
 ## Compatibility Version
@@ -21,7 +22,7 @@ View releases [here][link-releases]
 
 ## Manual Installation
 
-Create folder placetopaypayment (this is required, with this name)
+Create `placetopaypayment` folder (this is required, with this name)
 
 ```bash
 mkdir /var/www/html/modules/placetopaypayment
@@ -30,7 +31,7 @@ mkdir /var/www/html/modules/placetopaypayment
 Clone Project in modules
  
 ```bash
-git clone git@github.com:freddiegar/prestashop-gateway.git /var/www/html/modules/placetopaypayment
+git clone https://github.com/freddiegar/prestashop-gateway.git /var/www/html/modules/placetopaypayment
 ```
 
 Set permissions and install dependencies with composer
@@ -44,10 +45,11 @@ cd /var/www/html/modules/placetopaypayment \
 
 ## Docker Installation
 
-Install Prestashop 1.6 with PHP 5.6 (and MySQL 5.7). In folder of project;
+Install PrestaShop 1.6 (latest) with PHP 5.6 (and MySQL 5.7). In folder of project;
  
 ```bash
-make dev-install
+cd /var/www/html/modules/placetopaypayment
+make install
 ```
 
 Then... (Please wait few minutes, while install ALL and load Apache :D to continue), you can go to
@@ -85,13 +87,13 @@ Default versions
 Others installation options are [here][link-docker-prestashop], You can change versions in `.env` file
 
 ```bash
-# Prestashop 1.7 with PHP 7.0
+# PrestaShop 1.7 with PHP 7.0
 PS_VERSION=1.7-7.0
 
-# Prestashop 1.6.1.1 with PHP 5.6
+# PrestaShop 1.6.1.1 with PHP 5.6
 PS_VERSION=1.6.1.1
 
-# Prestashop latest with PHP 5.6 and MySQL 5.5 
+# PrestaShop latest with PHP 5.6 and MySQL 5.5
 PS_VERSION=latest
 MYSQL_VERSION=5.5
 ```
@@ -120,7 +122,7 @@ make bash-prestashop
 mv xinstall install
 ```
 
-> This apply to last versions from Prestashop (>= 1.7)
+> This apply to last versions from PrestaShop (>= 1.7)
 
 ## Used another database in dockerfile
 
@@ -200,7 +202,7 @@ be. My checklist for package development includes:
 - Include comprehensive documentation in README.md.
 - Provide an up-to-date CHANGELOG.md which adheres to the format outlined
     at [keepachangelog][link-keepachangelog].
-- Have no PHPCS warnings throughout all code, use `composer test` command.
+- Have no [phpcs][link-phpcs] warnings throughout all code, use `composer test` command.
 
 [link-placetopay]: https://www.placetopay.com
 [link-prestashop]: https://www.prestashop.com
@@ -211,3 +213,4 @@ be. My checklist for package development includes:
 [link-psr-2]: https://www.php-fig.org/psr/psr-2/
 [link-psr-4]: https://www.php-fig.org/psr/psr-4/
 [link-keepachangelog]: https://keepachangelog.com
+[link-phpcs]: http://pear.php.net/package/PHP_CodeSniffer
