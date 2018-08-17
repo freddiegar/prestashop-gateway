@@ -25,7 +25,7 @@
 {l s='Fill TAX information?' mod='placetopaypayment'}
 {l s='Fill buyer information?' mod='placetopaypayment'}
 {l s='Skip result?' mod='placetopaypayment'}
-{l s='Configuration Connection' mod='placetopaypayment'}
+{l s='Connection Configuration' mod='placetopaypayment'}
 {l s='Country' mod='placetopaypayment'}
 {l s='Colombia' mod='placetopaypayment'}
 {l s='Ecuador' mod='placetopaypayment'}

@@ -4,9 +4,9 @@
 
 ## Prerequisites
 
-- PHP >= 5.6.0
-- `curl` extension
-- `soap` extension
+- `PHP` >= 5.6.0
+- `curl-ext`
+- `soap-ext`
 - `prestashop` >= 1.5
 
 ## Compatibility Version
@@ -14,7 +14,7 @@
 | Prestashop | Plugin   |
 |------------|----------|
 | 1.5.x      | ~2.6.4   |
-| 1.6.x      | \>=2.6.4 |
+| 1.6.x      | >=2.6.4 |
 | 1.7.x      | 3.*      |
 
 View releases [here][link-releases]
@@ -187,6 +187,7 @@ UPDATE ps_configuration SET value='2525' where name = 'PS_MAIL_SMTP_PORT';
 | 601  | Update status payment PlacetoPay fail          |
 | 801  | Get order by id is failed                      |
 | 901  | Get last pending transaction is failed         |
+| 999  | Un-know error                                  |
 
 
 ## Quality

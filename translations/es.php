@@ -29,7 +29,7 @@ $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_6a8c1b534b184644e6fcc
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_f13d07d8a2bb8341f8f06b77048e0cef'] = '¿Detallar de los impuestos aplicados en el pago?';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_45a8293f1213912d7cf12e9cfd088d47'] = '¿Pre-diligenciar información del comprador en el formulario de pago?';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_befb274bdfcd4c55385afc8c59460bfc'] = '¿Omitir pantalla de resultado si el pago es aprobado?';
-$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_beb4b26e1cbb154c6b1bd4b2087dffb8'] = 'Configuración de conexión';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_78e59f1b3612db0fbf1be3983df1f10f'] = 'Configuración de conexión';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_59716c97497eb9694541f7c3d37b1a4d'] = 'Estoy en';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_ef3388cc5659bccb742fb8af762f1bfd'] = 'Colombia';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_4d5d85af33ec2aaedb674d2d6a7d53b6'] = 'Ecuador';
@@ -61,7 +61,7 @@ $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_c9cc8cce247e49bae79f1
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_93cba07454f06a4a960172bbd6e2a435'] = 'Si';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_bafd7322c6e97d25b6299b5d6fe8920b'] = 'No';
 $_MODULE['<{placetopaypayment}prestashop>response_5d5c4a24285e79624af97a58941965cf'] = 'Pago Completo';
-$_MODULE['<{placetopaypayment}prestashop>response_c1ccca925eb496e3073123ebab2da997'] = 'Perfecto, tu pago fue aprobado, gracias por la compra.';
+$_MODULE['<{placetopaypayment}prestashop>response_5d4f2f541dcbae61aaeebde92e4ade6d'] = 'Perfecto, tu pago ha sido aprobado, gracias por la compra.';
 $_MODULE['<{placetopaypayment}prestashop>response_08fc2add263dba5610ca59b67ec43346'] = 'Pago Fallido';
 $_MODULE['<{placetopaypayment}prestashop>response_d04ac5471730e68a8fbe7a5fc54a762c'] = 'Whoops! Tu pago no ha sido aprobado. Puedes reintentar el pago o escoger otro medio de pago.';
 $_MODULE['<{placetopaypayment}prestashop>response_842defa666a224eda21bb1a0e9800bef'] = 'Pago Rechazado';
@@ -91,10 +91,13 @@ $_MODULE['<{placetopaypayment}prestashop>response_5f7ae98bdc36ea2686daed151216ab
 $_MODULE['<{placetopaypayment}prestashop>response_91a1bd08a417cbd1ce9ee50d8c67bab6'] = 'Historico de pagos';
 $_MODULE['<{placetopaypayment}prestashop>setting_84201ad1138bdce8f2e1d3cfdc847139'] = 'Este módulo le permite aceptar pagos con tarjetas de crédito y débito usando PlacetoPay.';
 $_MODULE['<{placetopaypayment}prestashop>setting_3200d10a6757589d710a80f82f616f4e'] = 'Debes configurar tu cuenta PlacetoPay antes de usar este módulo.';
-$_MODULE['<{placetopaypayment}prestashop>setting_2adbc667e322f521a39e68543f7bed38'] = 'URL de notificación';
-$_MODULE['<{placetopaypayment}prestashop>setting_9f77b01739fb783836e178d420b6eff3'] = 'URL usada por PlacetoPay para notificar el estado de los pagos';
-$_MODULE['<{placetopaypayment}prestashop>setting_d619c18531564949fc16d17eac8f0e84'] = 'Ubicación tarea programada';
-$_MODULE['<{placetopaypayment}prestashop>setting_a36440d8769df9e632d0c27ff77e65b7'] = 'Configure esta tarea para validar los pagos con estado pendiente en su sitio';
+$_MODULE['<{placetopaypayment}prestashop>setting_a2b787ad97ab6f553dded04fc19dab01'] = 'URL de notificación';
+$_MODULE['<{placetopaypayment}prestashop>setting_481059542e3d94f3a41dfe33bbf41973'] = 'URL usada por PlacetoPay para notificar el estado de los pagos.';
+$_MODULE['<{placetopaypayment}prestashop>setting_d66be00270dd3d64aad0834d24367dad'] = 'Ubicación tarea programada';
+$_MODULE['<{placetopaypayment}prestashop>setting_3e75e0ca8d410b971074efb89689b85a'] = 'Configure esta tarea para validar los pagos con estado pendiente en su sitio.';
+$_MODULE['<{placetopaypayment}prestashop>setting_7b722fb4e0ed5b7e2a3b3326be32d3ac'] = 'Ubicación Logs';
+$_MODULE['<{placetopaypayment}prestashop>setting_2a7353c1992f2f3591306676d489c521'] = 'Los mensajes de seguimiento son registrados aquí (con modo depuración activado), errores y advertencias';
+$_MODULE['<{placetopaypayment}prestashop>setting_8e52de0d4b03d5fe87dc88da09616c7f'] = 'aquí.';
 $_MODULE['<{placetopaypayment}prestashop>brand_payment_bca22c1fc0054ffe1b1fef823dbb2318'] = 'Paga con PlacetoPay';
 $_MODULE['<{placetopaypayment}prestashop>brand_payment_f77653895afd18bd2b51465e1304e7ed'] = 'Puedes pagar usando tus tarjetas crédito o débito de forma rápida y segura.';
 $_MODULE['<{placetopaypayment}prestashop>message_payment_7f432fd9dab12810bf868e0915e308f6'] = 'Cualquier persona que realice un compra en el sitio';

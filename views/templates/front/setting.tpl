@@ -24,24 +24,37 @@
         <form class="form-horizontal">
             <div class="form-group">
                 <label class="control-label col-lg-3">
-                    {l s='URL Notification' mod='placetopaypayment'}
+                    {l s='Notification URL' mod='placetopaypayment'}
                 </label>
                 <div class="col-lg-9">
                     <span style="font-size: 16px;">{$url_notification}</span>
                     <p class="help-block">
-                        {l s='Return URL where PlacetoPay will send status payment\'s  to Prestashop' mod='placetopaypayment'}
+                        {l s='URL where PlacetoPay will send payment status to Prestashop.' mod='placetopaypayment'}
                     </p>
                 </div>
             </div>
 
             <div class="form-group">
                 <label class="control-label col-lg-3">
-                    {l s='Path schudele task' mod='placetopaypayment'}
+                    {l s='Scheduler task path' mod='placetopaypayment'}
                 </label>
                 <div class="col-lg-9">
                     <span style="font-size: 16px;">{$schedule_task}</span>
                     <p class="help-block">
-                        {l s='Set this task to validate payments with pending status in your site' mod='placetopaypayment'}
+                        {l s='Set this task to validate payments with pending status in your site.' mod='placetopaypayment'}
+                    </p>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-lg-3">
+                    {l s='Logs file path' mod='placetopaypayment'}
+                </label>
+                <div class="col-lg-9">
+                    <span style="font-size: 16px;">{$log_file}</span>
+                    <p class="help-block">
+                        {l s='Debug messages are registered here (with debug mode enabled) and warnings and errors messages' mod='placetopaypayment'}
+                        <a href="{$log_database}">{l s='here.' mod='placetopaypayment'}</a>
                     </p>
                 </div>
             </div>
