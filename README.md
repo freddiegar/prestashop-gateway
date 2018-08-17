@@ -45,7 +45,7 @@ cd /var/www/html/modules/placetopaypayment \
 
 ## Docker Installation
 
-Install PrestaShop 1.6 (latest) with PHP 5.6 (and MySQL 5.7). In folder of project;
+Install PrestaShop 1.6 (latest in 1.6 branch) with PHP 5.6 (and MySQL 5.7). In folder of project;
  
 ```bash
 cd /var/www/html/modules/placetopaypayment
@@ -74,7 +74,7 @@ __MySQL Access__
 - password: admin
 - database: prestashop
 
-See details in `docker-compose.yml` 
+See details in `docker-compose.yml` file or run `make config` command
 
 ### Customize docker installation
 
@@ -105,26 +105,9 @@ Ports by default in this installation are
 - Web Server (`WEB_PORT`): 8787 => 80
 - Database (`MYSQL_PORT`): 33060 => 3306
 
-## Setup module
+> You can change versions in `.env` file
 
-Install and setup you `login` and `trankey` in your [store](http://localhost:8787/adminstore)!
-
-Maybe you need to setup on shipping carriers.
-
-Enjoy development and test!
-
-## Troubleshooting
-
-If shop is not auto-installed, then rename folder `xinstall` in container and installed from [wizard](http://localhost:8787/install)
-
-```bash
-make bash-prestashop
-mv xinstall install
-```
-
-> This apply to last versions from PrestaShop (>= 1.7)
-
-## Used another database in dockerfile
+### Used another database in docker
 
 You can override setup in docker, rename `docker-compose.override.example.yml` to `docker-compose.override.yml` and [customize](https://store.docker.com/community/images/prestashop/prestashop) your installation, by example
 
@@ -142,7 +125,27 @@ services:
       DB_SERVER: my_db
 ```
 
-## Email
+
+## Setup module
+
+Install and setup you `login` and `trankey` in your [store](http://localhost:8787/adminstore)!
+
+Maybe you need to setup on shipping carriers.
+
+Enjoy development and testing!
+
+## Troubleshooting
+
+If shop is not auto-installed, then rename folder `xinstall` in container and installed from [wizard](http://localhost:8787/install)
+
+```bash
+make bash-prestashop
+mv xinstall install
+```
+
+> This apply to last versions from PrestaShop (>= 1.7)
+
+## SMTP Email
 
 Change email configuration to use [mailtrap.io][link-mailtrap] in development
 
@@ -191,7 +194,6 @@ UPDATE ps_configuration SET value='2525' where name = 'PS_MAIL_SMTP_PORT';
 | 801  | Get order by id is failed                      |
 | 901  | Get last pending transaction is failed         |
 | 999  | Un-know error                                  |
-
 
 ## Quality
 
