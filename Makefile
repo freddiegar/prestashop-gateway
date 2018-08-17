@@ -65,6 +65,28 @@ dev-install: down move-override dev-down dev-up
 
 # Generic commands
 
+.PHONY: start
+start: start-database start-prestashop
+
+.PHONY: stop
+stop: stop-prestashop stop-database
+
+.PHONY: start-prestashop
+start-prestashop:
+	docker container start $(CONTAINER_PS)
+
+.PHONY: stop-prestashop
+stop-prestashop:
+	docker container stop $(CONTAINER_PS)
+
+.PHONY: start-database
+start-database:
+	docker container start $(CONTAINER_DB)
+
+.PHONY: stop-database
+stop-database:
+	docker container stop $(CONTAINER_DB)
+
 .PHONY: bash-prestashop
 bash-prestashop:
 	docker exec -u root -it $(CONTAINER_PS) bash
