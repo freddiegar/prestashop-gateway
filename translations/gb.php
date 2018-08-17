@@ -29,7 +29,7 @@ $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_6a8c1b534b184644e6fcc
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_f13d07d8a2bb8341f8f06b77048e0cef'] = 'Fill TAX information?';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_45a8293f1213912d7cf12e9cfd088d47'] = 'Fill buyer information?';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_befb274bdfcd4c55385afc8c59460bfc'] = 'Skip result?';
-$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_beb4b26e1cbb154c6b1bd4b2087dffb8'] = 'Configuration Connection';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_78e59f1b3612db0fbf1be3983df1f10f'] = 'Connection Configuration';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_59716c97497eb9694541f7c3d37b1a4d'] = 'Country';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_ef3388cc5659bccb742fb8af762f1bfd'] = 'Colombia';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_4d5d85af33ec2aaedb674d2d6a7d53b6'] = 'Ecuador';

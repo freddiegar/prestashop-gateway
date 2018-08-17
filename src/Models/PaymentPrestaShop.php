@@ -512,7 +512,7 @@ class PaymentPrestaShop extends PaymentModule
                 $formErrors[] = sprintf('%s %s', $this->ll('Payment description'), $this->ll('is required.'));
             }
 
-            // Configuration Connection
+            // Connection Configuration
             if (!Tools::getValue(self::EXPIRATION_TIME_MINUTES)) {
                 $formErrors[] = sprintf('%s %s', $this->ll('Expiration time to pay'), $this->ll('is required.'));
             } elseif (filter_var(Tools::getValue(self::EXPIRATION_TIME_MINUTES), FILTER_VALIDATE_INT) === false
@@ -584,7 +584,7 @@ class PaymentPrestaShop extends PaymentModule
                 Configuration::updateValue(self::STOCK_REINJECT, Tools::getValue(self::STOCK_REINJECT));
             }
 
-            // Configuration Connection
+            // Connection Configuration
             Configuration::updateValue(self::COUNTRY, Tools::getValue(self::COUNTRY));
             Configuration::updateValue(self::ENVIRONMENT, Tools::getValue(self::ENVIRONMENT));
             // Set or clean custom URL
@@ -860,7 +860,7 @@ class PaymentPrestaShop extends PaymentModule
         $fieldsFormConnection = [
             'form' => [
                 'legend' => [
-                    'title' => $this->ll('Configuration Connection'),
+                    'title' => $this->ll('Connection Configuration'),
                     'icon' => 'icon-rocket'
                 ],
                 'input' => [
