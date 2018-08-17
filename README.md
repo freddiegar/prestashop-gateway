@@ -187,6 +187,7 @@ UPDATE ps_configuration SET value='2525' where name = 'PS_MAIL_SMTP_PORT';
 | 601  | Update status payment PlacetoPay fail          |
 | 801  | Get order by id is failed                      |
 | 901  | Get last pending transaction is failed         |
+| 999  | Un-know error                                  |
 
 
 ## Quality

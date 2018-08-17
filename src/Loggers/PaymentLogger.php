@@ -2,6 +2,7 @@
 
 namespace PlacetoPay\Loggers;
 
+use Exception;
 use \FileLogger;
 use \PrestaShopLogger;
 
@@ -33,14 +34,19 @@ class PaymentLogger
         $line = null
     ) {
         $format = sprintf("[%s:%d] => [%d]\n %s", $file, $line, $errorCode, $message);
+        $logSuccess = true;
 
-        self::getLogInstance()->log($format, $severity, $errorCode);
-
-        if ($severity >= self::WARNING) {
-            self::logInDatabase($message, $severity, $errorCode);
+        try {
+            self::getLogInstance()->log($format, $severity, $errorCode);
+        } catch (Exception $exception) {
+            $logSuccess = false;
         }
 
-        return true;
+        if ($severity >= self::WARNING || !$logSuccess) {
+            return self::logInDatabase($message, $severity, $errorCode);
+        }
+
+        return $logSuccess;
     }
 
     /**
@@ -51,7 +57,13 @@ class PaymentLogger
      */
     public static function logInDatabase($message, $severity = self::INFO, $errorCode = null)
     {
-        PrestaShopLogger::addLog($message, $severity, $errorCode, getModuleName(), $errorCode > 0 ? $errorCode : 999);
+        try {
+            $errorCode = $errorCode > 0 ? $errorCode : 999;
+
+            PrestaShopLogger::addLog($message, $severity, $errorCode, getModuleName(), $errorCode);
+        } catch (Exception $exception) {
+            return false;
+        }
 
         return true;
     }
