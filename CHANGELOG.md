@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Updated
 - Update dependencies guzzle/guzzle from 5.3.2 => 5.3.3
 - Update README file with [mailtrap.io](https://mailtrap.io/)
-- Update format name logfile, it is: [dev|prod]_YYYYMMDD_placetopayment.log
+- Update format name logfile, it is: \[dev|prod\]_YYYYMMDD_placetopayment.log
 - Update commands in Makefile
 
 ### Fixed

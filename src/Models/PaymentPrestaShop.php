@@ -611,10 +611,12 @@ class PaymentPrestaShop extends PaymentModule
     {
         $this->smarty->assign(
             [
+                'is_set_credentials' => $this->isSetCredentials(),
                 'version' => $this->getPluginVersion(),
                 'url_notification' => $this->getUrl('process.php'),
                 'schedule_task' => $this->getPathScheduleTask(),
-                'is_set_credentials' => $this->isSetCredentials(),
+                'log_file' => $this->getPathLogFile(),
+                'log_database' => $this->context->link->getAdminLink('AdminLogs'),
             ]
         );
 
@@ -1432,6 +1434,14 @@ class PaymentPrestaShop extends PaymentModule
     private function getPathScheduleTask()
     {
         return fixPath($this->getPathThisModule() . '/sonda.php');
+    }
+
+    /**
+     * @return string
+     */
+    private function getPathLogFile()
+    {
+        return PaymentLogger::getLogFilename();
     }
 
     /**

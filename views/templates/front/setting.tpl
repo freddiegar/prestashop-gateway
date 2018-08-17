@@ -45,6 +45,19 @@
                     </p>
                 </div>
             </div>
+
+            <div class="form-group">
+                <label class="control-label col-lg-3">
+                    {l s='Path log file' mod='placetopaypayment'}
+                </label>
+                <div class="col-lg-9">
+                    <span style="font-size: 16px;">{$log_file}</span>
+                    <p class="help-block">
+                        {l s='Debug messages are registed here (with debug mode enabled) and warnings and errors messages' mod='placetopaypayment'}
+                        <a href="{$log_database}">here</a>
+                    </p>
+                </div>
+            </div>
         </form>
     </div>
 </div>
