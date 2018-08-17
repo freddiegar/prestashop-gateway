@@ -447,7 +447,7 @@ class PaymentPrestaShop extends PaymentModule
             if ($orderState->save()) {
                 Configuration::updateValue(self::ORDER_STATE, $orderState->id);
                 copy(
-                    fixPath($this->getPathThisModule() . '/logo.png'),
+                    fixPath($this->getThisModulePath() . '/logo.png'),
                     fixPath(_PS_IMG_DIR_ . 'os/' . $orderState->id . '.gif')
                 );
             } else {
@@ -614,13 +614,13 @@ class PaymentPrestaShop extends PaymentModule
                 'is_set_credentials' => $this->isSetCredentials(),
                 'version' => $this->getPluginVersion(),
                 'url_notification' => $this->getUrl('process.php'),
-                'schedule_task' => $this->getPathScheduleTask(),
-                'log_file' => $this->getPathLogFile(),
+                'schedule_task' => $this->getScheduleTaskPath(),
+                'log_file' => $this->getLogFilePath(),
                 'log_database' => $this->context->link->getAdminLink('AdminLogs'),
             ]
         );
 
-        return $this->display($this->getPathThisModule(), fixPath('/views/templates/front/setting.tpl'));
+        return $this->display($this->getThisModulePath(), fixPath('/views/templates/front/setting.tpl'));
     }
 
     /**
@@ -643,7 +643,7 @@ class PaymentPrestaShop extends PaymentModule
             'allow_payment' => $this->getAllowBuyWithPendingPayments(),
         ]);
 
-        return $this->display($this->getPathThisModule(), fixPath('/views/templates/hook/pending_payment.tpl'));
+        return $this->display($this->getThisModulePath(), fixPath('/views/templates/hook/pending_payment.tpl'));
     }
 
     /**
@@ -658,7 +658,7 @@ class PaymentPrestaShop extends PaymentModule
             'company_name' => $this->getCompanyName(),
         ]);
 
-        return $this->display($this->getPathThisModule(), fixPath('/views/templates/hook/message_payment.tpl'));
+        return $this->display($this->getThisModulePath(), fixPath('/views/templates/hook/message_payment.tpl'));
     }
 
     /**
@@ -668,7 +668,7 @@ class PaymentPrestaShop extends PaymentModule
      */
     private function displayBrandMessage()
     {
-        return $this->display($this->getPathThisModule(), fixPath('/views/templates/hook/brand_payment.tpl'));
+        return $this->display($this->getThisModulePath(), fixPath('/views/templates/hook/brand_payment.tpl'));
     }
 
     /**
@@ -1054,7 +1054,7 @@ class PaymentPrestaShop extends PaymentModule
         $this->context->smarty->assign('company_name', $this->getCompanyName());
         $this->context->smarty->assign('allow_payment', $allowPayment);
 
-        return $this->display($this->getPathThisModule(), fixPath('/views/templates/hook_1_6/payment.tpl'));
+        return $this->display($this->getThisModulePath(), fixPath('/views/templates/hook_1_6/payment.tpl'));
     }
 
     /**
@@ -1431,15 +1431,15 @@ class PaymentPrestaShop extends PaymentModule
     /**
      * @return string
      */
-    private function getPathScheduleTask()
+    private function getScheduleTaskPath()
     {
-        return fixPath($this->getPathThisModule() . '/sonda.php');
+        return fixPath($this->getThisModulePath() . '/sonda.php');
     }
 
     /**
      * @return string
      */
-    private function getPathLogFile()
+    private function getLogFilePath()
     {
         return PaymentLogger::getLogFilename();
     }
@@ -1447,7 +1447,7 @@ class PaymentPrestaShop extends PaymentModule
     /**
      * @return string
      */
-    private function getPathThisModule()
+    private function getThisModulePath()
     {
         return _PS_MODULE_DIR_ . getModuleName();
     }
@@ -2167,7 +2167,7 @@ class PaymentPrestaShop extends PaymentModule
 
         $this->context->smarty->assign($attributes);
 
-        return $this->display($this->getPathThisModule(), fixPath('/views/templates/front/response.tpl'));
+        return $this->display($this->getThisModulePath(), fixPath('/views/templates/front/response.tpl'));
     }
 
     /**
@@ -2230,7 +2230,7 @@ class PaymentPrestaShop extends PaymentModule
             'slowValidation' => Tools::isSubmit('slowvalidation')
         ]);
 
-        return $this->display($this->getPathThisModule(), fixPath('/views/templates/front/history.tpl'));
+        return $this->display($this->getThisModulePath(), fixPath('/views/templates/front/history.tpl'));
     }
 
     /**
@@ -2430,6 +2430,7 @@ class PaymentPrestaShop extends PaymentModule
         );
         $setup .= sprintf('Plugin [%s]', $this->getPluginVersion()) . breakLine();
         $setup .= sprintf('URL Base [%s]', $this->getUrl('')) . breakLine();
+        $setup .= sprintf('Logs [%s]', $this->getLogFilePath()) . breakLine();
         $setup .= sprintf('%s [%s]', $this->ll('Country'), $this->getCountry()) . breakLine();
         $setup .= sprintf('%s [%s]', $this->ll('Environment'), $this->getEnvironment()) . breakLine();
 

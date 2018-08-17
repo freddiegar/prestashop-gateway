@@ -11,9 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Update README file with [mailtrap.io](https://mailtrap.io/)
 - Update format name logfile, it is: \[dev|prod\]_YYYYMMDD_placetopayment.log
 - Update commands in Makefile
+- Update log in database if save in logfile failed
 
 ### Fixed
-- Fix error when log in file or database failed
+- Fix translations in: `es` and `gb` locales
 
 ## [3.4.0] - 2018-07-25
 
