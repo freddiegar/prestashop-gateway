@@ -61,7 +61,7 @@ class PaymentLogger
      */
     public static function getLogFilename()
     {
-        $logfile = sprintf('%s_%s.log', getModuleName(), date('Y-m-d'));
+        $logfile = sprintf('%s_%s_%s.log', (isDebugEnable() ? 'dev' : 'prod'), @date('Ymd'), getModuleName());
 
         // PS < 1.7.0.0
         $pathLogs = '/log/';
