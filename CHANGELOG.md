@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Updated
 - Update dependencies guzzle/guzzle from 5.3.2 => 5.3.3
 - Update README file with [mailtrap.io](https://mailtrap.io/)
+- Add prefix dev or prod in log file, format: [dev|prod]_YYYYMMDD_placetopayment.log
+
+### Fixed
+- Fix error when log in file or database failed
 
 ## [3.4.0] - 2018-07-25
 

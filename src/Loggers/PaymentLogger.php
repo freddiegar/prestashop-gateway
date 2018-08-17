@@ -40,6 +40,8 @@ class PaymentLogger
             self::getLogInstance()->log($format, $severity, $errorCode);
         } catch (Exception $exception) {
             $logSuccess = false;
+
+            self::logInDatabase($exception->getMessage(), self::WARNING, $exception->getCode());
         }
 
         if ($severity >= self::WARNING || !$logSuccess) {
