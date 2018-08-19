@@ -1,8 +1,11 @@
+#!/bin/sh
+
 CONTAINER_PS=plugin_ps_prestashop
 CONTAINER_DB=plugin_ps_database
 CURRENT_FOLDER=$(shell pwd)
 UID=$(shell id -u)
 APACHE_USER=www-data
+MODULE_NAME=placetopaypayment
 
 # Persistence commands
 
@@ -130,6 +133,7 @@ restore-override:
 
 .PHONY: compile
 compile:
+	$(eval MODULE_NAME_VR=$(MODULE_NAME)$(PLUGIN_VERSION))
 	@touch ~/Downloads/placetopaypayment_test \
         && sudo rm -Rf ~/Downloads/placetopaypayment* \
         && sudo cp $(CURRENT_FOLDER) ~/Downloads/placetopaypayment -R \
@@ -146,8 +150,8 @@ compile:
         && sudo rm -Rf ~/Downloads/placetopaypayment/*.md \
         && sudo rm -Rf ~/Downloads/placetopaypayment/LICENSE \
         && cd ~/Downloads \
-        && sudo zip -r -q -o placetopaypayment_$(PLUGIN_VERSION).zip placetopaypayment \
-        && sudo chown $(UID):$(UID) placetopaypayment_$(PLUGIN_VERSION).zip \
-        && sudo chmod 644 placetopaypayment_$(PLUGIN_VERSION).zip \
+        && sudo zip -r -q -o $(MODULE_NAME_VR).zip placetopaypayment \
+        && sudo chown $(UID):$(UID) $(MODULE_NAME_VR).zip \
+        && sudo chmod 644 $(MODULE_NAME_VR).zip \
         && sudo rm -Rf ~/Downloads/placetopaypayment
-	@echo "Compile file complete: ~/Downloads/placetopaypayment_$(PLUGIN_VERSION).zip"
+	@echo "Compile file complete: ~/Downloads/$(MODULE_NAME_VR).zip"
