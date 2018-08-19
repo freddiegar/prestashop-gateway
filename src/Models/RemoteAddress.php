@@ -7,7 +7,10 @@
  * @copyright Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
  * @license   http://framework.zend.com/license/new-bsd New BSD License
  */
+
 namespace PlacetoPay\Models;
+
+use Tools;
 
 /**
  * Functionality for determining client IP address.
@@ -152,7 +155,7 @@ class RemoteAddress
      */
     protected function normalizeProxyHeader($header)
     {
-        $header = strtoupper($header);
+        $header = Tools::strtoupper($header);
         $header = str_replace('-', '_', $header);
         if (0 !== strpos($header, 'HTTP_')) {
             $header = 'HTTP_' . $header;

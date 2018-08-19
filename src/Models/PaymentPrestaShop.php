@@ -115,26 +115,20 @@ class PaymentPrestaShop extends PaymentModule
     /**
      * @var string
      */
-    private $tablePayment = '';
+    private $tablePayment = _DB_PREFIX_ . 'payment_placetopay';
 
     /**
      * @var string
      */
-    private $tableOrder = '';
+    private $tableOrder = _DB_PREFIX_ . 'orders';
 
     /**
      * PlacetoPayPayment constructor.
      */
     public function __construct()
     {
-        /**
-         * PHP < 5.6 not allowed this definitions in constructor
-         */
-        $this->tablePayment = _DB_PREFIX_ . 'payment_placetopay';
-        $this->tableOrder = _DB_PREFIX_ . 'orders';
-
-        $this->name = getModuleName();
-        $this->version = '3.4.0';
+        $this->name = 'placetopaypayment';
+        $this->version = '3.5.0';
         $this->author = 'EGM Ingeniería sin Fronteras S.A.S';
         $this->tab = 'payments_gateways';
 
@@ -422,7 +416,7 @@ class PaymentPrestaShop extends PaymentModule
             foreach (Language::getLanguages() as $language) {
                 $lang = $language['id_lang'];
 
-                switch (strtolower($language['iso_code'])) {
+                switch (Tools::strtolower($language['iso_code'])) {
                     case 'en':
                         $orderState->name[$lang] = 'Awaiting ' . $this->displayName . ' payment confirmation';
                         break;
@@ -1749,9 +1743,9 @@ class PaymentPrestaShop extends PaymentModule
             // On returnUrl from redirection process
             $reference = $this->reference($_reference, true);
             $paymentPlaceToPay = $this->getPaymentPlaceToPayBy('reference', $reference);
-        } elseif (!empty(file_get_contents("php://input"))) {
+        } elseif (!empty(Tools::file_get_contents("php://input"))) {
             // On resolve function called process
-            $input = json_decode(file_get_contents("php://input"), 1);
+            $input = json_decode(Tools::file_get_contents("php://input"), 1);
 
             $notification = new Notification((array)$input, $this->getTranKey());
 
@@ -2410,8 +2404,8 @@ class PaymentPrestaShop extends PaymentModule
 
         return !$this->isProduction()
         && !empty($force)
-        && strlen($force) === 5
-        && substr($this->getLogin(), -5) === $force
+        && Tools::strlen($force) === 5
+        && Tools::substr($this->getLogin(), -5) === $force
             ? true
             : false;
     }
