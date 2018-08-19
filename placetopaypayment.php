@@ -39,6 +39,6 @@ if (versionComparePlaceToPay('1.7.0.0', '<')) {
     });
 }
 
-class PlacetoPayPayment extends PlacetoPay\Models\PaymentPrestaShop
+class PlacetoPayPayment extends PlacetoPay\Models\PlacetoPayPayment
 {
 }

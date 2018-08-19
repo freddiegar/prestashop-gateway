@@ -88,7 +88,7 @@ use Validate;
  * @property string tab
  * @property string author
  */
-class PaymentPrestaShop extends PaymentModule
+class PlacetoPayPayment extends PaymentModule
 {
     /**
      * Configuration module vars
