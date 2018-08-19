@@ -1494,8 +1494,10 @@ class PaymentPrestaShop extends PaymentModule
         $currency = new Currency((int)($cart->id_currency));
         $invoiceAddress = new Address((int)($cart->id_address_invoice));
         $deliveryAddress = new Address((int)($cart->id_address_delivery));
-        $totalAmount = floatval($cart->getOrderTotal(true));
-        $taxAmount = floatval($totalAmount - floatval($cart->getOrderTotal(false)));
+
+        $totalAmount = (float)$cart->getOrderTotal(true);
+        $totalAmountWithoutTaxes = (float)$cart->getOrderTotal(false);
+        $taxAmount = (float)($totalAmount - $totalAmountWithoutTaxes);
 
         if (!Validate::isLoadedObject($customer)) {
             throw new PaymentException('Invalid customer', 301);
@@ -2106,16 +2108,16 @@ class PaymentPrestaShop extends PaymentModule
 
         switch ($this->getShowOnReturn()) {
             case self::SHOW_ON_RETURN_PSE_LIST:
-                return $this->getPaymentPSEList($order->id_customer);
+                $viewOnReturn = $this->getPaymentPSEList($order->id_customer);
                 break;
             case self::SHOW_ON_RETURN_DETAILS:
-                return $this->getPaymentDetails($order);
-                break;
             case self::SHOW_ON_RETURN_DEFAULT:
             default:
-                return $this->getPaymentDetails($order);
+                $viewOnReturn = $this->getPaymentDetails($order);
                 break;
         }
+
+        return $viewOnReturn;
     }
 
     /**

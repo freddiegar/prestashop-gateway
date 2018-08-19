@@ -1,0 +1,72 @@
+[1mdiff --git a/src/Models/PaymentPrestaShop.php b/src/Models/PaymentPrestaShop.php[m
+[1mindex 235e118..c62d43e 100644[m
+[1m--- a/src/Models/PaymentPrestaShop.php[m
+[1m+++ b/src/Models/PaymentPrestaShop.php[m
+[36m@@ -1,5 +1,33 @@[m
+ <?php[m
+ [m
+[32m+[m[32m/**[m
+[32m+[m[32m * MIT License[m
+[32m+[m[32m *[m
+[32m+[m[32m * Copyright (c) 2018 Freddie Gar[m
+[32m+[m[32m *[m
+[32m+[m[32m * Permission is hereby granted, free of charge, to any person obtaining a copy[m
+[32m+[m[32m * of this software and associated documentation files (the "Software"), to deal[m
+[32m+[m[32m * in the Software without restriction, including without limitation the rights[m
+[32m+[m[32m * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell[m
+[32m+[m[32m * copies of the Software, and to permit persons to whom the Software is[m
+[32m+[m[32m * furnished to do so, subject to the following conditions:[m
+[32m+[m[32m *[m
+[32m+[m[32m * The above copyright notice and this permission notice shall be included in all[m
+[32m+[m[32m * copies or substantial portions of the Software.[m
+[32m+[m[32m *[m
+[32m+[m[32m * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR[m
+[32m+[m[32m * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,[m
+[32m+[m[32m * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE[m
+[32m+[m[32m * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER[m
+[32m+[m[32m * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,[m
+[32m+[m[32m * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE[m
+[32m+[m[32m * SOFTWARE.[m
+[32m+[m[32m *[m
+[32m+[m[32m *  @author Freddie Gar <freddie.gar@outlook.com>[m
+[32m+[m[32m *  @copyright 2018[m
+[32m+[m[32m *  @license https://github.com/freddiegar/prestashop-gateway/blob/master/LICENSE[m
+[32m+[m[32m */[m
+[32m+[m
+ namespace PlacetoPay\Models;[m
+ [m
+ use Address;[m
+[36m@@ -1494,8 +1522,10 @@[m [mclass PaymentPrestaShop extends PaymentModule[m
+         $currency = new Currency((int)($cart->id_currency));[m
+         $invoiceAddress = new Address((int)($cart->id_address_invoice));[m
+         $deliveryAddress = new Address((int)($cart->id_address_delivery));[m
+[31m-        $totalAmount = floatval($cart->getOrderTotal(true));[m
+[31m-        $taxAmount = floatval($totalAmount - floatval($cart->getOrderTotal(false)));[m
+[32m+[m
+[32m+[m[32m        $totalAmount = (float)$cart->getOrderTotal(true);[m
+[32m+[m[32m        $totalAmountWithoutTaxes = (float)$cart->getOrderTotal(false);[m
+[32m+[m[32m        $taxAmount = (float)($totalAmount - $totalAmountWithoutTaxes);[m
+ [m
+         if (!Validate::isLoadedObject($customer)) {[m
+             throw new PaymentException('Invalid customer', 301);[m
+[36m@@ -2106,16 +2136,16 @@[m [mclass PaymentPrestaShop extends PaymentModule[m
+ [m
+         switch ($this->getShowOnReturn()) {[m
+             case self::SHOW_ON_RETURN_PSE_LIST:[m
+[31m-                return $this->getPaymentPSEList($order->id_customer);[m
+[32m+[m[32m                $viewOnReturn = $this->getPaymentPSEList($order->id_customer);[m
+                 break;[m
+             case self::SHOW_ON_RETURN_DETAILS:[m
+[31m-                return $this->getPaymentDetails($order);[m
+[31m-                break;[m
+             case self::SHOW_ON_RETURN_DEFAULT:[m
+             default:[m
+[31m-                return $this->getPaymentDetails($order);[m
+[32m+[m[32m                $viewOnReturn = $this->getPaymentDetails($order);[m
+                 break;[m
+         }[m
+[32m+[m
+[32m+[m[32m        return $viewOnReturn;[m
+     }[m
+ [m
+     /**[m
