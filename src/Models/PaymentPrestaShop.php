@@ -108,7 +108,6 @@ class PaymentPrestaShop extends PaymentModule
     const FILL_BUYER_INFORMATION = 'PLACETOPAY_FILL_BUYER_INFORMATION';
     const SKIP_RESULT = 'PLACETOPAY_SKIP_RESULT';
     const PAYMENT_METHODS_ENABLED = 'PLACETOPAY_PAYMENT_METHODS_ENABLED';
-    const STOCK_REINJECT = 'PLACETOPAY_STOCKREINJECT';
 
     const COUNTRY = 'PLACETOPAY_COUNTRY';
     const ENVIRONMENT = 'PLACETOPAY_ENVIRONMENT';
@@ -253,10 +252,6 @@ class PaymentPrestaShop extends PaymentModule
             Configuration::updateValue(self::SKIP_RESULT, self::OPTION_DISABLED);
             Configuration::updateValue(self::PAYMENT_METHODS_ENABLED, self::PAYMENT_METHODS_ENABLED_DEFAULT);
 
-            if (versionComparePlaceToPay('1.7.0.0', '<')) {
-                Configuration::updateValue(self::STOCK_REINJECT, self::OPTION_ENABLED);
-            }
-
             Configuration::updateValue(self::COUNTRY, CountryCode::COLOMBIA);
             Configuration::updateValue(self::ENVIRONMENT, Environment::TEST);
             Configuration::updateValue(self::CUSTOM_CONNECTION_URL, '');
@@ -303,10 +298,6 @@ class PaymentPrestaShop extends PaymentModule
             || !Configuration::deleteByName(self::CONNECTION_TYPE)
             || !parent::uninstall()
         ) {
-            return false;
-        }
-
-        if (versionComparePlaceToPay('1.7.0.0', '<') && !Configuration::deleteByName(self::STOCK_REINJECT)) {
             return false;
         }
 
@@ -602,10 +593,6 @@ class PaymentPrestaShop extends PaymentModule
                 Tools::getValue(self::COUNTRY)
             ));
 
-            if (versionComparePlaceToPay('1.7.0.0', '<')) {
-                Configuration::updateValue(self::STOCK_REINJECT, Tools::getValue(self::STOCK_REINJECT));
-            }
-
             // Connection Configuration
             Configuration::updateValue(self::COUNTRY, Tools::getValue(self::COUNTRY));
             Configuration::updateValue(self::ENVIRONMENT, Tools::getValue(self::ENVIRONMENT));
@@ -698,13 +685,7 @@ class PaymentPrestaShop extends PaymentModule
      */
     private function getConfigFieldsValues()
     {
-        $compatibility_1_6 = [];
-
-        if (versionComparePlaceToPay('1.7.0.0', '<')) {
-            $compatibility_1_6 = [self::STOCK_REINJECT => $this->getStockReInject()];
-        }
-
-        return array_merge([
+        return [
             self::COMPANY_DOCUMENT => $this->getCompanyDocument(),
             self::COMPANY_NAME => $this->getCompanyName(),
             self::EMAIL_CONTACT => $this->getEmailContact(),
@@ -728,7 +709,7 @@ class PaymentPrestaShop extends PaymentModule
             self::LOGIN => $this->getLogin(),
             self::TRAN_KEY => $this->getTranKey(),
             self::CONNECTION_TYPE => $this->getConnectionType(),
-        ], $compatibility_1_6);
+        ];
     }
 
     /**
@@ -736,18 +717,6 @@ class PaymentPrestaShop extends PaymentModule
      */
     private function renderForm()
     {
-        $compatibility_1_6 = null;
-
-        if (versionComparePlaceToPay('1.7.0.0', '<')) {
-            $compatibility_1_6 = [
-                'type' => 'switch',
-                'label' => $this->ll('Re-inject stock on declination?'),
-                'name' => self::STOCK_REINJECT,
-                'is_bool' => true,
-                'values' => $this->getListOptionSwitch(),
-            ];
-        }
-
         $fieldsFormCompany = [
             'form' => [
                 'legend' => [
@@ -870,8 +839,7 @@ class PaymentPrestaShop extends PaymentModule
                             'name' => 'label',
                             'query' => $this->getListOptionPaymentMethods(),
                         ]
-                    ],
-                    $compatibility_1_6,
+                    ]
                 ],
                 'submit' => [
                     'title' => $this->ll('Save'),
@@ -1372,14 +1340,6 @@ class PaymentPrestaShop extends PaymentModule
     private function getFillTaxInformation()
     {
         return $this->getCurrentValueOf(self::FILL_TAX_INFORMATION);
-    }
-
-    /**
-     * @return bool
-     */
-    private function getStockReInject()
-    {
-        return $this->getCurrentValueOf(self::STOCK_REINJECT);
     }
 
     /**
@@ -2007,13 +1967,6 @@ class PaymentPrestaShop extends PaymentModule
                     $history->addWithemail();
                     $history->save();
 
-                    if (versionComparePlaceToPay('1.7.0.0', '<') && $this->getStockReinject() == self::OPTION_ENABLED) {
-                        $products = $order->getProducts();
-                        foreach ($products as $product) {
-                            $order_detail = new \OrderDetail((int)($product['id_order_detail']));
-                            \Product::reinjectQuantities($order_detail, $product['product_quantity']);
-                        }
-                    }
                     break;
                 case PaymentStatus::DUPLICATE:
                 case PaymentStatus::APPROVED:
