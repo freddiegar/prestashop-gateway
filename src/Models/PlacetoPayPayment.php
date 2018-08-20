@@ -137,7 +137,6 @@ class PlacetoPayPayment extends PaymentModule
     const PAGE_ORDER_DETAILS = 'index.php?controller=order-detail';
 
     const MIN_VERSION_PS = '1.6.0.5';
-    const MAX_VERSION_PS = '1.7.4.2';
 
     /**
      * @var string
@@ -168,7 +167,7 @@ class PlacetoPayPayment extends PaymentModule
 
         $this->ps_versions_compliancy = [
             'min' => self::MIN_VERSION_PS,
-            'max' => self::MAX_VERSION_PS
+            'max' => _PS_VERSION_
         ];
 
         $this->controllers = ['validation'];

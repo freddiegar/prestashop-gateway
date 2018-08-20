@@ -15,6 +15,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Fix translations in: `es` and `gb` locales
 
+### Removed
+- Stock re-inject option setup in PS 1.6, deprecated in PS 1.5
+
 ## [3.4.0] - 2018-07-25
 
 ### Added
