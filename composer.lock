@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "6e2901f9f8606ab23187b703f55ac51a",
+    "content-hash": "0c8a9e177b1645086b675ef5559cb4cf",
     "packages": [
         {
             "name": "dnetix/redirection",
@@ -311,7 +311,8 @@
         "php": ">=5.6.0",
         "ext-curl": "*",
         "ext-soap": "*",
-        "ext-json": "*"
+        "ext-json": "*",
+        "ext-mbstring": "*"
     },
     "platform-dev": []
 }
