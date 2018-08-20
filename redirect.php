@@ -15,12 +15,12 @@ try {
     require fixPath(sprintf('%s/%2$s/%2$s.php', _PS_MODULE_DIR_, getModuleName()));
 
     if (!Context::getContext()->customer->isLogged() && !Context::getContext()->customer->is_guest) {
-        PaymentLogger::log('Access not allowed to: ' . __FILE__, PaymentLogger::WARNING, 17);
+        PaymentLogger::log('Access not allowed', PaymentLogger::WARNING, 17, __FILE__, __LINE__);
         Tools::redirect('authentication.php?back=order.php');
     }
 
     (new PlacetoPayPayment())->redirect($cart);
 } catch (Exception $e) {
-    PaymentLogger::log($e->getMessage(), PaymentLogger::ERROR, 999);
+    PaymentLogger::log($e->getMessage(), PaymentLogger::ERROR, 999, __FILE__, __LINE__);
     die($e->getMessage());
 }
