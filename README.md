@@ -209,9 +209,6 @@ Or adding version number in filename use
 make compile PLUGIN_VERSION=_X.Y.Z
 ```
 
-> This apply to last versions from PrestaShop (>= 1.7)
-
-
 ## Quality
 
 During package development I try as best as possible to embrace good design and development practices, to help ensure that this package is as good as it can
