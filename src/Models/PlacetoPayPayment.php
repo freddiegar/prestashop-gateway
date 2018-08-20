@@ -1,4 +1,31 @@
 <?php
+/**
+ * MIT License
+ *
+ * Copyright (c) 2018 Freddie Gar
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * @author Freddie Gar <freddie.gar@outlook.com>
+ * @copyright 2018
+ * @license https://github.com/freddiegar/prestashop-gateway/blob/master/LICENSE
+ */
 
 namespace PlacetoPay\Models;
 
@@ -61,7 +88,7 @@ use Validate;
  * @property string tab
  * @property string author
  */
-class PaymentPrestaShop extends PaymentModule
+class PlacetoPayPayment extends PaymentModule
 {
     /**
      * Configuration module vars
@@ -80,7 +107,6 @@ class PaymentPrestaShop extends PaymentModule
     const FILL_BUYER_INFORMATION = 'PLACETOPAY_FILL_BUYER_INFORMATION';
     const SKIP_RESULT = 'PLACETOPAY_SKIP_RESULT';
     const PAYMENT_METHODS_ENABLED = 'PLACETOPAY_PAYMENT_METHODS_ENABLED';
-    const STOCK_REINJECT = 'PLACETOPAY_STOCKREINJECT';
 
     const COUNTRY = 'PLACETOPAY_COUNTRY';
     const ENVIRONMENT = 'PLACETOPAY_ENVIRONMENT';
@@ -115,26 +141,20 @@ class PaymentPrestaShop extends PaymentModule
     /**
      * @var string
      */
-    private $tablePayment = '';
+    private $tablePayment = _DB_PREFIX_ . 'payment_placetopay';
 
     /**
      * @var string
      */
-    private $tableOrder = '';
+    private $tableOrder = _DB_PREFIX_ . 'orders';
 
     /**
      * PlacetoPayPayment constructor.
      */
     public function __construct()
     {
-        /**
-         * PHP < 5.6 not allowed this definitions in constructor
-         */
-        $this->tablePayment = _DB_PREFIX_ . 'payment_placetopay';
-        $this->tableOrder = _DB_PREFIX_ . 'orders';
-
-        $this->name = getModuleName();
-        $this->version = '3.4.0';
+        $this->name = 'placetopaypayment';
+        $this->version = '3.5.0';
         $this->author = 'EGM Ingeniería sin Fronteras S.A.S';
         $this->tab = 'payments_gateways';
 
@@ -231,10 +251,6 @@ class PaymentPrestaShop extends PaymentModule
             Configuration::updateValue(self::SKIP_RESULT, self::OPTION_DISABLED);
             Configuration::updateValue(self::PAYMENT_METHODS_ENABLED, self::PAYMENT_METHODS_ENABLED_DEFAULT);
 
-            if (versionComparePlaceToPay('1.7.0.0', '<')) {
-                Configuration::updateValue(self::STOCK_REINJECT, self::OPTION_ENABLED);
-            }
-
             Configuration::updateValue(self::COUNTRY, CountryCode::COLOMBIA);
             Configuration::updateValue(self::ENVIRONMENT, Environment::TEST);
             Configuration::updateValue(self::CUSTOM_CONNECTION_URL, '');
@@ -281,10 +297,6 @@ class PaymentPrestaShop extends PaymentModule
             || !Configuration::deleteByName(self::CONNECTION_TYPE)
             || !parent::uninstall()
         ) {
-            return false;
-        }
-
-        if (versionComparePlaceToPay('1.7.0.0', '<') && !Configuration::deleteByName(self::STOCK_REINJECT)) {
             return false;
         }
 
@@ -422,7 +434,7 @@ class PaymentPrestaShop extends PaymentModule
             foreach (Language::getLanguages() as $language) {
                 $lang = $language['id_lang'];
 
-                switch (strtolower($language['iso_code'])) {
+                switch (Tools::strtolower($language['iso_code'])) {
                     case 'en':
                         $orderState->name[$lang] = 'Awaiting ' . $this->displayName . ' payment confirmation';
                         break;
@@ -580,10 +592,6 @@ class PaymentPrestaShop extends PaymentModule
                 Tools::getValue(self::COUNTRY)
             ));
 
-            if (versionComparePlaceToPay('1.7.0.0', '<')) {
-                Configuration::updateValue(self::STOCK_REINJECT, Tools::getValue(self::STOCK_REINJECT));
-            }
-
             // Connection Configuration
             Configuration::updateValue(self::COUNTRY, Tools::getValue(self::COUNTRY));
             Configuration::updateValue(self::ENVIRONMENT, Tools::getValue(self::ENVIRONMENT));
@@ -676,13 +684,7 @@ class PaymentPrestaShop extends PaymentModule
      */
     private function getConfigFieldsValues()
     {
-        $compatibility_1_6 = [];
-
-        if (versionComparePlaceToPay('1.7.0.0', '<')) {
-            $compatibility_1_6 = [self::STOCK_REINJECT => $this->getStockReInject()];
-        }
-
-        return array_merge([
+        return [
             self::COMPANY_DOCUMENT => $this->getCompanyDocument(),
             self::COMPANY_NAME => $this->getCompanyName(),
             self::EMAIL_CONTACT => $this->getEmailContact(),
@@ -706,7 +708,7 @@ class PaymentPrestaShop extends PaymentModule
             self::LOGIN => $this->getLogin(),
             self::TRAN_KEY => $this->getTranKey(),
             self::CONNECTION_TYPE => $this->getConnectionType(),
-        ], $compatibility_1_6);
+        ];
     }
 
     /**
@@ -714,264 +716,34 @@ class PaymentPrestaShop extends PaymentModule
      */
     private function renderForm()
     {
-        $compatibility_1_6 = null;
-
-        if (versionComparePlaceToPay('1.7.0.0', '<')) {
-            $compatibility_1_6 = [
-                'type' => 'switch',
-                'label' => $this->ll('Re-inject stock on declination?'),
-                'name' => self::STOCK_REINJECT,
-                'is_bool' => true,
-                'values' => $this->getListOptionSwitch(),
-            ];
-        }
-
-        $fieldsFormCompany = [
+        $formCompany = [
             'form' => [
-                'legend' => [
-                    'title' => $this->ll('Company data'),
-                    'icon' => 'icon-building'
-                ],
-                'input' => [
-                    [
-                        'type' => 'text',
-                        'label' => $this->ll('Merchant ID'),
-                        'name' => self::COMPANY_DOCUMENT,
-                        'required' => true,
-                        'autocomplete' => 'off',
-                    ],
-                    [
-                        'type' => 'text',
-                        'label' => $this->ll('Legal Name'),
-                        'name' => self::COMPANY_NAME,
-                        'required' => true,
-                        'autocomplete' => 'off',
-                    ],
-                    [
-                        'type' => 'text',
-                        'label' => $this->ll('Email contact'),
-                        'name' => self::EMAIL_CONTACT,
-                        'required' => true,
-                        'autocomplete' => 'off',
-                    ],
-                    [
-                        'type' => 'text',
-                        'label' => $this->ll('Telephone contact'),
-                        'name' => self::TELEPHONE_CONTACT,
-                        'required' => true,
-                        'autocomplete' => 'off',
-                    ],
-                    [
-                        'type' => 'text',
-                        'label' => $this->ll('Payment description'),
-                        'name' => self::DESCRIPTION,
-                        'required' => true,
-                        'autocomplete' => 'off',
-                    ],
-                ],
-                'submit' => [
-                    'title' => $this->ll('Save'),
-                ]
+                'legend' => $this->getLegendTo('Company data', 'icon-building'),
+                'input' => $this->getFieldsCompany(),
+                'submit' => $this->getSubmitButton()
             ],
         ];
 
-        $fieldsFormSetup = [
+        $formConfiguration = [
             'form' => [
-                'legend' => [
-                    'title' => $this->ll('Configuration'),
-                    'icon' => 'icon-cogs'
-                ],
-                'input' => [
-                    [
-                        'type' => 'text',
-                        'label' => $this->ll('Expiration time to pay'),
-                        'name' => self::EXPIRATION_TIME_MINUTES,
-                        'required' => true,
-                        'autocomplete' => 'off',
-                    ],
-                    [
-                        'type' => 'select',
-                        'label' => $this->ll('Show on payment return'),
-                        'desc' => $this->ll('If you has PSE method payment in your commerce, set it in: PSE List.'),
-                        'name' => self::SHOW_ON_RETURN,
-                        'options' => [
-                            'id' => 'value',
-                            'name' => 'label',
-                            'query' => $this->getListOptionShowOnReturn(),
-                        ],
-                    ],
-                    [
-                        'type' => 'switch',
-                        'label' => $this->ll('Enable TransUnion message?'),
-                        'name' => self::CIFIN_MESSAGE,
-                        'is_bool' => true,
-                        'values' => $this->getListOptionSwitch(),
-                    ],
-                    [
-                        'type' => 'switch',
-                        'label' => $this->ll('Allow buy with pending payments?'),
-                        'name' => self::ALLOW_BUY_WITH_PENDING_PAYMENTS,
-                        'is_bool' => true,
-                        'values' => $this->getListOptionSwitch(),
-                    ],
-                    [
-                        'type' => 'switch',
-                        'label' => $this->ll('Fill TAX information?'),
-                        'name' => self::FILL_TAX_INFORMATION,
-                        'is_bool' => true,
-                        'values' => $this->getListOptionSwitch(),
-                    ],
-                    [
-                        'type' => 'switch',
-                        'label' => $this->ll('Fill buyer information?'),
-                        'name' => self::FILL_BUYER_INFORMATION,
-                        'is_bool' => true,
-                        'values' => $this->getListOptionSwitch(),
-                    ],
-                    [
-                        'type' => 'switch',
-                        'label' => $this->ll('Skip result?'),
-                        'name' => self::SKIP_RESULT,
-                        'is_bool' => true,
-                        'values' => $this->getListOptionSwitch(),
-                    ],
-                    [
-                        'type' => 'select',
-                        'multiple' => true,
-                        'label' => $this->ll('Payment methods enabled'),
-                        'name' => $this->getNameInMultipleFormat(self::PAYMENT_METHODS_ENABLED),
-                        'id' => self::PAYMENT_METHODS_ENABLED,
-                        // @codingStandardsIgnoreLine
-                        'desc' => $this->ll('IMPORTANT: Payment methods in PlacetoPay will restrict by this selection. [Ctrl + Clic] to select several'),
-                        'options' => [
-                            'id' => 'value',
-                            'name' => 'label',
-                            'query' => $this->getListOptionPaymentMethods(),
-                        ]
-                    ],
-                    $compatibility_1_6,
-                ],
-                'submit' => [
-                    'title' => $this->ll('Save'),
-                ]
+                'legend' => $this->getLegendTo('Configuration', 'icon-cogs'),
+                'input' => $this->getFieldsConfiguration(),
+                'submit' => $this->getSubmitButton()
             ],
         ];
 
-        $fieldsFormConnection = [
+        $formConnection = [
             'form' => [
-                'legend' => [
-                    'title' => $this->ll('Connection Configuration'),
-                    'icon' => 'icon-rocket'
-                ],
-                'input' => [
-                    [
-                        'type' => 'select',
-                        'label' => $this->ll('Country'),
-                        'name' => self::COUNTRY,
-                        'required' => true,
-                        'options' => [
-                            'id' => 'value',
-                            'name' => 'label',
-                            'query' => [
-                                [
-                                    'value' => CountryCode::COLOMBIA,
-                                    'label' => $this->ll('Colombia'),
-                                ],
-                                [
-                                    'value' => CountryCode::ECUADOR,
-                                    'label' => $this->ll('Ecuador'),
-                                ],
-                            ],
-                        ],
-                    ],
-                    [
-                        'type' => 'select',
-                        'label' => $this->ll('Environment'),
-                        'name' => self::ENVIRONMENT,
-                        'required' => true,
-                        'options' => [
-                            'id' => 'value',
-                            'name' => 'label',
-                            'query' => [
-                                [
-                                    'value' => Environment::PRODUCTION,
-                                    'label' => $this->ll('Production'),
-                                ],
-                                [
-                                    'value' => Environment::TEST,
-                                    'label' => $this->ll('Test'),
-                                ],
-                                [
-                                    'value' => Environment::DEVELOPMENT,
-                                    'label' => $this->ll('Development'),
-                                ],
-                                [
-                                    'value' => Environment::CUSTOM,
-                                    'label' => $this->ll('Custom'),
-                                ],
-                            ],
-                        ],
-                    ],
-                    [
-                        'type' => 'text',
-                        'label' => $this->ll('Custom connection URL'),
-                        'desc' => sprintf(
-                            '%s %s: %s',
-                            // @codingStandardsIgnoreLine
-                            $this->ll('By example: "https://alternative.placetopay.com/redirection". This value only is required when you select'),
-                            $this->ll('Environment'),
-                            $this->ll('Custom')
-                        ),
-                        'name' => self::CUSTOM_CONNECTION_URL,
-                        'required' => $this->isCustomEnvironment(),
-                        'autocomplete' => 'off',
-                    ],
-                    [
-                        'type' => 'text',
-                        'label' => $this->ll('Login'),
-                        'name' => self::LOGIN,
-                        'required' => true,
-                        'autocomplete' => 'off',
-                    ],
-                    [
-                        'type' => 'password',
-                        'label' => $this->ll('Trankey'),
-                        'name' => self::TRAN_KEY,
-                        'required' => true,
-                        'autocomplete' => 'off',
-                    ],
-                    [
-                        'type' => 'select',
-                        'label' => $this->ll('Connection type'),
-                        'name' => self::CONNECTION_TYPE,
-                        'required' => true,
-                        'options' => [
-                            'id' => 'value',
-                            'name' => 'label',
-                            'query' => [
-                                [
-                                    'value' => self::CONNECTION_TYPE_SOAP,
-                                    'label' => $this->ll('SOAP'),
-                                ],
-                                [
-                                    'value' => self::CONNECTION_TYPE_REST,
-                                    'label' => $this->ll('REST'),
-                                ],
-                            ],
-                        ],
-                    ],
-                ],
-                'submit' => [
-                    'title' => $this->ll('Save'),
-                ]
+                'legend' => $this->getLegendTo('Connection Configuration', 'icon-rocket'),
+                'input' => $this->getFieldsConnection(),
+                'submit' => $this->getSubmitButton()
             ],
         ];
 
         $helper = new HelperForm();
         $helper->show_toolbar = false;
         $helper->table = $this->table;
-        $lang = new Language((int)Configuration::get('PS_LANG_DEFAULT'));
-        $helper->default_form_language = $lang->id;
+        $helper->default_form_language = (new Language((int)Configuration::get('PS_LANG_DEFAULT')))->id;
         $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG') ?: 0;
         $helper->id = (int)Tools::getValue('id_carrier');
         $helper->identifier = $this->identifier;
@@ -985,7 +757,7 @@ class PaymentPrestaShop extends PaymentModule
             'id_language' => $this->context->language->id
         ];
 
-        return $helper->generateForm([$fieldsFormCompany, $fieldsFormSetup, $fieldsFormConnection]);
+        return $helper->generateForm([$formCompany, $formConfiguration, $formConnection]);
     }
 
     /**
@@ -1353,14 +1125,6 @@ class PaymentPrestaShop extends PaymentModule
     }
 
     /**
-     * @return bool
-     */
-    private function getStockReInject()
-    {
-        return $this->getCurrentValueOf(self::STOCK_REINJECT);
-    }
-
-    /**
      * @return string
      */
     private function getConnectionType()
@@ -1500,8 +1264,10 @@ class PaymentPrestaShop extends PaymentModule
         $currency = new Currency((int)($cart->id_currency));
         $invoiceAddress = new Address((int)($cart->id_address_invoice));
         $deliveryAddress = new Address((int)($cart->id_address_delivery));
-        $totalAmount = floatval($cart->getOrderTotal(true));
-        $taxAmount = floatval($totalAmount - floatval($cart->getOrderTotal(false)));
+
+        $totalAmount = (float)$cart->getOrderTotal(true);
+        $totalAmountWithoutTaxes = (float)$cart->getOrderTotal(false);
+        $taxAmount = (float)($totalAmount - $totalAmountWithoutTaxes);
 
         if (!Validate::isLoadedObject($customer)) {
             throw new PaymentException('Invalid customer', 301);
@@ -1749,9 +1515,9 @@ class PaymentPrestaShop extends PaymentModule
             // On returnUrl from redirection process
             $reference = $this->reference($_reference, true);
             $paymentPlaceToPay = $this->getPaymentPlaceToPayBy('reference', $reference);
-        } elseif (!empty(file_get_contents("php://input"))) {
+        } elseif (!empty($inputStream = Tools::file_get_contents("php://input"))) {
             // On resolve function called process
-            $input = json_decode(file_get_contents("php://input"), 1);
+            $input = json_decode($inputStream, 1);
 
             $notification = new Notification((array)$input, $this->getTranKey());
 
@@ -1983,13 +1749,6 @@ class PaymentPrestaShop extends PaymentModule
                     $history->addWithemail();
                     $history->save();
 
-                    if (versionComparePlaceToPay('1.7.0.0', '<') && $this->getStockReinject() == self::OPTION_ENABLED) {
-                        $products = $order->getProducts();
-                        foreach ($products as $product) {
-                            $order_detail = new \OrderDetail((int)($product['id_order_detail']));
-                            \Product::reinjectQuantities($order_detail, $product['product_quantity']);
-                        }
-                    }
                     break;
                 case PaymentStatus::DUPLICATE:
                 case PaymentStatus::APPROVED:
@@ -2112,16 +1871,16 @@ class PaymentPrestaShop extends PaymentModule
 
         switch ($this->getShowOnReturn()) {
             case self::SHOW_ON_RETURN_PSE_LIST:
-                return $this->getPaymentPSEList($order->id_customer);
+                $viewOnReturn = $this->getPaymentPSEList($order->id_customer);
                 break;
             case self::SHOW_ON_RETURN_DETAILS:
-                return $this->getPaymentDetails($order);
-                break;
             case self::SHOW_ON_RETURN_DEFAULT:
             default:
-                return $this->getPaymentDetails($order);
+                $viewOnReturn = $this->getPaymentDetails($order);
                 break;
         }
+
+        return $viewOnReturn;
     }
 
     /**
@@ -2410,8 +2169,8 @@ class PaymentPrestaShop extends PaymentModule
 
         return !$this->isProduction()
         && !empty($force)
-        && strlen($force) === 5
-        && substr($this->getLogin(), -5) === $force
+        && Tools::strlen($force) === 5
+        && Tools::substr($this->getLogin(), -5) === $force
             ? true
             : false;
     }
@@ -2651,5 +2410,277 @@ class PaymentPrestaShop extends PaymentModule
     private function getNameInMultipleFormat($name)
     {
         return sprintf('%s[]', $name);
+    }
+
+    /**
+     * @return array
+     */
+    private function getListOptionCountries()
+    {
+        return [
+            [
+                'value' => CountryCode::COLOMBIA,
+                'label' => $this->ll('Colombia'),
+            ],
+            [
+                'value' => CountryCode::ECUADOR,
+                'label' => $this->ll('Ecuador'),
+            ],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getListOptionEnvironments()
+    {
+        return [
+            [
+                'value' => Environment::PRODUCTION,
+                'label' => $this->ll('Production'),
+            ],
+            [
+                'value' => Environment::TEST,
+                'label' => $this->ll('Test'),
+            ],
+            [
+                'value' => Environment::DEVELOPMENT,
+                'label' => $this->ll('Development'),
+            ],
+            [
+                'value' => Environment::CUSTOM,
+                'label' => $this->ll('Custom'),
+            ],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getListOptionConnectionTypes()
+    {
+        return [
+            [
+                'value' => self::CONNECTION_TYPE_SOAP,
+                'label' => $this->ll('SOAP'),
+            ],
+            [
+                'value' => self::CONNECTION_TYPE_REST,
+                'label' => $this->ll('REST'),
+            ],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getFieldsCompany()
+    {
+        return [
+            [
+                'type' => 'text',
+                'label' => $this->ll('Merchant ID'),
+                'name' => self::COMPANY_DOCUMENT,
+                'required' => true,
+                'autocomplete' => 'off',
+            ],
+            [
+                'type' => 'text',
+                'label' => $this->ll('Legal Name'),
+                'name' => self::COMPANY_NAME,
+                'required' => true,
+                'autocomplete' => 'off',
+            ],
+            [
+                'type' => 'text',
+                'label' => $this->ll('Email contact'),
+                'name' => self::EMAIL_CONTACT,
+                'required' => true,
+                'autocomplete' => 'off',
+            ],
+            [
+                'type' => 'text',
+                'label' => $this->ll('Telephone contact'),
+                'name' => self::TELEPHONE_CONTACT,
+                'required' => true,
+                'autocomplete' => 'off',
+            ],
+            [
+                'type' => 'text',
+                'label' => $this->ll('Payment description'),
+                'name' => self::DESCRIPTION,
+                'required' => true,
+                'autocomplete' => 'off',
+            ],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getFieldsConfiguration()
+    {
+        return [
+            [
+                'type' => 'text',
+                'label' => $this->ll('Expiration time to pay'),
+                'name' => self::EXPIRATION_TIME_MINUTES,
+                'required' => true,
+                'autocomplete' => 'off',
+            ],
+            [
+                'type' => 'select',
+                'label' => $this->ll('Show on payment return'),
+                'desc' => $this->ll('If you has PSE method payment in your commerce, set it in: PSE List.'),
+                'name' => self::SHOW_ON_RETURN,
+                'options' => [
+                    'id' => 'value',
+                    'name' => 'label',
+                    'query' => $this->getListOptionShowOnReturn(),
+                ],
+            ],
+            [
+                'type' => 'switch',
+                'label' => $this->ll('Enable TransUnion message?'),
+                'name' => self::CIFIN_MESSAGE,
+                'is_bool' => true,
+                'values' => $this->getListOptionSwitch(),
+            ],
+            [
+                'type' => 'switch',
+                'label' => $this->ll('Allow buy with pending payments?'),
+                'name' => self::ALLOW_BUY_WITH_PENDING_PAYMENTS,
+                'is_bool' => true,
+                'values' => $this->getListOptionSwitch(),
+            ],
+            [
+                'type' => 'switch',
+                'label' => $this->ll('Fill TAX information?'),
+                'name' => self::FILL_TAX_INFORMATION,
+                'is_bool' => true,
+                'values' => $this->getListOptionSwitch(),
+            ],
+            [
+                'type' => 'switch',
+                'label' => $this->ll('Fill buyer information?'),
+                'name' => self::FILL_BUYER_INFORMATION,
+                'is_bool' => true,
+                'values' => $this->getListOptionSwitch(),
+            ],
+            [
+                'type' => 'switch',
+                'label' => $this->ll('Skip result?'),
+                'name' => self::SKIP_RESULT,
+                'is_bool' => true,
+                'values' => $this->getListOptionSwitch(),
+            ],
+            [
+                'type' => 'select',
+                'multiple' => true,
+                'label' => $this->ll('Payment methods enabled'),
+                'name' => $this->getNameInMultipleFormat(self::PAYMENT_METHODS_ENABLED),
+                'id' => self::PAYMENT_METHODS_ENABLED,
+                // @codingStandardsIgnoreLine
+                'desc' => $this->ll('IMPORTANT: Payment methods in PlacetoPay will restrict by this selection. [Ctrl + Clic] to select several'),
+                'options' => [
+                    'id' => 'value',
+                    'name' => 'label',
+                    'query' => $this->getListOptionPaymentMethods(),
+                ]
+            ]
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getFieldsConnection()
+    {
+        return [
+            [
+                'type' => 'select',
+                'label' => $this->ll('Country'),
+                'name' => self::COUNTRY,
+                'required' => true,
+                'options' => [
+                    'id' => 'value',
+                    'name' => 'label',
+                    'query' => $this->getListOptionCountries(),
+                ],
+            ],
+            [
+                'type' => 'select',
+                'label' => $this->ll('Environment'),
+                'name' => self::ENVIRONMENT,
+                'required' => true,
+                'options' => [
+                    'id' => 'value',
+                    'name' => 'label',
+                    'query' => $this->getListOptionEnvironments(),
+                ],
+            ],
+            [
+                'type' => 'text',
+                'label' => $this->ll('Custom connection URL'),
+                'desc' => sprintf(
+                    '%s %s: %s',
+                    // @codingStandardsIgnoreLine
+                    $this->ll('By example: "https://alternative.placetopay.com/redirection". This value only is required when you select'),
+                    $this->ll('Environment'),
+                    $this->ll('Custom')
+                ),
+                'name' => self::CUSTOM_CONNECTION_URL,
+                'required' => $this->isCustomEnvironment(),
+                'autocomplete' => 'off',
+            ],
+            [
+                'type' => 'text',
+                'label' => $this->ll('Login'),
+                'name' => self::LOGIN,
+                'required' => true,
+                'autocomplete' => 'off',
+            ],
+            [
+                'type' => 'password',
+                'label' => $this->ll('Trankey'),
+                'name' => self::TRAN_KEY,
+                'required' => true,
+                'autocomplete' => 'off',
+            ],
+            [
+                'type' => 'select',
+                'label' => $this->ll('Connection type'),
+                'name' => self::CONNECTION_TYPE,
+                'required' => true,
+                'options' => [
+                    'id' => 'value',
+                    'name' => 'label',
+                    'query' => $this->getListOptionConnectionTypes(),
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    private function getSubmitButton()
+    {
+        return [
+            'title' => $this->ll('Save'),
+        ];
+    }
+
+    /**
+     * @param $title
+     * @param $icon
+     * @return array
+     */
+    private function getLegendTo($title, $icon)
+    {
+        return [
+            'title' => $this->ll($title),
+            'icon' => $icon
+        ];
     }
 }

@@ -1,13 +1,35 @@
 <?php
-
 /**
- * Zend Framework (http://framework.zend.com/)
+ * MIT License
  *
- * @link      http://github.com/zendframework/zf2 for the canonical source repository
- * @copyright Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
- * @license   http://framework.zend.com/license/new-bsd New BSD License
+ * Copyright (c) 2018 Freddie Gar
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * @author Freddie Gar <freddie.gar@outlook.com>
+ * @copyright 2018
+ * @license https://github.com/freddiegar/prestashop-gateway/blob/master/LICENSE
  */
+
 namespace PlacetoPay\Models;
+
+use Tools;
 
 /**
  * Functionality for determining client IP address.
@@ -25,12 +47,14 @@ class RemoteAddress
      * @var bool
      */
     protected $useProxy = false;
+
     /**
      * List of trusted proxy IP addresses
      *
      * @var array
      */
     protected $trustedProxies = [];
+
     /**
      * HTTP header to introspect for proxies
      *
@@ -98,6 +122,7 @@ class RemoteAddress
         if ($ip) {
             return $ip;
         }
+
         // direct IP address
         if (isset($_SERVER['REMOTE_ADDR'])) {
             return $_SERVER['REMOTE_ADDR'];
@@ -152,7 +177,7 @@ class RemoteAddress
      */
     protected function normalizeProxyHeader($header)
     {
-        $header = strtoupper($header);
+        $header = Tools::strtoupper($header);
         $header = str_replace('-', '_', $header);
         if (0 !== strpos($header, 'HTTP_')) {
             $header = 'HTTP_' . $header;
