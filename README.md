@@ -8,6 +8,7 @@
 - `ext-curl`
 - `ext-soap`
 - `ext-json`
+- `ext-mbstring`
 - `prestashop` >= 1.5
 
 ## Compatibility Version
