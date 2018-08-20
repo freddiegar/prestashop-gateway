@@ -137,6 +137,7 @@ class PlacetoPayPayment extends PaymentModule
     const PAGE_ORDER_DETAILS = 'index.php?controller=order-detail';
 
     const MIN_VERSION_PS = '1.6.0.5';
+    const MAX_VERSION_PS = '1.7.4.2';
 
     /**
      * @var string
@@ -153,9 +154,9 @@ class PlacetoPayPayment extends PaymentModule
      */
     public function __construct()
     {
-        $this->name = 'placetopaypayment';
-        $this->version = '3.5.0';
-        $this->author = 'EGM Ingeniería sin Fronteras S.A.S';
+        $this->name = getModuleName();
+        $this->version = '3.4.1';
+        $this->author = 'EGM Ingeniería Sin Fronteras S.A.S';
         $this->tab = 'payments_gateways';
 
         $this->limited_countries = [
@@ -167,7 +168,7 @@ class PlacetoPayPayment extends PaymentModule
 
         $this->ps_versions_compliancy = [
             'min' => self::MIN_VERSION_PS,
-            'max' => _PS_VERSION_
+            'max' => self::MAX_VERSION_PS
         ];
 
         $this->controllers = ['validation'];
