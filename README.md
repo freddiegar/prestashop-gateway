@@ -170,6 +170,7 @@ UPDATE ps_configuration SET value='2525' where name = 'PS_MAIL_SMTP_PORT';
 | 15   | Get payment in payment table is failed         |
 | 16   | Command not available in this context          |
 | 17   | Access not allowed                             |
+| 18   | Cart empty or already used                      |
 | 99   | Un-known error, module not installed?          |
 | 100  | Install process is failed                      |
 | 201  | Order id is not found                          |

@@ -1259,6 +1259,13 @@ class PlacetoPayPayment extends PaymentModule
             Tools::redirect('authentication.php?back=order.php');
         }
 
+        if (empty($cart->id)) {
+            // @codingStandardsIgnoreLine
+            $message = 'Cart cannot be loaded or an order has already been placed using this cart';
+            PaymentLogger::log($message, PaymentLogger::ERROR, 18, __FILE__, __LINE__);
+            Tools::redirect('authentication.php?back=order.php');
+        }
+
         $language = Language::getIsoById((int)($cart->id_lang));
         $customer = new Customer((int)($cart->id_customer));
         $currency = new Currency((int)($cart->id_currency));
