@@ -198,14 +198,6 @@ class PlacetoPayPayment extends PaymentModule
     }
 
     /**
-     * @return string
-     */
-    private function getPluginVersion()
-    {
-        return $this->version;
-    }
-
-    /**
      * Create payments table and status order
      *
      * @return bool
@@ -305,174 +297,8 @@ class PlacetoPayPayment extends PaymentModule
     }
 
     /**
-     * Create payment table
-     *
-     * @return bool
-     */
-    private function createPaymentTable()
-    {
-        $sql = "CREATE TABLE IF NOT EXISTS `{$this->tablePayment}` (
-                `id_payment` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-                `id_order` INT UNSIGNED NOT NULL,
-                `id_currency` INT UNSIGNED NOT NULL,
-                `date` DATETIME NULL,
-                `amount` DECIMAL(10,2) NOT NULL,
-                `status` TINYINT NOT NULL,
-                `reason` VARCHAR(2) NULL,
-                `reason_description` VARCHAR(255) NULL,
-                `franchise` VARCHAR(5) NULL,
-                `franchise_name` VARCHAR(128) NULL,
-                `bank` VARCHAR(128) NULL,
-                `authcode` VARCHAR(12) NULL,
-                `receipt` VARCHAR(12) NULL,
-                `conversion` DOUBLE,
-                `ipaddress` VARCHAR(30) NULL,
-                INDEX `id_orderIX` (`id_order`)
-            ) ENGINE = " . _MYSQL_ENGINE_;
-
-        try {
-            Db::getInstance()->Execute($sql);
-        } catch (Exception $e) {
-            PaymentLogger::log($e->getMessage(), PaymentLogger::WARNING, 1, $e->getFile(), $e->getLine());
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * @return bool
-     */
-    private function addColumnEmail()
-    {
-        $sql = "ALTER TABLE `{$this->tablePayment}` ADD `payer_email` VARCHAR(80) NULL;";
-
-        try {
-            Db::getInstance()->Execute($sql);
-        } catch (PrestaShopDatabaseException $e) {
-            // Column had been to change before
-            PaymentLogger::log($e->getMessage(), PaymentLogger::INFO, 0, $e->getFile(), $e->getLine());
-        } catch (Exception $e) {
-            PaymentLogger::log($e->getMessage(), PaymentLogger::WARNING, 2, $e->getFile(), $e->getLine());
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * @return bool
-     */
-    private function addColumnRequestId()
-    {
-        $sql = "ALTER TABLE `{$this->tablePayment}` ADD `id_request` INT NULL;";
-
-        try {
-            Db::getInstance()->Execute($sql);
-        } catch (PrestaShopDatabaseException $e) {
-            // Column had been to change before
-            PaymentLogger::log($e->getMessage(), PaymentLogger::INFO, 0, $e->getFile(), $e->getLine());
-        } catch (Exception $e) {
-            PaymentLogger::log($e->getMessage(), PaymentLogger::WARNING, 3, $e->getFile(), $e->getLine());
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * @return bool
-     */
-    private function addColumnReference()
-    {
-        $sql = "ALTER TABLE `{$this->tablePayment}` ADD `reference` VARCHAR(60) NULL;";
-
-        try {
-            Db::getInstance()->Execute($sql);
-        } catch (PrestaShopDatabaseException $e) {
-            // Column had been to change before
-            PaymentLogger::log($e->getMessage(), PaymentLogger::INFO, 0, $e->getFile(), $e->getLine());
-        } catch (Exception $e) {
-            PaymentLogger::log($e->getMessage(), PaymentLogger::WARNING, 4, $e->getFile(), $e->getLine());
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * @return bool
-     */
-    private function alterColumnIpAddress()
-    {
-        // In all version < 2.0 this columns is bad name ipaddress => ip_address
-        $sql = "ALTER TABLE `{$this->tablePayment}` CHANGE COLUMN `ipaddress` `ip_address` VARCHAR(30) NULL;";
-
-        try {
-            Db::getInstance()->Execute($sql);
-        } catch (PrestaShopDatabaseException $e) {
-            // Column had been to change before
-            PaymentLogger::log($e->getMessage(), PaymentLogger::INFO, 0, $e->getFile(), $e->getLine());
-        } catch (Exception $e) {
-            PaymentLogger::log($e->getMessage(), PaymentLogger::WARNING, 5, $e->getFile(), $e->getLine());
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Create status order to Place To Pay
-     *
-     * @return bool
-     */
-    private function createOrderState()
-    {
-        if (!$this->getOrderState()) {
-            $orderState = new OrderState();
-            $orderState->name = [];
-
-            foreach (Language::getLanguages() as $language) {
-                $lang = $language['id_lang'];
-
-                switch (Tools::strtolower($language['iso_code'])) {
-                    case 'en':
-                        $orderState->name[$lang] = 'Awaiting ' . $this->displayName . ' payment confirmation';
-                        break;
-                    case 'fr':
-                        $orderState->name[$lang] = 'En attente du paiement par ' . $this->displayName;
-                        break;
-                    case 'es':
-                    default:
-                        $orderState->name[$lang] = 'En espera de confirmación de pago por ' . $this->displayName;
-                        break;
-                }
-            }
-
-            $orderState->color = 'lightblue';
-            $orderState->hidden = false;
-            $orderState->logable = false;
-            $orderState->invoice = false;
-            $orderState->delivery = false;
-            $orderState->send_email = false;
-            $orderState->unremovable = true;
-
-            if ($orderState->save()) {
-                Configuration::updateValue(self::ORDER_STATE, $orderState->id);
-                copy(
-                    fixPath($this->getThisModulePath() . '/logo.png'),
-                    fixPath(_PS_IMG_DIR_ . 'os/' . $orderState->id . '.gif')
-                );
-            } else {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
      * Show and save configuration page
+     * @return string
      */
     public function getContent()
     {
@@ -491,274 +317,6 @@ class PlacetoPayPayment extends PaymentModule
         }
 
         return $contentExtra . $this->displayConfiguration() . $this->renderForm();
-    }
-
-    /**
-     * Validation data from post settings form
-     * @return array
-     */
-    protected function formValidation()
-    {
-        $formErrors = [];
-
-        if (Tools::isSubmit('submitPlacetoPayConfiguration')) {
-            // Company data
-            if (!Tools::getValue(self::COMPANY_DOCUMENT)) {
-                $formErrors[] = sprintf('%s %s', $this->ll('Merchant ID'), $this->ll('is required.'));
-            }
-
-            if (!Tools::getValue(self::COMPANY_NAME)) {
-                $formErrors[] = sprintf('%s %s', $this->ll('Legal Name'), $this->ll('is required.'));
-            }
-
-            if (!Tools::getValue(self::EMAIL_CONTACT)) {
-                $formErrors[] = sprintf('%s %s', $this->ll('Email contact'), $this->ll('is required.'));
-            } elseif (filter_var(Tools::getValue(self::EMAIL_CONTACT), FILTER_VALIDATE_EMAIL) === false) {
-                $formErrors[] = sprintf('%s %s', $this->ll('Email contact'), $this->ll('is not valid.'));
-            }
-
-            if (!Tools::getValue(self::TELEPHONE_CONTACT)) {
-                $formErrors[] = sprintf('%s %s', $this->ll('Telephone contact'), $this->ll('is required.'));
-            }
-
-            if (!Tools::getValue(self::DESCRIPTION)) {
-                $formErrors[] = sprintf('%s %s', $this->ll('Payment description'), $this->ll('is required.'));
-            }
-
-            // Connection Configuration
-            if (!Tools::getValue(self::EXPIRATION_TIME_MINUTES)) {
-                $formErrors[] = sprintf('%s %s', $this->ll('Expiration time to pay'), $this->ll('is required.'));
-            } elseif (filter_var(Tools::getValue(self::EXPIRATION_TIME_MINUTES), FILTER_VALIDATE_INT) === false
-                || Tools::getValue(self::EXPIRATION_TIME_MINUTES) < self::EXPIRATION_TIME_MINUTES_MIN) {
-                $formErrors[] = sprintf(
-                    '%s %s (min %d)',
-                    $this->ll('Expiration time to pay'),
-                    $this->ll('is not valid.'),
-                    self::EXPIRATION_TIME_MINUTES_MIN
-                );
-            }
-
-            if (!Tools::getValue(self::COUNTRY)) {
-                $formErrors[] = sprintf('%s %s', $this->ll('Country'), $this->ll('is required.'));
-            }
-
-            if (!Tools::getValue(self::ENVIRONMENT)) {
-                $formErrors[] = sprintf('%s %s', $this->ll('Environment'), $this->ll('is required.'));
-            } elseif (Tools::getValue(self::ENVIRONMENT) === Environment::CUSTOM
-                && filter_var(Tools::getValue(self::CUSTOM_CONNECTION_URL), FILTER_VALIDATE_URL) === false) {
-                $formErrors[] = sprintf('%s %s', $this->ll('Custom connection URL'), $this->ll('is not valid.'));
-            }
-
-            if (!Tools::getValue(self::LOGIN)) {
-                $formErrors[] = sprintf('%s %s', $this->ll('Login'), $this->ll('is required.'));
-            }
-
-            if (empty($this->getCurrentValueOf(self::TRAN_KEY)) && !Tools::getValue(self::TRAN_KEY)) {
-                $formErrors[] = sprintf('%s %s', $this->ll('Trankey'), $this->ll('is required.'));
-            }
-
-            if (!Tools::getValue(self::CONNECTION_TYPE)) {
-                $formErrors[] = sprintf('%s %s', $this->ll('Connection type'), $this->ll('is required.'));
-            }
-        }
-
-        return $formErrors;
-    }
-
-    /**
-     * Update configuration vars
-     */
-    private function formProcess()
-    {
-        if (Tools::isSubmit('submitPlacetoPayConfiguration')) {
-            // Company data
-            Configuration::updateValue(self::COMPANY_DOCUMENT, Tools::getValue(self::COMPANY_DOCUMENT));
-            Configuration::updateValue(self::COMPANY_NAME, Tools::getValue(self::COMPANY_NAME));
-            Configuration::updateValue(self::EMAIL_CONTACT, Tools::getValue(self::EMAIL_CONTACT));
-            Configuration::updateValue(self::TELEPHONE_CONTACT, Tools::getValue(self::TELEPHONE_CONTACT));
-            Configuration::updateValue(self::DESCRIPTION, Tools::getValue(self::DESCRIPTION));
-            // Configuration
-            Configuration::updateValue(self::EXPIRATION_TIME_MINUTES, Tools::getValue(self::EXPIRATION_TIME_MINUTES));
-            Configuration::updateValue(self::SHOW_ON_RETURN, Tools::getValue(self::SHOW_ON_RETURN));
-            Configuration::updateValue(self::CIFIN_MESSAGE, Tools::getValue(self::CIFIN_MESSAGE));
-            Configuration::updateValue(
-                self::ALLOW_BUY_WITH_PENDING_PAYMENTS,
-                Tools::getValue(self::ALLOW_BUY_WITH_PENDING_PAYMENTS)
-            );
-            Configuration::updateValue(self::FILL_TAX_INFORMATION, Tools::getValue(self::FILL_TAX_INFORMATION));
-            Configuration::updateValue(self::FILL_BUYER_INFORMATION, Tools::getValue(self::FILL_BUYER_INFORMATION));
-            Configuration::updateValue(self::SKIP_RESULT, Tools::getValue(self::SKIP_RESULT));
-            Configuration::updateValue(self::PAYMENT_METHODS_ENABLED, PaymentMethod::getPaymentMethodsSelected(
-                Tools::getValue(self::PAYMENT_METHODS_ENABLED),
-                Tools::getValue(self::COUNTRY)
-            ));
-
-            // Connection Configuration
-            Configuration::updateValue(self::COUNTRY, Tools::getValue(self::COUNTRY));
-            Configuration::updateValue(self::ENVIRONMENT, Tools::getValue(self::ENVIRONMENT));
-            // Set or clean custom URL
-            $this->isCustomEnvironment()
-                ? Configuration::updateValue(self::CUSTOM_CONNECTION_URL, Tools::getValue(self::CUSTOM_CONNECTION_URL))
-                : Configuration::updateValue(self::CUSTOM_CONNECTION_URL, '');
-            Configuration::updateValue(self::LOGIN, Tools::getValue(self::LOGIN));
-
-            if (Tools::getValue(self::TRAN_KEY)) {
-                // Value changed
-                Configuration::updateValue(self::TRAN_KEY, Tools::getValue(self::TRAN_KEY));
-            }
-
-            Configuration::updateValue(self::CONNECTION_TYPE, Tools::getValue(self::CONNECTION_TYPE));
-        }
-    }
-
-    /**
-     * Show configuration form
-     *
-     * @return string
-     */
-    private function displayConfiguration()
-    {
-        $this->smarty->assign(
-            [
-                'is_set_credentials' => $this->isSetCredentials(),
-                'version' => $this->getPluginVersion(),
-                'url_notification' => $this->getUrl('process.php'),
-                'schedule_task' => $this->getScheduleTaskPath(),
-                'log_file' => $this->getLogFilePath(),
-                'log_database' => $this->context->link->getAdminLink('AdminLogs'),
-            ]
-        );
-
-        return $this->display($this->getThisModulePath(), fixPath('/views/templates/front/setting.tpl'));
-    }
-
-    /**
-     * Show warning pending payment
-     *
-     * @param $lastPendingTransaction
-     * @return string
-     */
-    private function displayPendingPaymentMessage($lastPendingTransaction)
-    {
-        $this->smarty->assign([
-            'last_order' => isset($lastPendingTransaction['reference'])
-                ? $lastPendingTransaction['reference']
-                : '########',
-            'last_authorization' => isset($lastPendingTransaction['authcode'])
-                ? $lastPendingTransaction['authcode']
-                : null,
-            'telephone_contact' => $this->getTelephoneContact(),
-            'email_contact' => $this->getEmailContact(),
-            'allow_payment' => $this->getAllowBuyWithPendingPayments(),
-        ]);
-
-        return $this->display($this->getThisModulePath(), fixPath('/views/templates/hook/pending_payment.tpl'));
-    }
-
-    /**
-     * Show warning pending payment
-     *
-     * @return string
-     */
-    private function displayTransUnionMessage()
-    {
-        $this->smarty->assign([
-            'site_name' => Configuration::get('PS_SHOP_NAME'),
-            'company_name' => $this->getCompanyName(),
-        ]);
-
-        return $this->display($this->getThisModulePath(), fixPath('/views/templates/hook/message_payment.tpl'));
-    }
-
-    /**
-     * Show warning pending payment
-     *
-     * @return string
-     */
-    private function displayBrandMessage()
-    {
-        return $this->display($this->getThisModulePath(), fixPath('/views/templates/hook/brand_payment.tpl'));
-    }
-
-    /**
-     * @return array
-     */
-    private function getConfigFieldsValues()
-    {
-        return [
-            self::COMPANY_DOCUMENT => $this->getCompanyDocument(),
-            self::COMPANY_NAME => $this->getCompanyName(),
-            self::EMAIL_CONTACT => $this->getEmailContact(),
-            self::TELEPHONE_CONTACT => $this->getTelephoneContact(),
-            self::DESCRIPTION => $this->getDescription(),
-
-            self::EXPIRATION_TIME_MINUTES => $this->getExpirationTimeMinutes(),
-            self::SHOW_ON_RETURN => $this->getShowOnReturn(),
-            self::CIFIN_MESSAGE => $this->getTransUnionMessage(),
-            self::ALLOW_BUY_WITH_PENDING_PAYMENTS => $this->getAllowBuyWithPendingPayments(),
-            self::FILL_TAX_INFORMATION => $this->getFillTaxInformation(),
-            self::FILL_BUYER_INFORMATION => $this->getFillBuyerInformation(),
-            self::SKIP_RESULT => $this->getSkipResult(),
-            $this->getNameInMultipleFormat(self::PAYMENT_METHODS_ENABLED) => PaymentMethod::toArray(
-                $this->getPaymentMethodsEnabled()
-            ),
-
-            self::COUNTRY => $this->getCountry(),
-            self::ENVIRONMENT => $this->getEnvironment(),
-            self::CUSTOM_CONNECTION_URL => $this->isCustomEnvironment() ? $this->getCustomConnectionUrl() : '',
-            self::LOGIN => $this->getLogin(),
-            self::TRAN_KEY => $this->getTranKey(),
-            self::CONNECTION_TYPE => $this->getConnectionType(),
-        ];
-    }
-
-    /**
-     * @return string
-     */
-    private function renderForm()
-    {
-        $formCompany = [
-            'form' => [
-                'legend' => $this->getLegendTo('Company data', 'icon-building'),
-                'input' => $this->getFieldsCompany(),
-                'submit' => $this->getSubmitButton()
-            ],
-        ];
-
-        $formConfiguration = [
-            'form' => [
-                'legend' => $this->getLegendTo('Configuration', 'icon-cogs'),
-                'input' => $this->getFieldsConfiguration(),
-                'submit' => $this->getSubmitButton()
-            ],
-        ];
-
-        $formConnection = [
-            'form' => [
-                'legend' => $this->getLegendTo('Connection Configuration', 'icon-rocket'),
-                'input' => $this->getFieldsConnection(),
-                'submit' => $this->getSubmitButton()
-            ],
-        ];
-
-        $helper = new HelperForm();
-        $helper->show_toolbar = false;
-        $helper->table = $this->table;
-        $helper->default_form_language = (new Language((int)Configuration::get('PS_LANG_DEFAULT')))->id;
-        $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG') ?: 0;
-        $helper->id = (int)Tools::getValue('id_carrier');
-        $helper->identifier = $this->identifier;
-        $helper->submit_action = 'submitPlacetoPayConfiguration';
-        $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false) . '&configure='
-            . getModuleName() . '&tab_module=' . $this->tab . '&module_name=' . getModuleName();
-        $helper->token = Tools::getAdminTokenLite('AdminModules');
-        $helper->tpl_vars = [
-            'fields_value' => $this->getConfigFieldsValues(),
-            'languages' => $this->context->controller->getLanguages(),
-            'id_language' => $this->context->language->id
-        ];
-
-        return $helper->generateForm([$formCompany, $formConfiguration, $formConnection]);
     }
 
     /**
@@ -894,353 +452,48 @@ class PlacetoPayPayment extends PaymentModule
     }
 
     /**
-     * @param $action
-     * @param $content
-     * @return string
-     */
-    private function generateForm($action, $content)
-    {
-        $action = is_null($action)
-            ? "onsubmit='return false;'"
-            : "action='{$action}'";
-
-        $content = mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8');
-
-        return "<form accept-charset='UTF-8' {$action} id='payment-form'>{$content}</form>";
-    }
-
-    /**
-     * Last transaction pending to current costumer
+     * Show information response payment to customer
      *
-     * @param $customerId
-     * @return mixed
+     * @param $params
+     * @return bool|mixed
      * @throws PaymentException
      */
-    private function getLastPendingTransaction($customerId)
+    public function hookPaymentReturn($params)
     {
-        $status = PaymentStatus::PENDING;
-
-        try {
-            $result = Db::getInstance()->ExecuteS("
-                SELECT p.* 
-                FROM `{$this->tablePayment}` p
-                    INNER JOIN `{$this->tableOrder}` o ON o.id_cart = p.id_order
-                WHERE o.`id_customer` = {$customerId} 
-                    AND p.`status` = {$status} 
-                LIMIT 1
-            ");
-        } catch (Exception $e) {
-            throw new PaymentException($e->getMessage(), 901);
+        if (isDebugEnable()) {
+            PaymentLogger::log(
+                'Trigger ' . __METHOD__ . ' en PS vr. ' . _PS_VERSION_,
+                PaymentLogger::DEBUG,
+                0,
+                __FILE__,
+                __LINE__
+            );
         }
 
-        if (!empty($result)) {
-            $result = $result[0];
+        if (!$this->active) {
+            return null;
         }
 
-        return $result;
-    }
+        $order = isset($params['objOrder'])
+            ? $params['objOrder']
+            : $params['order'];
 
-    /**
-     * @return string
-     */
-    private function getUri()
-    {
-        $uri = null;
-        $endpoints = PaymentUrl::getEndpointsTo($this->getCountry());
-
-        if ($this->isCustomEnvironment()) {
-            $uri = $this->getCustomConnectionUrl();
-        } elseif (!empty($endpoints[$this->getEnvironment()])) {
-            $uri = $endpoints[$this->getEnvironment()];
+        if ($order->module != getModuleName()) {
+            return null;
         }
 
-        return $uri;
-    }
-
-    /**
-     * @return string
-     */
-    private function getCountry()
-    {
-        $country = $this->getCurrentValueOf(self::COUNTRY);
-
-        return empty($country)
-            ? CountryCode::COLOMBIA
-            : $country;
-    }
-
-    /**
-     * @return string
-     */
-    private function getEnvironment()
-    {
-        $environment = $this->getCurrentValueOf(self::ENVIRONMENT);
-
-        return empty($environment)
-            ? Environment::TEST
-            : $environment;
-    }
-
-    /**
-     * @return string
-     */
-    private function getCustomConnectionUrl()
-    {
-        $customEnvironment = $this->getCurrentValueOf(self::CUSTOM_CONNECTION_URL);
-
-        return empty($customEnvironment)
-            ? null
-            : $customEnvironment;
-    }
-
-    /**
-     * @return bool
-     */
-    private function isProduction()
-    {
-        return $this->getEnvironment() === Environment::PRODUCTION;
-    }
-
-    /**
-     * @return bool
-     */
-    private function isCustomEnvironment()
-    {
-        return $this->getEnvironment() === Environment::CUSTOM;
-    }
-
-    /**
-     * @return string
-     */
-    private function getLogin()
-    {
-        return $this->getCurrentValueOf(self::LOGIN);
-    }
-
-    /**
-     * @return string
-     */
-    private function getTranKey()
-    {
-        return $this->getCurrentValueOf(self::TRAN_KEY);
-    }
-
-    /**
-     * @return string
-     */
-    private function getCompanyDocument()
-    {
-        return $this->getCurrentValueOf(self::COMPANY_DOCUMENT);
-    }
-
-    /**
-     * @return string
-     */
-    private function getCompanyName()
-    {
-        return $this->getCurrentValueOf(self::COMPANY_NAME);
-    }
-
-    /**
-     * @return string
-     */
-    private function getDescription()
-    {
-        return $this->getCurrentValueOf(self::DESCRIPTION);
-    }
-
-    /**
-     * @return string
-     */
-    private function getEmailContact()
-    {
-        $emailContact = $this->getCurrentValueOf(self::EMAIL_CONTACT);
-
-        return empty($emailContact)
-            ? Configuration::get('PS_SHOP_EMAIL')
-            : $emailContact;
-    }
-
-    /**
-     * @return string
-     */
-    private function getTelephoneContact()
-    {
-        $telephoneContact = $this->getCurrentValueOf(self::TELEPHONE_CONTACT);
-
-        return empty($telephoneContact)
-            ? Configuration::get('PS_SHOP_PHONE')
-            : $telephoneContact;
-    }
-
-    /**
-     * @return bool
-     */
-    private function getTransUnionMessage()
-    {
-        return $this->getCurrentValueOf(self::CIFIN_MESSAGE);
-    }
-
-    /**
-     * @return bool
-     */
-    private function getAllowBuyWithPendingPayments()
-    {
-        return (int)$this->getCurrentValueOf(self::ALLOW_BUY_WITH_PENDING_PAYMENTS);
-    }
-
-    /**
-     * @return string
-     */
-    private function getShowOnReturn()
-    {
-        return $this->getCurrentValueOf(self::SHOW_ON_RETURN);
-    }
-
-    /**
-     * @return bool
-     */
-    private function isShowOnReturnDetails()
-    {
-        return in_array($this->getShowOnReturn(), [self::SHOW_ON_RETURN_DEFAULT, self::SHOW_ON_RETURN_DETAILS]);
-    }
-
-    /**
-     * @return int
-     */
-    private function getExpirationTimeMinutes()
-    {
-        $minutes = $this->getCurrentValueOf(self::EXPIRATION_TIME_MINUTES);
-
-        return !is_numeric($minutes) || $minutes < self::EXPIRATION_TIME_MINUTES_MIN
-            ? self::EXPIRATION_TIME_MINUTES_DEFAULT
-            : $minutes;
-    }
-
-    /**
-     * @return bool
-     */
-    private function getFillTaxInformation()
-    {
-        return $this->getCurrentValueOf(self::FILL_TAX_INFORMATION);
-    }
-
-    /**
-     * @return string
-     */
-    private function getConnectionType()
-    {
-        $connectionType = $this->getCurrentValueOf(self::CONNECTION_TYPE);
-
-        return empty($connectionType) || !in_array($connectionType, [
-            self::CONNECTION_TYPE_SOAP,
-            self::CONNECTION_TYPE_REST
-        ])
-            ? self::CONNECTION_TYPE_REST
-            : $connectionType;
-    }
-
-    /**
-     * @return bool
-     */
-    private function getFillBuyerInformation()
-    {
-        return $this->getCurrentValueOf(self::FILL_BUYER_INFORMATION);
-    }
-
-    /**
-     * @return bool
-     */
-    private function getSkipResult()
-    {
-        return $this->getCurrentValueOf(self::SKIP_RESULT);
-    }
-
-    /**
-     * @return string
-     */
-    private function getPaymentMethodsEnabled()
-    {
-        $paymentMethods = $this->getCurrentValueOf(self::PAYMENT_METHODS_ENABLED);
-
-        if (is_array($paymentMethods)) {
-            $paymentMethods = PaymentMethod::toString($paymentMethods);
+        switch ($this->getShowOnReturn()) {
+            case self::SHOW_ON_RETURN_PSE_LIST:
+                $viewOnReturn = $this->getPaymentPSEList($order->id_customer);
+                break;
+            case self::SHOW_ON_RETURN_DETAILS:
+            case self::SHOW_ON_RETURN_DEFAULT:
+            default:
+                $viewOnReturn = $this->getPaymentDetails($order);
+                break;
         }
 
-        return empty($paymentMethods)
-            ? self::PAYMENT_METHODS_ENABLED_DEFAULT
-            : $paymentMethods;
-    }
-
-    /**
-     * @return mixed
-     */
-    private function getOrderState()
-    {
-        return Configuration::get(self::ORDER_STATE);
-    }
-
-    /**
-     * @param string $page process.php
-     * @param string $params Query string to add in URL, please include symbol (?), eg: ?var=foo
-     * @return string
-     */
-    private function getUrl($page, $params = '')
-    {
-        $baseUrl = Context::getContext()->shop->getBaseURL(true);
-        $url = $baseUrl . 'modules/' . getModuleName() . '/' . $page . $params;
-
-        return $url;
-    }
-
-    /**
-     * @return string
-     */
-    private function getScheduleTaskPath()
-    {
-        return fixPath($this->getThisModulePath() . '/sonda.php');
-    }
-
-    /**
-     * @return string
-     */
-    private function getLogFilePath()
-    {
-        return PaymentLogger::getLogFilename();
-    }
-
-    /**
-     * @return string
-     */
-    private function getThisModulePath()
-    {
-        return _PS_MODULE_DIR_ . getModuleName();
-    }
-
-    /**
-     * @param null $cartId
-     * @return Order
-     * @throws PaymentException
-     */
-    private function getOrderByCartId($cartId = null)
-    {
-        if (versionComparePlaceToPay('1.7.1.0', '>=')) {
-            $orderId = Order::getIdByCartId($cartId);
-        } else {
-            $orderId = Order::getOrderByCartId($cartId);
-        }
-
-        if (!$orderId) {
-            throw new PaymentException(Tools::displayError(), 201);
-        }
-
-        $order = new Order($orderId);
-
-        if (!Validate::isLoadedObject($order)) {
-            throw new PaymentException(Tools::displayError(), 202);
-        }
-
-        return $order;
+        return $viewOnReturn;
     }
 
     /**
@@ -1438,76 +691,6 @@ class PlacetoPayPayment extends PaymentModule
     }
 
     /**
-     * Register payment
-     *
-     * @param $requestId
-     * @param $orderId
-     * @param $currencyId
-     * @param $amount
-     * @param $status
-     * @param $message
-     * @param $ipAddress
-     * @param $reference
-     * @return bool
-     * @throws PaymentException
-     */
-    private function insertPaymentPlaceToPay(
-        $requestId,
-        $orderId,
-        $currencyId,
-        $amount,
-        $status,
-        $message,
-        $ipAddress,
-        $reference
-    ) {
-        // Default values
-        $reason = '';
-        $date = date('Y-m-d H:i:s');
-        $reasonDescription = pSQL($message);
-        $conversion = 1;
-        $authCode = '000000';
-
-        $sql = "
-            INSERT INTO {$this->tablePayment} (
-                id_order,
-                id_currency,
-                date,
-                amount,
-                status,
-                reason,
-                reason_description,
-                conversion,
-                ip_address,
-                id_request,
-                authcode,
-                reference
-            ) VALUES (
-                '$orderId',
-                '$currencyId',
-                '$date',
-                '$amount',
-                '$status',
-                '$reason',
-                '$reasonDescription',
-                '$conversion',
-                '$ipAddress',
-                '$requestId',
-                '$authCode',
-                '$reference'
-            )
-        ";
-
-        try {
-            Db::getInstance()->Execute($sql);
-        } catch (Exception $e) {
-            throw new PaymentException($e->getMessage(), 401);
-        }
-
-        return true;
-    }
-
-    /**
      * Process response from PlacetoPay Platform
      *
      * @param null $_reference
@@ -1654,442 +837,6 @@ class PlacetoPayPayment extends PaymentModule
     }
 
     /**
-     * @param $status
-     * @return string
-     */
-    private function getRedirectPageFromStatus($status)
-    {
-        if ($status == PaymentStatus::APPROVED) {
-            $redirectTo = self::PAGE_ORDER_CONFIRMATION;
-        } else {
-            $redirectTo = $this->isShowOnReturnDetails()
-                ? self::PAGE_ORDER_DETAILS
-                : self::PAGE_ORDER_HISTORY;
-        }
-
-        return $redirectTo;
-    }
-
-    /**
-     * @param string $column You can any column from $this->tablePayment table
-     * @param int $value
-     * @return array|bool
-     */
-    private function getPaymentPlaceToPayBy($column, $value = null)
-    {
-        try {
-            if (!empty($column) && !empty($value)) {
-                $rows = Db::getInstance()->ExecuteS("
-                SELECT *
-                FROM  `{$this->tablePayment}`
-                WHERE {$column} = '{$value}'
-            ");
-            }
-        } catch (Exception $e) {
-            PaymentLogger::log($e->getMessage(), PaymentLogger::WARNING, 15, $e->getFile(), $e->getLine());
-        }
-
-        return !empty($rows[0]) ? $rows[0] : false;
-    }
-
-    /**
-     * @param RedirectInformation $response
-     * @return int
-     */
-    private function getStatusPayment(RedirectInformation $response)
-    {
-        // By default is pending so make a query for it later (see information.php example)
-        $status = PaymentStatus::PENDING;
-        $lastPayment = $response->lastTransaction();
-
-        if ($response->isSuccessful() && !empty($lastPayment)) {
-            // In order to use the functions please refer to the RedirectInformation class
-            if ($lastPayment->status()->isApproved()) {
-                // Approved status
-                $status = PaymentStatus::APPROVED;
-            } elseif ($lastPayment->status()->isRejected()) {
-                // This is why it has been reject
-                $status = PaymentStatus::REJECTED;
-            } elseif ($lastPayment->status()->isFailed()) {
-                // This is why it has been fail
-                $status = PaymentStatus::FAILED;
-            }
-        } elseif ($response->status()->isRejected()) {
-            // Canceled by user
-            $status = PaymentStatus::REJECTED;
-        }
-
-        return $status;
-    }
-
-    /**
-     * @param $paymentId
-     * @param $status
-     * @param Order $order
-     * @param RedirectInformation $response
-     * @throws PaymentException
-     */
-    private function settleTransaction($paymentId, $status, Order $order, RedirectInformation $response)
-    {
-        // Order not has been processed
-        if ($order->getCurrentState() != (int)Configuration::get('PS_OS_PAYMENT')) {
-            switch ($status) {
-                case PaymentStatus::FAILED:
-                case PaymentStatus::REJECTED:
-                    if (in_array($order->getCurrentState(), [
-                        Configuration::get('PS_OS_ERROR'),
-                        Configuration::get('PS_OS_CANCELED')
-                    ])) {
-                        break;
-                    }
-
-                    // Update status order
-                    $history = new OrderHistory();
-                    $history->id_order = (int)($order->id);
-
-                    if ($status == PaymentStatus::FAILED) {
-                        $history->changeIdOrderState(Configuration::get('PS_OS_ERROR'), $history->id_order);
-                    } elseif ($status == PaymentStatus::REJECTED) {
-                        $history->changeIdOrderState(Configuration::get('PS_OS_CANCELED'), $history->id_order);
-                    }
-
-                    $history->addWithemail();
-                    $history->save();
-
-                    break;
-                case PaymentStatus::DUPLICATE:
-                case PaymentStatus::APPROVED:
-                    // Order approved, change state
-                    $history = new OrderHistory();
-                    $history->id_order = (int)($order->id);
-                    $history->changeIdOrderState(Configuration::get('PS_OS_PAYMENT'), $history->id_order);
-                    $history->addWithemail();
-                    $history->save();
-                    break;
-                case PaymentStatus::PENDING:
-                    break;
-            }
-        }
-
-        // Update status in payment table
-        $this->updateTransaction($paymentId, $status, $response);
-    }
-
-    /**
-     * @param $paymentId
-     * @param $status
-     * @param $response
-     * @return bool
-     * @throws PaymentException
-     */
-    private function updateTransaction($paymentId, $status, RedirectInformation $response)
-    {
-        $date = pSQL($response->status()->date());
-        $reason = pSQL($response->status()->reason());
-        $reasonDescription = pSQL($response->status()->message());
-
-        $bank = '';
-        $franchise = '';
-        $franchiseName = '';
-        $authCode = '';
-        $receipt = '';
-        $conversion = '';
-        $payerEmail = '';
-
-        if (!empty($payment = $response->lastTransaction())
-            && !empty($paymentStatus = $payment->status())
-            && ($paymentStatus->isApproved() || $paymentStatus->isRejected() || $paymentStatus->isFailed())
-        ) {
-            $date = pSQL($paymentStatus->date());
-            $reason = pSQL($paymentStatus->reason());
-            $reasonDescription = pSQL($paymentStatus->message());
-
-            if (!$paymentStatus->isFailed()) {
-                $bank = pSQL($payment->issuerName());
-                $franchise = pSQL($payment->paymentMethod());
-                $franchiseName = pSQL($payment->paymentMethodName());
-                $authCode = pSQL($payment->authorization());
-                $receipt = pSQL($payment->receipt());
-                $conversion = pSQL($payment->amount()->factor());
-            }
-        }
-
-        if (!empty($request = $response->request())
-            && !empty($payer = $request->payer())
-            && !empty($email = $payer->email())) {
-            $payerEmail = pSQL($email);
-        }
-
-        $sql = "
-            UPDATE `{$this->tablePayment}` SET
-                `status` = {$status},
-                `date` = '{$date}',
-                `reason` = '{$reason}',
-                `reason_description` = '{$reasonDescription}',
-                `franchise` = '{$franchise}',
-                `franchise_name` = '{$franchiseName}',
-                `bank` = '{$bank}',
-                `authcode` = '{$authCode}',
-                `receipt` = '{$receipt}',
-                `conversion` = '{$conversion}',
-                `payer_email` = '{$payerEmail}'
-            WHERE `id_payment` = {$paymentId}
-        ";
-
-        try {
-            Db::getInstance()->Execute($sql);
-        } catch (Exception $e) {
-            throw new PaymentException($e->getMessage(), 601);
-        }
-
-        return true;
-    }
-
-    /**
-     * Show information response payment to customer
-     *
-     * @param $params
-     * @return bool|mixed
-     * @throws PaymentException
-     */
-    public function hookPaymentReturn($params)
-    {
-        if (isDebugEnable()) {
-            PaymentLogger::log(
-                'Trigger ' . __METHOD__ . ' en PS vr. ' . _PS_VERSION_,
-                PaymentLogger::DEBUG,
-                0,
-                __FILE__,
-                __LINE__
-            );
-        }
-
-        if (!$this->active) {
-            return null;
-        }
-
-        $order = isset($params['objOrder'])
-            ? $params['objOrder']
-            : $params['order'];
-
-        if ($order->module != getModuleName()) {
-            return null;
-        }
-
-        switch ($this->getShowOnReturn()) {
-            case self::SHOW_ON_RETURN_PSE_LIST:
-                $viewOnReturn = $this->getPaymentPSEList($order->id_customer);
-                break;
-            case self::SHOW_ON_RETURN_DETAILS:
-            case self::SHOW_ON_RETURN_DEFAULT:
-            default:
-                $viewOnReturn = $this->getPaymentDetails($order);
-                break;
-        }
-
-        return $viewOnReturn;
-    }
-
-    /**
-     * @param Order $order
-     * @return mixed
-     * @throws PaymentException
-     */
-    private function getPaymentDetails(Order $order)
-    {
-        // Get information
-        $transaction = $this->getTransactionInformation($order->id_cart);
-        $cart = new Cart((int)$order->id_cart);
-        $invoiceAddress = new Address((int)($cart->id_address_invoice));
-        $totalAmount = (float)($cart->getOrderTotal(true, Cart::BOTH));
-        $taxAmount = $totalAmount - (float)($cart->getOrderTotal(false, Cart::BOTH));
-        $payerName = '';
-        $payerEmail = !empty($transaction['payer_email']) ? $transaction['payer_email'] : null;
-        $transaction['tax'] = $taxAmount;
-
-        // Customer data
-        $customer = new Customer((int)($order->id_customer));
-
-        if (Validate::isLoadedObject($customer)) {
-            $payerName = empty($invoiceAddress)
-                ? $customer->firstname . ' ' . $customer->lastname
-                : $invoiceAddress->firstname . ' ' . $invoiceAddress->lastname;
-            $payerEmail = isset($payerEmail) ? $payerEmail : $customer->email;
-        }
-
-        $attributes = [
-                'company_document' => $this->getCompanyDocument(),
-                'company_name' => $this->getCompanyName(),
-                'payment_description' => sprintf($this->getDescription(), $transaction['reference']),
-                'store_email' => $this->getEmailContact(),
-                'store_phone' => $this->getTelephoneContact(),
-                'transaction' => $transaction,
-                'payer_name' => $payerName,
-                'payer_email' => $payerEmail,
-                'customer_id' => $cart->id_customer,
-                'orderId' => $order->id,
-                'logged' => (Context::getContext()->customer->isLogged() ? true : false),
-            ] + $this->getStatusDescription($transaction['status']);
-
-        $this->context->smarty->assign($attributes);
-
-        return $this->display($this->getThisModulePath(), fixPath('/views/templates/front/response.tpl'));
-    }
-
-    /**
-     * @param $status
-     * @return array
-     */
-    private function getStatusDescription($status)
-    {
-        $description = [
-            'status' => 'pending',
-            'status_description' => $this->ll('Pending payment')
-        ];
-
-        switch ($status) {
-            case PaymentStatus::APPROVED:
-            case PaymentStatus::DUPLICATE:
-                $description = [
-                    'status' => 'ok',
-                    'status_description' => $this->ll('Completed payment')
-                ];
-                break;
-            case PaymentStatus::FAILED:
-                $description = [
-                    'status' => 'fail',
-                    'status_description' => $this->ll('Failed payment')
-                ];
-                break;
-            case PaymentStatus::REJECTED:
-                $description = [
-                    'status' => 'rejected',
-                    'status_description' => $this->ll('Rejected payment')
-                ];
-                break;
-        }
-
-        return $description;
-    }
-
-    /**
-     * @param $customerId
-     * @return string
-     */
-    private function getPaymentPSEList($customerId)
-    {
-        $orders = self::getCustomerOrders($customerId);
-
-        if ($orders) {
-            foreach ($orders as &$order) {
-                $myOrder = new Order((int)$order['id_order']);
-                if (Validate::isLoadedObject($myOrder)) {
-                    $order['virtual'] = $myOrder->isVirtual(false);
-                }
-            }
-        }
-
-        $this->context->smarty->assign([
-            'orders' => $orders,
-            'invoiceAllowed' => (int)Configuration::get('PS_INVOICE'),
-            'reorderingAllowed' => !(bool)Configuration::get('PS_DISALLOW_HISTORY_REORDERING'),
-            'slowValidation' => Tools::isSubmit('slowvalidation')
-        ]);
-
-        return $this->display($this->getThisModulePath(), fixPath('/views/templates/front/history.tpl'));
-    }
-
-    /**
-     * Get customer orders
-     *
-     * @param $id_customer Customer id
-     * @param bool $show_hidden_status Display or not hidden order statuses
-     * @param Context|null $context
-     * @return array
-     */
-    private function getCustomerOrders($id_customer, $show_hidden_status = false, Context $context = null)
-    {
-        if (!$context) {
-            $context = Context::getContext();
-        }
-
-        $sql = 'SELECT o.`id_order`, o.`id_currency`, o.`payment`, o.`invoice_number`, pp.`date` date_add, 
-                      pp.`reference`, pp.`amount` total_paid, pp.`authcode` cus, 
-                      (SELECT SUM(od.`product_quantity`) 
-                      FROM `' . _DB_PREFIX_ . 'order_detail` od 
-                      WHERE od.`id_order` = o.`id_order`) nb_products
-        FROM `' . $this->tableOrder . '` o
-            JOIN `' . $this->tablePayment . '` pp ON pp.id_order = o.id_cart
-        WHERE o.`id_customer` = ' . (int)$id_customer .
-            Shop::addSqlRestriction(Shop::SHARE_ORDER) . '
-        GROUP BY o.`id_order`
-        ORDER BY o.`date_add` DESC';
-
-        $res = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
-        if (!$res) {
-            return [];
-        }
-
-        foreach ($res as $key => $val) {
-            $res2 = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS('
-                SELECT os.`id_order_state`, osl.`name` AS order_state, os.`invoice`, os.`color` AS order_state_color
-                FROM `' . _DB_PREFIX_ . 'order_history` oh
-                LEFT JOIN `' . _DB_PREFIX_ . 'order_state` os ON (os.`id_order_state` = oh.`id_order_state`)
-                INNER JOIN `' . _DB_PREFIX_ . 'order_state_lang` osl ON (
-                    os.`id_order_state` = osl.`id_order_state` AND osl.`id_lang` = ' . (int)$context->language->id . '
-                )
-            WHERE oh.`id_order` = ' . (int)$val['id_order'] . (!$show_hidden_status ? ' AND os.`hidden` != 1' : '') . '
-            ORDER BY oh.`date_add` DESC, oh.`id_order_history` DESC
-            LIMIT 1');
-
-            if ($res2) {
-                $res[$key] = array_merge($res[$key], $res2[0]);
-            }
-        }
-
-        return $res;
-    }
-
-    /**
-     * @param $cartId
-     * @param null $orderId
-     * @return mixed
-     * @throws PaymentException
-     */
-    private function getTransactionInformation($cartId, $orderId = null)
-    {
-        $id_order = (empty($cartId)
-            ? "(SELECT `id_cart` FROM `{$this->tableOrder}` WHERE `id_order` = {$orderId})"
-            : $cartId);
-
-        try {
-            $result = Db::getInstance()->ExecuteS(
-                "SELECT * FROM `{$this->tablePayment}` WHERE `id_order` = {$id_order}"
-            );
-        } catch (Exception $e) {
-            throw new PaymentException($e->getMessage(), 801);
-        }
-
-        if (!empty($result)) {
-            $result = $result[0];
-
-            if (empty($result['reason_description'])) {
-                $result['reason_description'] = ($result['reason'] == '?-')
-                    ? $this->ll('Processing transaction')
-                    : $this->ll('No information');
-            }
-
-            if (empty($result['status'])) {
-                $result['status_description'] = ($result['status'] == '')
-                    ? $this->ll('Processing transaction')
-                    : $this->ll('No information');
-            }
-        }
-
-        return $result;
-    }
-
-    /**
      * Update status order in background
      * @param int $minutes
      */
@@ -2168,24 +915,1261 @@ class PlacetoPayPayment extends PaymentModule
     }
 
     /**
+     * Register payment
+     *
+     * @param $requestId
+     * @param $orderId
+     * @param $currencyId
+     * @param $amount
+     * @param $status
+     * @param $message
+     * @param $ipAddress
+     * @param $reference
+     * @return bool
+     * @throws PaymentException
+     */
+    final private function insertPaymentPlaceToPay(
+        $requestId,
+        $orderId,
+        $currencyId,
+        $amount,
+        $status,
+        $message,
+        $ipAddress,
+        $reference
+    ) {
+        // Default values
+        $reason = '';
+        $date = date('Y-m-d H:i:s');
+        $reasonDescription = pSQL($message);
+        $conversion = 1;
+        $authCode = '000000';
+
+        $sql = "
+            INSERT INTO {$this->tablePayment} (
+                id_order,
+                id_currency,
+                date,
+                amount,
+                status,
+                reason,
+                reason_description,
+                conversion,
+                ip_address,
+                id_request,
+                authcode,
+                reference
+            ) VALUES (
+                '$orderId',
+                '$currencyId',
+                '$date',
+                '$amount',
+                '$status',
+                '$reason',
+                '$reasonDescription',
+                '$conversion',
+                '$ipAddress',
+                '$requestId',
+                '$authCode',
+                '$reference'
+            )
+        ";
+
+        try {
+            Db::getInstance()->Execute($sql);
+        } catch (Exception $e) {
+            throw new PaymentException($e->getMessage(), 401);
+        }
+
+        return true;
+    }
+
+    /**
+     * @param $paymentId
+     * @param $status
+     * @param Order $order
+     * @param RedirectInformation $response
+     * @throws PaymentException
+     */
+    final private function settleTransaction($paymentId, $status, Order $order, RedirectInformation $response)
+    {
+        // Order not has been processed
+        if ($order->getCurrentState() != (int)Configuration::get('PS_OS_PAYMENT')) {
+            switch ($status) {
+                case PaymentStatus::FAILED:
+                case PaymentStatus::REJECTED:
+                    if (in_array($order->getCurrentState(), [
+                        Configuration::get('PS_OS_ERROR'),
+                        Configuration::get('PS_OS_CANCELED')
+                    ])) {
+                        break;
+                    }
+
+                    // Update status order
+                    $history = new OrderHistory();
+                    $history->id_order = (int)($order->id);
+
+                    if ($status == PaymentStatus::FAILED) {
+                        $history->changeIdOrderState(Configuration::get('PS_OS_ERROR'), $history->id_order);
+                    } elseif ($status == PaymentStatus::REJECTED) {
+                        $history->changeIdOrderState(Configuration::get('PS_OS_CANCELED'), $history->id_order);
+                    }
+
+                    $history->addWithemail();
+                    $history->save();
+
+                    break;
+                case PaymentStatus::DUPLICATE:
+                case PaymentStatus::APPROVED:
+                    // Order approved, change state
+                    $history = new OrderHistory();
+                    $history->id_order = (int)($order->id);
+                    $history->changeIdOrderState(Configuration::get('PS_OS_PAYMENT'), $history->id_order);
+                    $history->addWithemail();
+                    $history->save();
+                    break;
+                case PaymentStatus::PENDING:
+                    break;
+            }
+        }
+
+        // Update status in payment table
+        $this->updateTransaction($paymentId, $status, $response);
+    }
+
+    /**
+     * @param $paymentId
+     * @param $status
+     * @param $response
+     * @return bool
+     * @throws PaymentException
+     */
+    final private function updateTransaction($paymentId, $status, RedirectInformation $response)
+    {
+        $date = pSQL($response->status()->date());
+        $reason = pSQL($response->status()->reason());
+        $reasonDescription = pSQL($response->status()->message());
+
+        $bank = '';
+        $franchise = '';
+        $franchiseName = '';
+        $authCode = '';
+        $receipt = '';
+        $conversion = '';
+        $payerEmail = '';
+
+        if (!empty($payment = $response->lastTransaction())
+            && !empty($paymentStatus = $payment->status())
+            && ($paymentStatus->isApproved() || $paymentStatus->isRejected() || $paymentStatus->isFailed())
+        ) {
+            $date = pSQL($paymentStatus->date());
+            $reason = pSQL($paymentStatus->reason());
+            $reasonDescription = pSQL($paymentStatus->message());
+
+            if (!$paymentStatus->isFailed()) {
+                $bank = pSQL($payment->issuerName());
+                $franchise = pSQL($payment->paymentMethod());
+                $franchiseName = pSQL($payment->paymentMethodName());
+                $authCode = pSQL($payment->authorization());
+                $receipt = pSQL($payment->receipt());
+                $conversion = pSQL($payment->amount()->factor());
+            }
+        }
+
+        if (!empty($request = $response->request())
+            && !empty($payer = $request->payer())
+            && !empty($email = $payer->email())) {
+            $payerEmail = pSQL($email);
+        }
+
+        $sql = "
+            UPDATE `{$this->tablePayment}` SET
+                `status` = {$status},
+                `date` = '{$date}',
+                `reason` = '{$reason}',
+                `reason_description` = '{$reasonDescription}',
+                `franchise` = '{$franchise}',
+                `franchise_name` = '{$franchiseName}',
+                `bank` = '{$bank}',
+                `authcode` = '{$authCode}',
+                `receipt` = '{$receipt}',
+                `conversion` = '{$conversion}',
+                `payer_email` = '{$payerEmail}'
+            WHERE `id_payment` = {$paymentId}
+        ";
+
+        try {
+            Db::getInstance()->Execute($sql);
+        } catch (Exception $e) {
+            throw new PaymentException($e->getMessage(), 601);
+        }
+
+        return true;
+    }
+
+    /**
+     * Update order with error
+     */
+    final private function updateCurrentOrderWithError()
+    {
+        $history = new OrderHistory();
+        $history->id_order = $this->currentOrder;
+        $history->changeIdOrderState(Configuration::get('PS_OS_ERROR'), $history->id_order);
+        $history->save();
+    }
+
+    /**
+     * Create status order to Place To Pay
+     *
      * @return bool
      */
-    private function isEnableShowSetup()
+    final private function createOrderState()
     {
-        $force = Tools::getValue('f', null);
+        if (!$this->getOrderState()) {
+            $orderState = new OrderState();
+            $orderState->name = [];
 
-        return !$this->isProduction()
-        && !empty($force)
-        && Tools::strlen($force) === 5
-        && Tools::substr($this->getLogin(), -5) === $force
-            ? true
-            : false;
+            foreach (Language::getLanguages() as $language) {
+                $lang = $language['id_lang'];
+
+                switch (Tools::strtolower($language['iso_code'])) {
+                    case 'en':
+                        $orderState->name[$lang] = 'Awaiting ' . $this->displayName . ' payment confirmation';
+                        break;
+                    case 'fr':
+                        $orderState->name[$lang] = 'En attente du paiement par ' . $this->displayName;
+                        break;
+                    case 'es':
+                    default:
+                        $orderState->name[$lang] = 'En espera de confirmación de pago por ' . $this->displayName;
+                        break;
+                }
+            }
+
+            $orderState->color = 'lightblue';
+            $orderState->hidden = false;
+            $orderState->logable = false;
+            $orderState->invoice = false;
+            $orderState->delivery = false;
+            $orderState->send_email = false;
+            $orderState->unremovable = true;
+
+            if ($orderState->save()) {
+                Configuration::updateValue(self::ORDER_STATE, $orderState->id);
+                copy(
+                    fixPath($this->getThisModulePath() . '/logo.png'),
+                    fixPath(_PS_IMG_DIR_ . 'os/' . $orderState->id . '.gif')
+                );
+            } else {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Create payment table
+     *
+     * @return bool
+     */
+    final private function createPaymentTable()
+    {
+        $sql = "CREATE TABLE IF NOT EXISTS `{$this->tablePayment}` (
+                `id_payment` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                `id_order` INT UNSIGNED NOT NULL,
+                `id_currency` INT UNSIGNED NOT NULL,
+                `date` DATETIME NULL,
+                `amount` DECIMAL(10,2) NOT NULL,
+                `status` TINYINT NOT NULL,
+                `reason` VARCHAR(2) NULL,
+                `reason_description` VARCHAR(255) NULL,
+                `franchise` VARCHAR(5) NULL,
+                `franchise_name` VARCHAR(128) NULL,
+                `bank` VARCHAR(128) NULL,
+                `authcode` VARCHAR(12) NULL,
+                `receipt` VARCHAR(12) NULL,
+                `conversion` DOUBLE,
+                `ipaddress` VARCHAR(30) NULL,
+                INDEX `id_orderIX` (`id_order`)
+            ) ENGINE = " . _MYSQL_ENGINE_;
+
+        try {
+            Db::getInstance()->Execute($sql);
+        } catch (Exception $e) {
+            PaymentLogger::log($e->getMessage(), PaymentLogger::WARNING, 1, $e->getFile(), $e->getLine());
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    final private function addColumnEmail()
+    {
+        $sql = "ALTER TABLE `{$this->tablePayment}` ADD `payer_email` VARCHAR(80) NULL;";
+
+        try {
+            Db::getInstance()->Execute($sql);
+        } catch (PrestaShopDatabaseException $e) {
+            // Column had been to change before
+            PaymentLogger::log($e->getMessage(), PaymentLogger::INFO, 0, $e->getFile(), $e->getLine());
+        } catch (Exception $e) {
+            PaymentLogger::log($e->getMessage(), PaymentLogger::WARNING, 2, $e->getFile(), $e->getLine());
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    final private function addColumnRequestId()
+    {
+        $sql = "ALTER TABLE `{$this->tablePayment}` ADD `id_request` INT NULL;";
+
+        try {
+            Db::getInstance()->Execute($sql);
+        } catch (PrestaShopDatabaseException $e) {
+            // Column had been to change before
+            PaymentLogger::log($e->getMessage(), PaymentLogger::INFO, 0, $e->getFile(), $e->getLine());
+        } catch (Exception $e) {
+            PaymentLogger::log($e->getMessage(), PaymentLogger::WARNING, 3, $e->getFile(), $e->getLine());
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    final private function addColumnReference()
+    {
+        $sql = "ALTER TABLE `{$this->tablePayment}` ADD `reference` VARCHAR(60) NULL;";
+
+        try {
+            Db::getInstance()->Execute($sql);
+        } catch (PrestaShopDatabaseException $e) {
+            // Column had been to change before
+            PaymentLogger::log($e->getMessage(), PaymentLogger::INFO, 0, $e->getFile(), $e->getLine());
+        } catch (Exception $e) {
+            PaymentLogger::log($e->getMessage(), PaymentLogger::WARNING, 4, $e->getFile(), $e->getLine());
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    final private function alterColumnIpAddress()
+    {
+        // In all version < 2.0 this columns is bad name ipaddress => ip_address
+        $sql = "ALTER TABLE `{$this->tablePayment}` CHANGE COLUMN `ipaddress` `ip_address` VARCHAR(30) NULL;";
+
+        try {
+            Db::getInstance()->Execute($sql);
+        } catch (PrestaShopDatabaseException $e) {
+            // Column had been to change before
+            PaymentLogger::log($e->getMessage(), PaymentLogger::INFO, 0, $e->getFile(), $e->getLine());
+        } catch (Exception $e) {
+            PaymentLogger::log($e->getMessage(), PaymentLogger::WARNING, 5, $e->getFile(), $e->getLine());
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Validation data from post settings form
+     * @return array
+     */
+    final private function formValidation()
+    {
+        $formErrors = [];
+
+        if (Tools::isSubmit('submitPlacetoPayConfiguration')) {
+            // Company data
+            if (!Tools::getValue(self::COMPANY_DOCUMENT)) {
+                $formErrors[] = sprintf('%s %s', $this->ll('Merchant ID'), $this->ll('is required.'));
+            }
+
+            if (!Tools::getValue(self::COMPANY_NAME)) {
+                $formErrors[] = sprintf('%s %s', $this->ll('Legal Name'), $this->ll('is required.'));
+            }
+
+            if (!Tools::getValue(self::EMAIL_CONTACT)) {
+                $formErrors[] = sprintf('%s %s', $this->ll('Email contact'), $this->ll('is required.'));
+            } elseif (filter_var(Tools::getValue(self::EMAIL_CONTACT), FILTER_VALIDATE_EMAIL) === false) {
+                $formErrors[] = sprintf('%s %s', $this->ll('Email contact'), $this->ll('is not valid.'));
+            }
+
+            if (!Tools::getValue(self::TELEPHONE_CONTACT)) {
+                $formErrors[] = sprintf('%s %s', $this->ll('Telephone contact'), $this->ll('is required.'));
+            }
+
+            if (!Tools::getValue(self::DESCRIPTION)) {
+                $formErrors[] = sprintf('%s %s', $this->ll('Payment description'), $this->ll('is required.'));
+            }
+
+            // Connection Configuration
+            if (!Tools::getValue(self::EXPIRATION_TIME_MINUTES)) {
+                $formErrors[] = sprintf('%s %s', $this->ll('Expiration time to pay'), $this->ll('is required.'));
+            } elseif (filter_var(Tools::getValue(self::EXPIRATION_TIME_MINUTES), FILTER_VALIDATE_INT) === false
+                || Tools::getValue(self::EXPIRATION_TIME_MINUTES) < self::EXPIRATION_TIME_MINUTES_MIN) {
+                $formErrors[] = sprintf(
+                    '%s %s (min %d)',
+                    $this->ll('Expiration time to pay'),
+                    $this->ll('is not valid.'),
+                    self::EXPIRATION_TIME_MINUTES_MIN
+                );
+            }
+
+            if (!Tools::getValue(self::COUNTRY)) {
+                $formErrors[] = sprintf('%s %s', $this->ll('Country'), $this->ll('is required.'));
+            }
+
+            if (!Tools::getValue(self::ENVIRONMENT)) {
+                $formErrors[] = sprintf('%s %s', $this->ll('Environment'), $this->ll('is required.'));
+            } elseif (Tools::getValue(self::ENVIRONMENT) === Environment::CUSTOM
+                && filter_var(Tools::getValue(self::CUSTOM_CONNECTION_URL), FILTER_VALIDATE_URL) === false) {
+                $formErrors[] = sprintf('%s %s', $this->ll('Custom connection URL'), $this->ll('is not valid.'));
+            }
+
+            if (!Tools::getValue(self::LOGIN)) {
+                $formErrors[] = sprintf('%s %s', $this->ll('Login'), $this->ll('is required.'));
+            }
+
+            if (empty($this->getCurrentValueOf(self::TRAN_KEY)) && !Tools::getValue(self::TRAN_KEY)) {
+                $formErrors[] = sprintf('%s %s', $this->ll('Trankey'), $this->ll('is required.'));
+            }
+
+            if (!Tools::getValue(self::CONNECTION_TYPE)) {
+                $formErrors[] = sprintf('%s %s', $this->ll('Connection type'), $this->ll('is required.'));
+            }
+        }
+
+        return $formErrors;
+    }
+
+    /**
+     * Update configuration vars
+     */
+    final private function formProcess()
+    {
+        if (Tools::isSubmit('submitPlacetoPayConfiguration')) {
+            // Company data
+            Configuration::updateValue(self::COMPANY_DOCUMENT, Tools::getValue(self::COMPANY_DOCUMENT));
+            Configuration::updateValue(self::COMPANY_NAME, Tools::getValue(self::COMPANY_NAME));
+            Configuration::updateValue(self::EMAIL_CONTACT, Tools::getValue(self::EMAIL_CONTACT));
+            Configuration::updateValue(self::TELEPHONE_CONTACT, Tools::getValue(self::TELEPHONE_CONTACT));
+            Configuration::updateValue(self::DESCRIPTION, Tools::getValue(self::DESCRIPTION));
+            // Configuration
+            Configuration::updateValue(self::EXPIRATION_TIME_MINUTES, Tools::getValue(self::EXPIRATION_TIME_MINUTES));
+            Configuration::updateValue(self::SHOW_ON_RETURN, Tools::getValue(self::SHOW_ON_RETURN));
+            Configuration::updateValue(self::CIFIN_MESSAGE, Tools::getValue(self::CIFIN_MESSAGE));
+            Configuration::updateValue(
+                self::ALLOW_BUY_WITH_PENDING_PAYMENTS,
+                Tools::getValue(self::ALLOW_BUY_WITH_PENDING_PAYMENTS)
+            );
+            Configuration::updateValue(self::FILL_TAX_INFORMATION, Tools::getValue(self::FILL_TAX_INFORMATION));
+            Configuration::updateValue(self::FILL_BUYER_INFORMATION, Tools::getValue(self::FILL_BUYER_INFORMATION));
+            Configuration::updateValue(self::SKIP_RESULT, Tools::getValue(self::SKIP_RESULT));
+            Configuration::updateValue(self::PAYMENT_METHODS_ENABLED, PaymentMethod::getPaymentMethodsSelected(
+                Tools::getValue(self::PAYMENT_METHODS_ENABLED),
+                Tools::getValue(self::COUNTRY)
+            ));
+
+            // Connection Configuration
+            Configuration::updateValue(self::COUNTRY, Tools::getValue(self::COUNTRY));
+            Configuration::updateValue(self::ENVIRONMENT, Tools::getValue(self::ENVIRONMENT));
+            // Set or clean custom URL
+            $this->isCustomEnvironment()
+                ? Configuration::updateValue(self::CUSTOM_CONNECTION_URL, Tools::getValue(self::CUSTOM_CONNECTION_URL))
+                : Configuration::updateValue(self::CUSTOM_CONNECTION_URL, '');
+            Configuration::updateValue(self::LOGIN, Tools::getValue(self::LOGIN));
+
+            if (Tools::getValue(self::TRAN_KEY)) {
+                // Value changed
+                Configuration::updateValue(self::TRAN_KEY, Tools::getValue(self::TRAN_KEY));
+            }
+
+            Configuration::updateValue(self::CONNECTION_TYPE, Tools::getValue(self::CONNECTION_TYPE));
+        }
+    }
+
+    /**
+     * Show configuration form
+     *
+     * @return string
+     */
+    final private function displayConfiguration()
+    {
+        $this->smarty->assign(
+            [
+                'is_set_credentials' => $this->isSetCredentials(),
+                'version' => $this->getPluginVersion(),
+                'url_notification' => $this->getUrl('process.php'),
+                'schedule_task' => $this->getScheduleTaskPath(),
+                'log_file' => $this->getLogFilePath(),
+                'log_database' => $this->context->link->getAdminLink('AdminLogs'),
+            ]
+        );
+
+        return $this->display($this->getThisModulePath(), fixPath('/views/templates/front/setting.tpl'));
+    }
+
+    /**
+     * Show warning pending payment
+     *
+     * @param $lastPendingTransaction
+     * @return string
+     */
+    final private function displayPendingPaymentMessage($lastPendingTransaction)
+    {
+        $this->smarty->assign([
+            'last_order' => isset($lastPendingTransaction['reference'])
+                ? $lastPendingTransaction['reference']
+                : '########',
+            'last_authorization' => isset($lastPendingTransaction['authcode'])
+                ? $lastPendingTransaction['authcode']
+                : null,
+            'telephone_contact' => $this->getTelephoneContact(),
+            'email_contact' => $this->getEmailContact(),
+            'allow_payment' => $this->getAllowBuyWithPendingPayments(),
+        ]);
+
+        return $this->display($this->getThisModulePath(), fixPath('/views/templates/hook/pending_payment.tpl'));
+    }
+
+    /**
+     * Show warning pending payment
+     *
+     * @return string
+     */
+    final private function displayTransUnionMessage()
+    {
+        $this->smarty->assign([
+            'site_name' => Configuration::get('PS_SHOP_NAME'),
+            'company_name' => $this->getCompanyName(),
+        ]);
+
+        return $this->display($this->getThisModulePath(), fixPath('/views/templates/hook/message_payment.tpl'));
+    }
+
+    /**
+     * Show warning pending payment
+     *
+     * @return string
+     */
+    final private function displayBrandMessage()
+    {
+        return $this->display($this->getThisModulePath(), fixPath('/views/templates/hook/brand_payment.tpl'));
+    }
+
+    /**
+     * @return array
+     */
+    final private function getConfigFieldsValues()
+    {
+        return [
+            self::COMPANY_DOCUMENT => $this->getCompanyDocument(),
+            self::COMPANY_NAME => $this->getCompanyName(),
+            self::EMAIL_CONTACT => $this->getEmailContact(),
+            self::TELEPHONE_CONTACT => $this->getTelephoneContact(),
+            self::DESCRIPTION => $this->getDescription(),
+
+            self::EXPIRATION_TIME_MINUTES => $this->getExpirationTimeMinutes(),
+            self::SHOW_ON_RETURN => $this->getShowOnReturn(),
+            self::CIFIN_MESSAGE => $this->getTransUnionMessage(),
+            self::ALLOW_BUY_WITH_PENDING_PAYMENTS => $this->getAllowBuyWithPendingPayments(),
+            self::FILL_TAX_INFORMATION => $this->getFillTaxInformation(),
+            self::FILL_BUYER_INFORMATION => $this->getFillBuyerInformation(),
+            self::SKIP_RESULT => $this->getSkipResult(),
+            $this->getNameInMultipleFormat(self::PAYMENT_METHODS_ENABLED) => PaymentMethod::toArray(
+                $this->getPaymentMethodsEnabled()
+            ),
+
+            self::COUNTRY => $this->getCountry(),
+            self::ENVIRONMENT => $this->getEnvironment(),
+            self::CUSTOM_CONNECTION_URL => $this->isCustomEnvironment() ? $this->getCustomConnectionUrl() : '',
+            self::LOGIN => $this->getLogin(),
+            self::TRAN_KEY => $this->getTranKey(),
+            self::CONNECTION_TYPE => $this->getConnectionType(),
+        ];
     }
 
     /**
      * @return string
      */
-    private function getSetup()
+    final private function renderForm()
+    {
+        $formCompany = [
+            'form' => [
+                'legend' => $this->getLegendTo('Company data', 'icon-building'),
+                'input' => $this->getFieldsCompany(),
+                'submit' => $this->getSubmitButton()
+            ],
+        ];
+
+        $formConfiguration = [
+            'form' => [
+                'legend' => $this->getLegendTo('Configuration', 'icon-cogs'),
+                'input' => $this->getFieldsConfiguration(),
+                'submit' => $this->getSubmitButton()
+            ],
+        ];
+
+        $formConnection = [
+            'form' => [
+                'legend' => $this->getLegendTo('Connection Configuration', 'icon-rocket'),
+                'input' => $this->getFieldsConnection(),
+                'submit' => $this->getSubmitButton()
+            ],
+        ];
+
+        $helper = new HelperForm();
+        $helper->show_toolbar = false;
+        $helper->table = $this->table;
+        $helper->default_form_language = (new Language((int)Configuration::get('PS_LANG_DEFAULT')))->id;
+        $helper->allow_employee_form_lang = Configuration::get('PS_BO_ALLOW_EMPLOYEE_FORM_LANG') ?: 0;
+        $helper->id = (int)Tools::getValue('id_carrier');
+        $helper->identifier = $this->identifier;
+        $helper->submit_action = 'submitPlacetoPayConfiguration';
+        $helper->currentIndex = $this->context->link->getAdminLink('AdminModules', false) . '&configure='
+            . getModuleName() . '&tab_module=' . $this->tab . '&module_name=' . getModuleName();
+        $helper->token = Tools::getAdminTokenLite('AdminModules');
+        $helper->tpl_vars = [
+            'fields_value' => $this->getConfigFieldsValues(),
+            'languages' => $this->context->controller->getLanguages(),
+            'id_language' => $this->context->language->id
+        ];
+
+        return $helper->generateForm([$formCompany, $formConfiguration, $formConnection]);
+    }
+
+    /**
+     * @param $action
+     * @param $content
+     * @return string
+     */
+    final private function generateForm($action, $content)
+    {
+        $action = is_null($action)
+            ? "onsubmit='return false;'"
+            : "action='{$action}'";
+
+        $content = mb_convert_encoding($content, 'HTML-ENTITIES', 'UTF-8');
+
+        return "<form accept-charset='UTF-8' {$action} id='payment-form'>{$content}</form>";
+    }
+
+    /**
+     * @return string
+     */
+    final private function getPluginVersion()
+    {
+        return $this->version;
+    }
+
+    /**
+     * @param string $name
+     * @return mixed|string
+     */
+    final private function getCurrentValueOf($name)
+    {
+        return Tools::getValue($name)
+            ? Tools::getValue($name)
+            : Configuration::get($name);
+    }
+
+    /**
+     * @param string $page process.php
+     * @param string $params Query string to add in URL, please include symbol (?), eg: ?var=foo
+     * @return string
+     */
+    final private function getUrl($page, $params = '')
+    {
+        $baseUrl = Context::getContext()->shop->getBaseURL(true);
+        $url = $baseUrl . 'modules/' . getModuleName() . '/' . $page . $params;
+
+        return $url;
+    }
+
+    /**
+     * @return string
+     */
+    final private function getScheduleTaskPath()
+    {
+        return fixPath($this->getThisModulePath() . '/sonda.php');
+    }
+
+    /**
+     * @return string
+     */
+    final private function getLogFilePath()
+    {
+        return PaymentLogger::getLogFilename();
+    }
+
+    /**
+     * @return string
+     */
+    final private function getCompanyDocument()
+    {
+        return $this->getCurrentValueOf(self::COMPANY_DOCUMENT);
+    }
+
+    /**
+     * @return string
+     */
+    final private function getCompanyName()
+    {
+        return $this->getCurrentValueOf(self::COMPANY_NAME);
+    }
+
+    /**
+     * @return string
+     */
+    final private function getEmailContact()
+    {
+        $emailContact = $this->getCurrentValueOf(self::EMAIL_CONTACT);
+
+        return empty($emailContact)
+            ? Configuration::get('PS_SHOP_EMAIL')
+            : $emailContact;
+    }
+
+    /**
+     * @return string
+     */
+    final private function getTelephoneContact()
+    {
+        $telephoneContact = $this->getCurrentValueOf(self::TELEPHONE_CONTACT);
+
+        return empty($telephoneContact)
+            ? Configuration::get('PS_SHOP_PHONE')
+            : $telephoneContact;
+    }
+
+    /**
+     * @return string
+     */
+    final private function getDescription()
+    {
+        return $this->getCurrentValueOf(self::DESCRIPTION);
+    }
+
+    /**
+     * @return int
+     */
+    final private function getExpirationTimeMinutes()
+    {
+        $minutes = $this->getCurrentValueOf(self::EXPIRATION_TIME_MINUTES);
+
+        return !is_numeric($minutes) || $minutes < self::EXPIRATION_TIME_MINUTES_MIN
+            ? self::EXPIRATION_TIME_MINUTES_DEFAULT
+            : $minutes;
+    }
+
+    /**
+     * @return string
+     */
+    final private function getShowOnReturn()
+    {
+        return $this->getCurrentValueOf(self::SHOW_ON_RETURN);
+    }
+
+    /**
+     * @return bool
+     */
+    final private function getTransUnionMessage()
+    {
+        return $this->getCurrentValueOf(self::CIFIN_MESSAGE);
+    }
+
+    /**
+     * @return bool
+     */
+    final private function getAllowBuyWithPendingPayments()
+    {
+        return (int)$this->getCurrentValueOf(self::ALLOW_BUY_WITH_PENDING_PAYMENTS);
+    }
+
+    /**
+     * @return bool
+     */
+    final private function getFillTaxInformation()
+    {
+        return $this->getCurrentValueOf(self::FILL_TAX_INFORMATION);
+    }
+
+    /**
+     * @return bool
+     */
+    final private function getFillBuyerInformation()
+    {
+        return $this->getCurrentValueOf(self::FILL_BUYER_INFORMATION);
+    }
+
+    /**
+     * @return bool
+     */
+    final private function getSkipResult()
+    {
+        return $this->getCurrentValueOf(self::SKIP_RESULT);
+    }
+
+    /**
+     * @return string
+     */
+    final private function getPaymentMethodsEnabled()
+    {
+        $paymentMethods = $this->getCurrentValueOf(self::PAYMENT_METHODS_ENABLED);
+
+        if (is_array($paymentMethods)) {
+            $paymentMethods = PaymentMethod::toString($paymentMethods);
+        }
+
+        return empty($paymentMethods)
+            ? self::PAYMENT_METHODS_ENABLED_DEFAULT
+            : $paymentMethods;
+    }
+
+    /**
+     * @return string
+     */
+    final private function getCountry()
+    {
+        $country = $this->getCurrentValueOf(self::COUNTRY);
+
+        return empty($country)
+            ? CountryCode::COLOMBIA
+            : $country;
+    }
+
+    /**
+     * @return string
+     */
+    final private function getEnvironment()
+    {
+        $environment = $this->getCurrentValueOf(self::ENVIRONMENT);
+
+        return empty($environment)
+            ? Environment::TEST
+            : $environment;
+    }
+
+    /**
+     * @return string
+     */
+    final private function getCustomConnectionUrl()
+    {
+        $customEnvironment = $this->getCurrentValueOf(self::CUSTOM_CONNECTION_URL);
+
+        return empty($customEnvironment)
+            ? null
+            : $customEnvironment;
+    }
+
+    /**
+     * @return string
+     */
+    final private function getLogin()
+    {
+        return $this->getCurrentValueOf(self::LOGIN);
+    }
+
+    /**
+     * @return string
+     */
+    final private function getTranKey()
+    {
+        return $this->getCurrentValueOf(self::TRAN_KEY);
+    }
+
+    /**
+     * @return string
+     */
+    final private function getConnectionType()
+    {
+        $connectionType = $this->getCurrentValueOf(self::CONNECTION_TYPE);
+
+        return empty($connectionType) || !in_array($connectionType, [
+            self::CONNECTION_TYPE_SOAP,
+            self::CONNECTION_TYPE_REST
+        ])
+            ? self::CONNECTION_TYPE_REST
+            : $connectionType;
+    }
+
+    /**
+     * @return string
+     */
+    final private function getUri()
+    {
+        $uri = null;
+        $endpoints = PaymentUrl::getEndpointsTo($this->getCountry());
+
+        if ($this->isCustomEnvironment()) {
+            $uri = $this->getCustomConnectionUrl();
+        } elseif (!empty($endpoints[$this->getEnvironment()])) {
+            $uri = $endpoints[$this->getEnvironment()];
+        }
+
+        return $uri;
+    }
+
+    /**
+     * @return mixed
+     */
+    final private function getOrderState()
+    {
+        return Configuration::get(self::ORDER_STATE);
+    }
+
+    /**
+     * @return string
+     */
+    final private function getThisModulePath()
+    {
+        return _PS_MODULE_DIR_ . getModuleName();
+    }
+
+    /**
+     * @param $status
+     * @return string
+     */
+    final private function getRedirectPageFromStatus($status)
+    {
+        if ($status == PaymentStatus::APPROVED) {
+            $redirectTo = self::PAGE_ORDER_CONFIRMATION;
+        } else {
+            $redirectTo = $this->isShowOnReturnDetails()
+                ? self::PAGE_ORDER_DETAILS
+                : self::PAGE_ORDER_HISTORY;
+        }
+
+        return $redirectTo;
+    }
+
+    /**
+     * @param string $column You can any column from $this->tablePayment table
+     * @param int $value
+     * @return array|bool
+     */
+    final private function getPaymentPlaceToPayBy($column, $value = null)
+    {
+        try {
+            if (!empty($column) && !empty($value)) {
+                $rows = Db::getInstance()->ExecuteS("
+                SELECT *
+                FROM  `{$this->tablePayment}`
+                WHERE {$column} = '{$value}'
+            ");
+            }
+        } catch (Exception $e) {
+            PaymentLogger::log($e->getMessage(), PaymentLogger::WARNING, 15, $e->getFile(), $e->getLine());
+        }
+
+        return !empty($rows[0]) ? $rows[0] : false;
+    }
+
+    /**
+     * @param null $cartId
+     * @return Order
+     * @throws PaymentException
+     */
+    final private function getOrderByCartId($cartId = null)
+    {
+        if (versionComparePlaceToPay('1.7.1.0', '>=')) {
+            $orderId = Order::getIdByCartId($cartId);
+        } else {
+            $orderId = Order::getOrderByCartId($cartId);
+        }
+
+        if (!$orderId) {
+            throw new PaymentException(Tools::displayError(), 201);
+        }
+
+        $order = new Order($orderId);
+
+        if (!Validate::isLoadedObject($order)) {
+            throw new PaymentException(Tools::displayError(), 202);
+        }
+
+        return $order;
+    }
+
+    /**
+     * Last transaction pending to current costumer
+     *
+     * @param $customerId
+     * @return mixed
+     * @throws PaymentException
+     */
+    final private function getLastPendingTransaction($customerId)
+    {
+        $status = PaymentStatus::PENDING;
+
+        try {
+            $result = Db::getInstance()->ExecuteS("
+                SELECT p.* 
+                FROM `{$this->tablePayment}` p
+                    INNER JOIN `{$this->tableOrder}` o ON o.id_cart = p.id_order
+                WHERE o.`id_customer` = {$customerId} 
+                    AND p.`status` = {$status} 
+                LIMIT 1
+            ");
+        } catch (Exception $e) {
+            throw new PaymentException($e->getMessage(), 901);
+        }
+
+        if (!empty($result)) {
+            $result = $result[0];
+        }
+
+        return $result;
+    }
+
+    /**
+     * Get customer orders
+     *
+     * @param $id_customer Customer id
+     * @param bool $show_hidden_status Display or not hidden order statuses
+     * @param Context|null $context
+     * @return array
+     */
+    final private function getCustomerOrders($id_customer, $show_hidden_status = false, Context $context = null)
+    {
+        if (!$context) {
+            $context = Context::getContext();
+        }
+
+        $sql = 'SELECT o.`id_order`, o.`id_currency`, o.`payment`, o.`invoice_number`, pp.`date` date_add, 
+                      pp.`reference`, pp.`amount` total_paid, pp.`authcode` cus, 
+                      (SELECT SUM(od.`product_quantity`) 
+                      FROM `' . _DB_PREFIX_ . 'order_detail` od 
+                      WHERE od.`id_order` = o.`id_order`) nb_products
+        FROM `' . $this->tableOrder . '` o
+            JOIN `' . $this->tablePayment . '` pp ON pp.id_order = o.id_cart
+        WHERE o.`id_customer` = ' . (int)$id_customer .
+            Shop::addSqlRestriction(Shop::SHARE_ORDER) . '
+        GROUP BY o.`id_order`
+        ORDER BY o.`date_add` DESC';
+
+        $res = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
+        if (!$res) {
+            return [];
+        }
+
+        foreach ($res as $key => $val) {
+            $res2 = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS('
+                SELECT os.`id_order_state`, osl.`name` AS order_state, os.`invoice`, os.`color` AS order_state_color
+                FROM `' . _DB_PREFIX_ . 'order_history` oh
+                LEFT JOIN `' . _DB_PREFIX_ . 'order_state` os ON (os.`id_order_state` = oh.`id_order_state`)
+                INNER JOIN `' . _DB_PREFIX_ . 'order_state_lang` osl ON (
+                    os.`id_order_state` = osl.`id_order_state` AND osl.`id_lang` = ' . (int)$context->language->id . '
+                )
+            WHERE oh.`id_order` = ' . (int)$val['id_order'] . (!$show_hidden_status ? ' AND os.`hidden` != 1' : '') . '
+            ORDER BY oh.`date_add` DESC, oh.`id_order_history` DESC
+            LIMIT 1');
+
+            if ($res2) {
+                $res[$key] = array_merge($res[$key], $res2[0]);
+            }
+        }
+
+        return $res;
+    }
+
+    /**
+     * @param $cartId
+     * @param null $orderId
+     * @return mixed
+     * @throws PaymentException
+     */
+    final private function getTransactionInformation($cartId, $orderId = null)
+    {
+        $id_order = (empty($cartId)
+            ? "(SELECT `id_cart` FROM `{$this->tableOrder}` WHERE `id_order` = {$orderId})"
+            : $cartId);
+
+        try {
+            $result = Db::getInstance()->ExecuteS(
+                "SELECT * FROM `{$this->tablePayment}` WHERE `id_order` = {$id_order}"
+            );
+        } catch (Exception $e) {
+            throw new PaymentException($e->getMessage(), 801);
+        }
+
+        if (!empty($result)) {
+            $result = $result[0];
+
+            if (empty($result['reason_description'])) {
+                $result['reason_description'] = ($result['reason'] == '?-')
+                    ? $this->ll('Processing transaction')
+                    : $this->ll('No information');
+            }
+
+            if (empty($result['status'])) {
+                $result['status_description'] = ($result['status'] == '')
+                    ? $this->ll('Processing transaction')
+                    : $this->ll('No information');
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param Order $order
+     * @return mixed
+     * @throws PaymentException
+     */
+    final private function getPaymentDetails(Order $order)
+    {
+        // Get information
+        $transaction = $this->getTransactionInformation($order->id_cart);
+        $cart = new Cart((int)$order->id_cart);
+        $invoiceAddress = new Address((int)($cart->id_address_invoice));
+        $totalAmount = (float)($cart->getOrderTotal(true, Cart::BOTH));
+        $taxAmount = $totalAmount - (float)($cart->getOrderTotal(false, Cart::BOTH));
+        $payerName = '';
+        $payerEmail = !empty($transaction['payer_email']) ? $transaction['payer_email'] : null;
+        $transaction['tax'] = $taxAmount;
+
+        // Customer data
+        $customer = new Customer((int)($order->id_customer));
+
+        if (Validate::isLoadedObject($customer)) {
+            $payerName = empty($invoiceAddress)
+                ? $customer->firstname . ' ' . $customer->lastname
+                : $invoiceAddress->firstname . ' ' . $invoiceAddress->lastname;
+            $payerEmail = isset($payerEmail) ? $payerEmail : $customer->email;
+        }
+
+        $attributes = [
+                'company_document' => $this->getCompanyDocument(),
+                'company_name' => $this->getCompanyName(),
+                'payment_description' => sprintf($this->getDescription(), $transaction['reference']),
+                'store_email' => $this->getEmailContact(),
+                'store_phone' => $this->getTelephoneContact(),
+                'transaction' => $transaction,
+                'payer_name' => $payerName,
+                'payer_email' => $payerEmail,
+                'customer_id' => $cart->id_customer,
+                'orderId' => $order->id,
+                'logged' => (Context::getContext()->customer->isLogged() ? true : false),
+            ] + $this->getStatusDescription($transaction['status']);
+
+        $this->context->smarty->assign($attributes);
+
+        return $this->display($this->getThisModulePath(), fixPath('/views/templates/front/response.tpl'));
+    }
+
+    /**
+     * @param $status
+     * @return array
+     */
+    final private function getStatusDescription($status)
+    {
+        $description = [
+            'status' => 'pending',
+            'status_description' => $this->ll('Pending payment')
+        ];
+
+        switch ($status) {
+            case PaymentStatus::APPROVED:
+            case PaymentStatus::DUPLICATE:
+                $description = [
+                    'status' => 'ok',
+                    'status_description' => $this->ll('Completed payment')
+                ];
+                break;
+            case PaymentStatus::FAILED:
+                $description = [
+                    'status' => 'fail',
+                    'status_description' => $this->ll('Failed payment')
+                ];
+                break;
+            case PaymentStatus::REJECTED:
+                $description = [
+                    'status' => 'rejected',
+                    'status_description' => $this->ll('Rejected payment')
+                ];
+                break;
+        }
+
+        return $description;
+    }
+
+    /**
+     * @param RedirectInformation $response
+     * @return int
+     */
+    final private function getStatusPayment(RedirectInformation $response)
+    {
+        // By default is pending so make a query for it later (see information.php example)
+        $status = PaymentStatus::PENDING;
+        $lastPayment = $response->lastTransaction();
+
+        if ($response->isSuccessful() && !empty($lastPayment)) {
+            // In order to use the functions please refer to the RedirectInformation class
+            if ($lastPayment->status()->isApproved()) {
+                // Approved status
+                $status = PaymentStatus::APPROVED;
+            } elseif ($lastPayment->status()->isRejected()) {
+                // This is why it has been reject
+                $status = PaymentStatus::REJECTED;
+            } elseif ($lastPayment->status()->isFailed()) {
+                // This is why it has been fail
+                $status = PaymentStatus::FAILED;
+            }
+        } elseif ($response->status()->isRejected()) {
+            // Canceled by user
+            $status = PaymentStatus::REJECTED;
+        }
+
+        return $status;
+    }
+
+    /**
+     * @param $customerId
+     * @return string
+     */
+    final private function getPaymentPSEList($customerId)
+    {
+        $orders = self::getCustomerOrders($customerId);
+
+        if ($orders) {
+            foreach ($orders as &$order) {
+                $myOrder = new Order((int)$order['id_order']);
+                if (Validate::isLoadedObject($myOrder)) {
+                    $order['virtual'] = $myOrder->isVirtual(false);
+                }
+            }
+        }
+
+        $this->context->smarty->assign([
+            'orders' => $orders,
+            'invoiceAllowed' => (int)Configuration::get('PS_INVOICE'),
+            'reorderingAllowed' => !(bool)Configuration::get('PS_DISALLOW_HISTORY_REORDERING'),
+            'slowValidation' => Tools::isSubmit('slowvalidation')
+        ]);
+
+        return $this->display($this->getThisModulePath(), fixPath('/views/templates/front/history.tpl'));
+    }
+
+    /**
+     * @return string
+     */
+    final private function getSetup()
     {
         $setup = $this->ll('Configuration') . breakLine();
         $setup .= sprintf('PHP [%s]', PHP_VERSION) . breakLine();
@@ -2250,32 +2234,18 @@ class PlacetoPayPayment extends PaymentModule
     }
 
     /**
-     * Options to show when user return from payment
+     * @param $name
+     * @return string
      */
-    private function getListOptionShowOnReturn()
+    final private function getNameInMultipleFormat($name)
     {
-        $options = [
-            [
-                'value' => self::SHOW_ON_RETURN_DEFAULT,
-                'label' => $this->ll('PrestaShop View'),
-            ],
-            [
-                'value' => self::SHOW_ON_RETURN_DETAILS,
-                'label' => $this->ll('Payment Details'),
-            ],
-            [
-                'value' => self::SHOW_ON_RETURN_PSE_LIST,
-                'label' => $this->ll('PSE List'),
-            ],
-        ];
-
-        return $options;
+        return sprintf('%s[]', $name);
     }
 
     /**
      * @return array
      */
-    private function getListOptionSwitch()
+    final private function getOptionSwitch()
     {
         return [
             [
@@ -2292,196 +2262,100 @@ class PlacetoPayPayment extends PaymentModule
     }
 
     /**
+     * @param array $options
+     * @return array
+     */
+    final private function getOptionList($options)
+    {
+        $listOption = [];
+
+        if (!is_array($options)) {
+            return $listOption;
+        }
+
+        foreach ($options as $value => $label) {
+            $listOption[] = compact('value', 'label');
+        }
+
+        return $listOption;
+    }
+
+    /**
      * Options payment methods
      * @return array
      */
-    private function getListOptionPaymentMethods()
+    final private function getOptionListPaymentMethods()
     {
-        $options = [];
-
-        $options[] = [
-            'value' => self::PAYMENT_METHODS_ENABLED_DEFAULT,
-            'label' => $this->ll('All'),
+        $options = [
+            self::PAYMENT_METHODS_ENABLED_DEFAULT => $this->ll('All'),
         ];
 
         foreach (PaymentMethod::getPaymentMethodsAvailable($this->getCountry()) as $code => $name) {
-            $options[] = [
-                'value' => $code,
-                'label' => $name,
-            ];
+            $options[$code] = $name;
         }
 
-        return $options;
+        return $this->getOptionList($options);
     }
 
     /**
-     * @param string $name
-     * @return mixed|string
+     * Options to show when user return from payment
      */
-    private function getCurrentValueOf($name)
+    final private function getOptionListShowOnReturn()
     {
-        return Tools::getValue($name)
-            ? Tools::getValue($name)
-            : Configuration::get($name);
-    }
-
-    /**
-     * @param $cart
-     * @return bool
-     */
-    public function checkCurrency($cart)
-    {
-        $currency_order = new Currency($cart->id_currency);
-        $currencies_module = $this->getCurrency($cart->id_currency);
-
-        if (is_array($currencies_module)) {
-            foreach ($currencies_module as $currency_module) {
-                if ($currency_order->id == $currency_module['id_currency']) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * @param $string
-     * @param bool $rollBack
-     * @return string
-     */
-    private function reference($string, $rollBack = false)
-    {
-        return !$rollBack
-            ? base64_encode($string)
-            : base64_decode($string);
-    }
-
-    /**
-     * @return bool
-     */
-    private function isSetCredentials()
-    {
-        return !empty($this->getLogin()) && !empty($this->getTranKey());
-    }
-
-    /**
-     * Manage translations
-     * @param $string
-     * @return string
-     */
-    private function ll($string)
-    {
-        return $this->l($string, getModuleName());
-    }
-
-    /**
-     * @param array $errors
-     * @return mixed
-     */
-    private function showError(array $errors)
-    {
-        if (versionComparePlaceToPay('1.7.0.0', '<')) {
-            $errors = implode('<br>', $errors);
-        }
-
-        return $this->displayError($errors);
-    }
-
-    private function updateCurrentOrderWithError()
-    {
-        $history = new OrderHistory();
-        $history->id_order = $this->currentOrder;
-        $history->changeIdOrderState(Configuration::get('PS_OS_ERROR'), $history->id_order);
-        $history->save();
-    }
-
-    /**
-     * @return PaymentRedirection
-     * @throws \Dnetix\Redirection\Exceptions\PlacetoPayException
-     */
-    private function instanceRedirection()
-    {
-        return new PaymentRedirection(
-            $this->getLogin(),
-            $this->getTranKey(),
-            $this->getUri(),
-            $this->getConnectionType()
-        );
-    }
-
-    /**
-     * @param $name
-     * @return string
-     */
-    private function getNameInMultipleFormat($name)
-    {
-        return sprintf('%s[]', $name);
-    }
-
-    /**
-     * @return array
-     */
-    private function getListOptionCountries()
-    {
-        return [
-            [
-                'value' => CountryCode::COLOMBIA,
-                'label' => $this->ll('Colombia'),
-            ],
-            [
-                'value' => CountryCode::ECUADOR,
-                'label' => $this->ll('Ecuador'),
-            ],
+        $options = [
+            self::SHOW_ON_RETURN_DEFAULT => $this->ll('PrestaShop View'),
+            self::SHOW_ON_RETURN_DETAILS => $this->ll('Payment Details'),
+            self::SHOW_ON_RETURN_PSE_LIST => $this->ll('PSE List'),
         ];
+
+        return $this->getOptionList($options);
     }
 
     /**
      * @return array
      */
-    private function getListOptionEnvironments()
+    final private function getOptionListCountries()
     {
-        return [
-            [
-                'value' => Environment::PRODUCTION,
-                'label' => $this->ll('Production'),
-            ],
-            [
-                'value' => Environment::TEST,
-                'label' => $this->ll('Test'),
-            ],
-            [
-                'value' => Environment::DEVELOPMENT,
-                'label' => $this->ll('Development'),
-            ],
-            [
-                'value' => Environment::CUSTOM,
-                'label' => $this->ll('Custom'),
-            ],
+        $options = [
+            CountryCode::COLOMBIA => $this->ll('Colombia'),
+            CountryCode::ECUADOR => $this->ll('Ecuador'),
         ];
+
+        return $this->getOptionList($options);
     }
 
     /**
      * @return array
      */
-    private function getListOptionConnectionTypes()
+    final private function getOptionListEnvironments()
     {
-        return [
-            [
-                'value' => self::CONNECTION_TYPE_SOAP,
-                'label' => $this->ll('SOAP'),
-            ],
-            [
-                'value' => self::CONNECTION_TYPE_REST,
-                'label' => $this->ll('REST'),
-            ],
+        $options = [
+            Environment::PRODUCTION => $this->ll('Production'),
+            Environment::TEST => $this->ll('Test'),
+            Environment::DEVELOPMENT => $this->ll('Development'),
+            Environment::CUSTOM => $this->ll('Custom'),
         ];
+
+        return $this->getOptionList($options);
     }
 
     /**
      * @return array
      */
-    private function getFieldsCompany()
+    final private function getOptionListConnectionTypes()
+    {
+        $options = [
+            self::CONNECTION_TYPE_SOAP => $this->ll('SOAP'),
+            self::CONNECTION_TYPE_REST => $this->ll('REST'),
+        ];
+
+        return $this->getOptionList($options);
+    }
+
+    /**
+     * @return array
+     */
+    final private function getFieldsCompany()
     {
         return [
             [
@@ -2525,7 +2399,7 @@ class PlacetoPayPayment extends PaymentModule
     /**
      * @return array
      */
-    private function getFieldsConfiguration()
+    final private function getFieldsConfiguration()
     {
         return [
             [
@@ -2543,7 +2417,7 @@ class PlacetoPayPayment extends PaymentModule
                 'options' => [
                     'id' => 'value',
                     'name' => 'label',
-                    'query' => $this->getListOptionShowOnReturn(),
+                    'query' => $this->getOptionListShowOnReturn(),
                 ],
             ],
             [
@@ -2551,35 +2425,35 @@ class PlacetoPayPayment extends PaymentModule
                 'label' => $this->ll('Enable TransUnion message?'),
                 'name' => self::CIFIN_MESSAGE,
                 'is_bool' => true,
-                'values' => $this->getListOptionSwitch(),
+                'values' => $this->getOptionSwitch(),
             ],
             [
                 'type' => 'switch',
                 'label' => $this->ll('Allow buy with pending payments?'),
                 'name' => self::ALLOW_BUY_WITH_PENDING_PAYMENTS,
                 'is_bool' => true,
-                'values' => $this->getListOptionSwitch(),
+                'values' => $this->getOptionSwitch(),
             ],
             [
                 'type' => 'switch',
                 'label' => $this->ll('Fill TAX information?'),
                 'name' => self::FILL_TAX_INFORMATION,
                 'is_bool' => true,
-                'values' => $this->getListOptionSwitch(),
+                'values' => $this->getOptionSwitch(),
             ],
             [
                 'type' => 'switch',
                 'label' => $this->ll('Fill buyer information?'),
                 'name' => self::FILL_BUYER_INFORMATION,
                 'is_bool' => true,
-                'values' => $this->getListOptionSwitch(),
+                'values' => $this->getOptionSwitch(),
             ],
             [
                 'type' => 'switch',
                 'label' => $this->ll('Skip result?'),
                 'name' => self::SKIP_RESULT,
                 'is_bool' => true,
-                'values' => $this->getListOptionSwitch(),
+                'values' => $this->getOptionSwitch(),
             ],
             [
                 'type' => 'select',
@@ -2592,7 +2466,7 @@ class PlacetoPayPayment extends PaymentModule
                 'options' => [
                     'id' => 'value',
                     'name' => 'label',
-                    'query' => $this->getListOptionPaymentMethods(),
+                    'query' => $this->getOptionListPaymentMethods(),
                 ]
             ]
         ];
@@ -2601,7 +2475,7 @@ class PlacetoPayPayment extends PaymentModule
     /**
      * @return array
      */
-    private function getFieldsConnection()
+    final private function getFieldsConnection()
     {
         return [
             [
@@ -2612,7 +2486,7 @@ class PlacetoPayPayment extends PaymentModule
                 'options' => [
                     'id' => 'value',
                     'name' => 'label',
-                    'query' => $this->getListOptionCountries(),
+                    'query' => $this->getOptionListCountries(),
                 ],
             ],
             [
@@ -2623,7 +2497,7 @@ class PlacetoPayPayment extends PaymentModule
                 'options' => [
                     'id' => 'value',
                     'name' => 'label',
-                    'query' => $this->getListOptionEnvironments(),
+                    'query' => $this->getOptionListEnvironments(),
                 ],
             ],
             [
@@ -2662,19 +2536,9 @@ class PlacetoPayPayment extends PaymentModule
                 'options' => [
                     'id' => 'value',
                     'name' => 'label',
-                    'query' => $this->getListOptionConnectionTypes(),
+                    'query' => $this->getOptionListConnectionTypes(),
                 ],
             ],
-        ];
-    }
-
-    /**
-     * @return array
-     */
-    private function getSubmitButton()
-    {
-        return [
-            'title' => $this->ll('Save'),
         ];
     }
 
@@ -2683,11 +2547,137 @@ class PlacetoPayPayment extends PaymentModule
      * @param $icon
      * @return array
      */
-    private function getLegendTo($title, $icon)
+    final private function getLegendTo($title, $icon)
     {
         return [
             'title' => $this->ll($title),
             'icon' => $icon
         ];
+    }
+
+    /**
+     * @return array
+     */
+    final private function getSubmitButton()
+    {
+        return [
+            'title' => $this->ll('Save'),
+        ];
+    }
+
+    /**
+     * @return bool
+     */
+    final private function isShowOnReturnDetails()
+    {
+        return in_array($this->getShowOnReturn(), [self::SHOW_ON_RETURN_DEFAULT, self::SHOW_ON_RETURN_DETAILS]);
+    }
+
+    /**
+     * @return bool
+     */
+    final private function isProduction()
+    {
+        return $this->getEnvironment() === Environment::PRODUCTION;
+    }
+
+    /**
+     * @return bool
+     */
+    final private function isCustomEnvironment()
+    {
+        return $this->getEnvironment() === Environment::CUSTOM;
+    }
+
+    /**
+     * @return bool
+     */
+    final private function isSetCredentials()
+    {
+        return !empty($this->getLogin()) && !empty($this->getTranKey());
+    }
+
+    /**
+     * @return bool
+     */
+    final private function isEnableShowSetup()
+    {
+        $force = Tools::getValue('f', null);
+
+        return !$this->isProduction()
+        && !empty($force)
+        && Tools::strlen($force) === 5
+        && Tools::substr($this->getLogin(), -5) === $force
+            ? true
+            : false;
+    }
+
+    /**
+     * Manage translations
+     * @param $string
+     * @return string
+     */
+    final private function ll($string)
+    {
+        return $this->l($string, getModuleName());
+    }
+
+    /**
+     * @param array $errors
+     * @return mixed
+     */
+    final private function showError(array $errors)
+    {
+        if (versionComparePlaceToPay('1.7.0.0', '<')) {
+            $errors = implode('<br>', $errors);
+        }
+
+        return $this->displayError($errors);
+    }
+
+    /**
+     * @param $cart
+     * @return bool
+     */
+    final private function checkCurrency($cart)
+    {
+        $currency_order = new Currency($cart->id_currency);
+        $currencies_module = $this->getCurrency($cart->id_currency);
+
+        if (is_array($currencies_module)) {
+            foreach ($currencies_module as $currency_module) {
+                if ($currency_order->id == $currency_module['id_currency']) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param $string
+     * @param bool $rollBack
+     * @return string
+     */
+    final private function reference($string, $rollBack = false)
+    {
+        return !$rollBack
+            ? base64_encode($string)
+            : base64_decode($string);
+    }
+
+    /**
+     * @return PaymentRedirection
+     * @throws \Dnetix\Redirection\Exceptions\PlacetoPayException
+     */
+    final private function instanceRedirection()
+    {
+        return new PaymentRedirection(
+            $this->getLogin(),
+            $this->getTranKey(),
+            $this->getUri(),
+            $this->getConnectionType()
+        );
     }
 }
