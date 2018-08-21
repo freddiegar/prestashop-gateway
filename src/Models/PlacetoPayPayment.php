@@ -168,8 +168,7 @@ class PlacetoPayPayment extends PaymentModule
 
         $this->ps_versions_compliancy = [
             'min' => self::MIN_VERSION_PS,
-            'max' => self::MAX_VERSION_PS,
-//            'max' => _PS_VERSION_,
+            'max' => (isDebugEnable() ? _PS_VERSION_ : self::MIN_VERSION_PS),
         ];
 
         $this->controllers = ['validation'];
