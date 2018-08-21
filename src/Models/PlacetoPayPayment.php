@@ -137,6 +137,7 @@ class PlacetoPayPayment extends PaymentModule
     const PAGE_ORDER_DETAILS = 'index.php?controller=order-detail';
 
     const MIN_VERSION_PS = '1.6.0.5';
+    const MAX_VERSION_PS = '1.7.4.2';
 
     /**
      * @var string
@@ -167,7 +168,8 @@ class PlacetoPayPayment extends PaymentModule
 
         $this->ps_versions_compliancy = [
             'min' => self::MIN_VERSION_PS,
-            'max' => _PS_VERSION_
+            'max' => self::MAX_VERSION_PS,
+//            'max' => _PS_VERSION_,
         ];
 
         $this->controllers = ['validation'];
@@ -1250,19 +1252,18 @@ class PlacetoPayPayment extends PaymentModule
      */
     public function redirect(Cart $cart)
     {
+        if (empty($cart->id)) {
+            $message = 'Cart cannot be loaded or an order has already been placed using this cart';
+            PaymentLogger::log($message, PaymentLogger::ERROR, 18, __FILE__, __LINE__);
+            Tools::redirect('authentication.php?back=order.php');
+        }
+
         $lastPendingTransaction = $this->getLastPendingTransaction($cart->id_customer);
 
         if (!empty($lastPendingTransaction) && $this->getAllowBuyWithPendingPayments() == self::OPTION_DISABLED) {
             // @codingStandardsIgnoreLine
             $message = 'Payment not allowed, customer has payment pending and not allowed but with payment pending is disable';
             PaymentLogger::log($message, PaymentLogger::ERROR, 7, __FILE__, __LINE__);
-            Tools::redirect('authentication.php?back=order.php');
-        }
-
-        if (empty($cart->id)) {
-            // @codingStandardsIgnoreLine
-            $message = 'Cart cannot be loaded or an order has already been placed using this cart';
-            PaymentLogger::log($message, PaymentLogger::ERROR, 18, __FILE__, __LINE__);
             Tools::redirect('authentication.php?back=order.php');
         }
 
@@ -1313,7 +1314,7 @@ class PlacetoPayPayment extends PaymentModule
             $expiration = date('c', strtotime($this->getExpirationTimeMinutes() . ' minutes'));
             $ipAddress = (new RemoteAddress())->getIpAddress();
 
-            // Create order in prestashop
+            // Create order in PrestaShop
             $this->validateOrder(
                 $cart->id,
                 $orderStatus,

@@ -1,6 +1,6 @@
 # Prestashop Gateway to PlacetoPay
 
-[PlacetoPay][link-placetopay] Plugin Payment for [Prestashop][link-prestashop] 1.5 to 1.7 Stable
+[PlacetoPay][link-placetopay] Plugin Payment for [Prestashop][link-prestashop] 1.5, 1.6 and 1.7 Stable
 
 ## Prerequisites
 
@@ -13,11 +13,11 @@
 
 ## Compatibility Version
 
-| Prestashop | Plugin   |
-|------------|----------|
-| 1.5.x      | ~2.6.4   |
-| 1.6.x      | >=2.6.4 |
-| 1.7.x      | 3.*      |
+| PrestaShop | Plugin   | Comments       |
+|------------|----------|----------------|
+| 1.5.x      | ~2.6.4   | `@deprecated`  |
+| 1.6.x      | >=2.6.4  | From  1.6.0.5  |
+| 1.7.x      | 3.*      | Until 1.7.4.2  |
 
 View releases [here][link-releases]
 

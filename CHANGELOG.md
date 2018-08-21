@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Update README file with [mailtrap.io](https://mailtrap.io/)
 - Update format name logfile, it is: \[dev|prod\]_YYYYMMDD_placetopayment.log
 - Update commands in Makefile
+- Update max version's PrestaShop supported: PS 1.7.4.2
 
 ### Fixed
 - Fix translations in: `es` and `gb` locales
