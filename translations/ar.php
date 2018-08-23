@@ -26,7 +26,7 @@ $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_accea76d09b0193c332cf
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_293270e21c674fa0408db264f62a6dbd'] = 'Listado de pagos';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_8ec99a29fa6cd2466b9670f96a2a9d3e'] = '¿Habilitar el mensaje de TransUnion?';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_6a8c1b534b184644e6fccc4bf1b5f12e'] = '¿Permitir compras con pagos pendientes?';
-$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_f13d07d8a2bb8341f8f06b77048e0cef'] = '¿Detallar de los impuestos aplicados en el pago?';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_f13d07d8a2bb8341f8f06b77048e0cef'] = '¿Detallar impuestos aplicados en el pago?';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_45a8293f1213912d7cf12e9cfd088d47'] = '¿Pre-diligenciar información del comprador en el formulario de pago?';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_befb274bdfcd4c55385afc8c59460bfc'] = '¿Omitir pantalla de resultado si el pago es aprobado?';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_78e59f1b3612db0fbf1be3983df1f10f'] = 'Configuración de conexión';
