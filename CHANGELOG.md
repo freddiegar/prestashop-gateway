@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [3.4.2] - 2018-08-23
+
 ### Updated
 - Update dependencies guzzle/guzzle from 5.3.2 => 5.3.3
 - Update README file with [mailtrap.io](https://mailtrap.io/)
