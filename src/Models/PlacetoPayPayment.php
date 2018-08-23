@@ -750,9 +750,8 @@ class PlacetoPayPayment extends PaymentModule
         $paymentId = $paymentPlaceToPay['id_payment'];
         $cartId = $paymentPlaceToPay['id_order'];
         $requestId = $paymentPlaceToPay['id_request'];
+        $reference = $paymentPlaceToPay['reference'];
         $oldStatus = $paymentPlaceToPay['status'];
-
-        $order = $this->getOrderByCartId($cartId);
 
         if (isDebugEnable()) {
             PaymentLogger::log(print_r($paymentPlaceToPay, true), PaymentLogger::DEBUG, 0, __FILE__, __LINE__);
@@ -761,7 +760,7 @@ class PlacetoPayPayment extends PaymentModule
         if (!isDebugEnable() && $oldStatus != PaymentStatus::PENDING) {
             $message = sprintf(
                 'Payment with reference: [%s] not is pending, current status is [%d=%s]',
-                $order->reference,
+                $reference,
                 $oldStatus,
                 implode('->', $this->getStatusDescription($oldStatus))
             );
@@ -781,6 +780,8 @@ class PlacetoPayPayment extends PaymentModule
         if (isDebugEnable()) {
             PaymentLogger::log(print_r($paymentRedirection, true), PaymentLogger::DEBUG, 0, __FILE__, __LINE__);
         }
+
+        $order = $this->getOrderByCartId($cartId);
 
         if ($paymentRedirection->isSuccessful() && $order) {
             $newStatus = $this->getStatusPayment($paymentRedirection);
@@ -883,19 +884,28 @@ class PlacetoPayPayment extends PaymentModule
                     $paymentId = (int)$row['id_payment'];
                     $cartId = (int)$row['id_order'];
 
-                    echo "Processing reference: [{$reference}] (Request ID: {$requestId})." . breakLine();
+                    echo "Processing order: [{$cartId}] with reference: [{$reference}] "
+                        . " (Request ID: {$requestId})." . breakLine();
+
+                    if (!$requestId) {
+                        echo 'Request ID payment is not valid.' . breakLine(2);
+                        continue;
+                    }
 
                     $response = $paymentRedirection->query($requestId);
                     $status = $this->getStatusPayment($response);
                     $order = $this->getOrderByCartId($cartId);
 
-                    if ($order) {
-                        $this->settleTransaction($paymentId, $status, $order, $response);
+                    if (!$order) {
+                        echo 'Order not found: ' . $cartId . breakLine(2);
+                        continue;
                     }
+
+                    $this->settleTransaction($paymentId, $status, $order, $response);
 
                     echo sprintf(
                         'Payment with reference: [%s] is [%d=%s]' . breakLine(2),
-                        $order->reference,
+                        $reference,
                         $status,
                         implode('->', $this->getStatusDescription($status))
                     );
@@ -1883,7 +1893,6 @@ class PlacetoPayPayment extends PaymentModule
     /**
      * @param null $cartId
      * @return Order
-     * @throws PaymentException
      */
     final private function getOrderByCartId($cartId = null)
     {
@@ -1894,13 +1903,29 @@ class PlacetoPayPayment extends PaymentModule
         }
 
         if (!$orderId) {
-            throw new PaymentException(Tools::displayError(), 201);
+            PaymentLogger::log(
+                sprintf('Order ID from Cart [%s] not found', $cartId),
+                PaymentLogger::WARNING,
+                201,
+                __FILE__,
+                __LINE__
+            );
+
+            return null;
         }
 
         $order = new Order($orderId);
 
         if (!Validate::isLoadedObject($order)) {
-            throw new PaymentException(Tools::displayError(), 202);
+            PaymentLogger::log(
+                sprintf('Order [%s] from Cart [%s] not loaded', $orderId, $cartId),
+                PaymentLogger::WARNING,
+                202,
+                __FILE__,
+                __LINE__
+            );
+
+            return null;
         }
 
         return $order;

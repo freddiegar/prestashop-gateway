@@ -175,7 +175,7 @@ UPDATE ps_configuration SET value='2525' where name = 'PS_MAIL_SMTP_PORT';
 | 99   | Un-known error, module not installed?          |
 | 100  | Install process is failed                      |
 | 201  | Order id is not found                          |
-| 202  | Order id is not loaded                         |
+| 202  | Order is not loaded                            |
 | 301  | Customer is not loaded                         |
 | 302  | Address is not loaded                          |
 | 303  | Currency is not loaded                         |

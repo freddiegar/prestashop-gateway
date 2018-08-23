@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - Fix translations in: `es` and `gb` locales
+- Fix bug getting order by cart id, fail if order not exist
 
 ### Removed
 - Stock re-inject option setup in PS 1.6, deprecated in PS 1.5
