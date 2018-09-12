@@ -8,7 +8,7 @@
             </strong>
         </p>
         <p>
-            Vr: {$version}
+            Vr: {$version} {$warning_compliancy}
         </p>
     </div>
 

@@ -137,7 +137,8 @@ class PlacetoPayPayment extends PaymentModule
     const PAGE_ORDER_DETAILS = 'index.php?controller=order-detail';
 
     const MIN_VERSION_PS = '1.6.0.5';
-    const MAX_VERSION_PS = '1.7.4.2';
+    const MAX_VERSION_PS = '1.6.0.5';
+//    const MAX_VERSION_PS = '1.7.4.2';
 
     /**
      * @var string
@@ -168,7 +169,7 @@ class PlacetoPayPayment extends PaymentModule
 
         $this->ps_versions_compliancy = [
             'min' => self::MIN_VERSION_PS,
-            'max' => (isDebugEnable() ? _PS_VERSION_ : self::MAX_VERSION_PS),
+            'max' => _PS_VERSION_,
         ];
 
         $this->controllers = ['validation'];
@@ -182,16 +183,21 @@ class PlacetoPayPayment extends PaymentModule
         parent::__construct();
 
         $this->displayName = $this->ll('PlacetoPay');
-        $this->description = $this->ll('Accept payments by credit cards and debits account');
+        $this->description = $this->ll('Accept payments by credit cards and debits account.');
+        $this->description .= '<br><span style="font-style: italic;" class="text-info">' . $this->getCompliancyMessage() . '</span>';
 
         $this->confirmUninstall = $this->ll('Are you sure you want to uninstall?');
 
+        if (!$this->isCompliancy()) {
+            $this->warning .= '<br> - ' . $this->getCompliancyMessage();
+        }
+
         if (!count(Currency::checkPaymentCurrencies($this->id))) {
-            $this->warning = $this->ll('No currency has been set for this module.');
+            $this->warning .= '<br> - ' . $this->ll('No currency has been set for this module.');
         }
 
         if (!$this->isSetCredentials()) {
-            $this->warning = $this->ll('You need to configure your PlacetoPay account before using this module');
+            $this->warning .= '<br> - ' . $this->ll('You need to configure your PlacetoPay account before using this module.');
         }
 
         @date_default_timezone_set(Configuration::get('PS_TIMEZONE'));
@@ -1423,6 +1429,7 @@ class PlacetoPayPayment extends PaymentModule
         $this->smarty->assign(
             [
                 'is_set_credentials' => $this->isSetCredentials(),
+                'warning_compliancy' => $this->getCompliancyMessage(),
                 'version' => $this->getPluginVersion(),
                 'url_notification' => $this->getUrl('process.php'),
                 'schedule_task' => $this->getScheduleTaskPath(),
@@ -1585,6 +1592,22 @@ class PlacetoPayPayment extends PaymentModule
     final private function getPluginVersion()
     {
         return $this->version;
+    }
+
+    /**
+     * @return bool
+     */
+    final private function isCompliancy()
+    {
+        return versionComparePlaceToPay(self::MAX_VERSION_PS, '<=');
+    }
+
+    /**
+     * @return string
+     */
+    final private function getCompliancyMessage()
+    {
+        return sprintf($this->ll('This plugin don\'t has been tested with your PrestaShop version [%s].'), _PS_VERSION_);
     }
 
     /**
