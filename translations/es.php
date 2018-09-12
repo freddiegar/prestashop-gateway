@@ -96,7 +96,7 @@ $_MODULE['<{placetopaypayment}prestashop>setting_a2b787ad97ab6f553dded04fc19dab0
 $_MODULE['<{placetopaypayment}prestashop>setting_481059542e3d94f3a41dfe33bbf41973'] = 'URL usada por PlacetoPay para notificar el estado de los pagos.';
 $_MODULE['<{placetopaypayment}prestashop>setting_d66be00270dd3d64aad0834d24367dad'] = 'Ubicación tarea programada';
 $_MODULE['<{placetopaypayment}prestashop>setting_3e75e0ca8d410b971074efb89689b85a'] = 'Configure esta tarea para validar los pagos con estado pendiente en su sitio.';
-$_MODULE['<{placetopaypayment}prestashop>setting_7b722fb4e0ed5b7e2a3b3326be32d3ac'] = 'Ubicación Logs';
+$_MODULE['<{placetopaypayment}prestashop>setting_7b722fb4e0ed5b7e2a3b3326be32d3ac'] = 'Ubicación Registros/Logs';
 $_MODULE['<{placetopaypayment}prestashop>setting_2a7353c1992f2f3591306676d489c521'] = 'Los mensajes de seguimiento son registrados aquí (con modo depuración activado), errores y advertencias';
 $_MODULE['<{placetopaypayment}prestashop>setting_8e52de0d4b03d5fe87dc88da09616c7f'] = 'aquí.';
 $_MODULE['<{placetopaypayment}prestashop>brand_payment_bca22c1fc0054ffe1b1fef823dbb2318'] = 'Paga con PlacetoPay';
