@@ -184,14 +184,15 @@ class PlacetoPayPayment extends PaymentModule
 
         $this->displayName = $this->ll('PlacetoPay');
         $this->description = $this->ll('Accept payments by credit cards and debits account.');
-        $this->description .= '<br>'
-            . '<span style="font-style: italic;" class="text-info">'
-            . $this->getCompliancyMessage()
-            . '</span>';
 
         $this->confirmUninstall = $this->ll('Are you sure you want to uninstall?');
 
         if (!$this->isCompliancy()) {
+            $this->description .= '<br>'
+                . '<span style="font-style: italic;" class="text-info">'
+                . $this->getCompliancyMessage()
+                . '</span>';
+
             $this->warning .= '<br> - ' . $this->getCompliancyMessage();
         }
 
@@ -1433,7 +1434,7 @@ class PlacetoPayPayment extends PaymentModule
         $this->smarty->assign(
             [
                 'is_set_credentials' => $this->isSetCredentials(),
-                'warning_compliancy' => $this->getCompliancyMessage(),
+                'warning_compliancy' => (!$this->isCompliancy() ? $this->getCompliancyMessage() : ''),
                 'version' => $this->getPluginVersion(),
                 'url_notification' => $this->getUrl('process.php'),
                 'schedule_task' => $this->getScheduleTaskPath(),
