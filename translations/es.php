@@ -3,10 +3,10 @@
 global $_MODULE;
 $_MODULE = array();
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_f867d2feefb8fd5a080864a00faf9f09'] = 'PlacetoPay';
-$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_96b1f8b105303b62fa80db89c6f97327'] = 'Acepta pagos con tarjetas de crédito y débito';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_4a84fa314d025e9515472cc472202a81'] = 'Acepta pagos con tarjetas de crédito y débito.';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_876f23178c29dc2552c0b48bf23cd9bd'] = 'Estás seguro de querer des-instalar el módulo?';
-$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_a02758d758e8bec77a33d7f392eb3f8a'] = 'No se ha configurado una moneda para este módulo';
-$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_303abcabb179fbb226ff8dacada64c94'] = 'Necesitas configurar tu cuenta PlacetoPay antes de usar este módulo';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_a02758d758e8bec77a33d7f392eb3f8a'] = 'No se ha configurado una moneda para este módulo.';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_3200d10a6757589d710a80f82f616f4e'] = 'Necesitas configurar tu cuenta PlacetoPay antes de usar este módulo.';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_ee66f9c9930cb33d2a5dde9b240d3f7e'] = 'es obligatorio.';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_b0f2aa53ca75f7cb21943f01e6cf22ff'] = 'no es válido.';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_9e682e30199eee42b1b3063282f3f35a'] = 'Configuración de PlacetoPay actualizada';

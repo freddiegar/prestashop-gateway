@@ -3,10 +3,10 @@
 global $_MODULE;
 $_MODULE = array();
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_f867d2feefb8fd5a080864a00faf9f09'] = 'PlacetoPay';
-$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_96b1f8b105303b62fa80db89c6f97327'] = 'Accept payments by credit cards and debits account';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_4a84fa314d025e9515472cc472202a81'] = 'Accept payments by credit cards and debits account.';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_876f23178c29dc2552c0b48bf23cd9bd'] = 'Are you sure you want to uninstall?';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_a02758d758e8bec77a33d7f392eb3f8a'] = 'No currency has been set for this module.';
-$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_303abcabb179fbb226ff8dacada64c94'] = 'You need to configure your PlacetoPay account before using this module';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_3200d10a6757589d710a80f82f616f4e'] = 'You need to configure your PlacetoPay account before using this module.';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_ee66f9c9930cb33d2a5dde9b240d3f7e'] = 'is required.';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_b0f2aa53ca75f7cb21943f01e6cf22ff'] = 'is not valid.';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_9e682e30199eee42b1b3063282f3f35a'] = 'PlacetoPay settings updated';
@@ -90,7 +90,7 @@ $_MODULE['<{placetopaypayment}prestashop>response_13dba24862cf9128167a59100e154c
 $_MODULE['<{placetopaypayment}prestashop>response_5f7ae98bdc36ea2686daed151216abf6'] = 'Retry payment';
 $_MODULE['<{placetopaypayment}prestashop>response_91a1bd08a417cbd1ce9ee50d8c67bab6'] = 'Payment History';
 $_MODULE['<{placetopaypayment}prestashop>setting_84201ad1138bdce8f2e1d3cfdc847139'] = 'This module allows you to accept payments by PlacetoPay.';
-$_MODULE['<{placetopaypayment}prestashop>setting_3200d10a6757589d710a80f82f616f4e'] = 'You need to configure your PlacetoPay account before using this module';
+$_MODULE['<{placetopaypayment}prestashop>setting_3200d10a6757589d710a80f82f616f4e'] = 'You need to configure your PlacetoPay account before using this module.';
 $_MODULE['<{placetopaypayment}prestashop>setting_a2b787ad97ab6f553dded04fc19dab01'] = 'Notification URL';
 $_MODULE['<{placetopaypayment}prestashop>setting_481059542e3d94f3a41dfe33bbf41973'] = 'URL where PlacetoPay will send payment status to Prestashop.';
 $_MODULE['<{placetopaypayment}prestashop>setting_d66be00270dd3d64aad0834d24367dad'] = 'Scheduler task path';
