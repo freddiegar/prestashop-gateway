@@ -155,7 +155,7 @@ class PlacetoPayPayment extends PaymentModule
     public function __construct()
     {
         $this->name = getModuleName();
-        $this->version = '3.4.2';
+        $this->version = '3.4.3';
         $this->author = 'EGM Ingeniería Sin Fronteras S.A.S';
         $this->tab = 'payments_gateways';
 
@@ -168,7 +168,7 @@ class PlacetoPayPayment extends PaymentModule
 
         $this->ps_versions_compliancy = [
             'min' => self::MIN_VERSION_PS,
-            'max' => (isDebugEnable() ? _PS_VERSION_ : self::MIN_VERSION_PS),
+            'max' => (isDebugEnable() ? _PS_VERSION_ : self::MAX_VERSION_PS),
         ];
 
         $this->controllers = ['validation'];
