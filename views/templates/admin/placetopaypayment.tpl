@@ -1,8 +1,8 @@
 {l s='PlacetoPay' mod='placetopaypayment'}
-{l s='Accept payments by credit cards and debits account' mod='placetopaypayment'}
+{l s='Accept payments by credit cards and debits account.' mod='placetopaypayment'}
 {l s='Are you sure you want to uninstall?' mod='placetopaypayment'}
 {l s='No currency has been set for this module.' mod='placetopaypayment'}
-{l s='You need to configure your PlacetoPay account before using this module' mod='placetopaypayment'}
+{l s='You need to configure your PlacetoPay account before using this module.' mod='placetopaypayment'}
 {l s='is required.' mod='placetopaypayment'}
 {l s='is not valid.' mod='placetopaypayment'}
 {l s='PlacetoPay settings updated' mod='placetopaypayment'}
@@ -62,3 +62,4 @@
 {l s='Save' mod='placetopaypayment'}
 {l s='Yes' mod='placetopaypayment'}
 {l s='No' mod='placetopaypayment'}
+{l s='This plugin don\'t has been tested with your PrestaShop version [%s].' mod='placetopaypayment'}

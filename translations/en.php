@@ -60,6 +60,7 @@ $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_b1c94ca2fbc3e78fc3006
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_c9cc8cce247e49bae79f15173ce97354'] = 'Save';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_93cba07454f06a4a960172bbd6e2a435'] = 'Yes';
 $_MODULE['<{placetopaypayment}prestashop>placetopaypayment_bafd7322c6e97d25b6299b5d6fe8920b'] = 'No';
+$_MODULE['<{placetopaypayment}prestashop>placetopaypayment_6aeabdd64048318ca8c79647564ba969'] = 'This plugin don\'t has been tested with your PrestaShop version [%s].';
 $_MODULE['<{placetopaypayment}prestashop>response_5d5c4a24285e79624af97a58941965cf'] = 'Completed payment';
 $_MODULE['<{placetopaypayment}prestashop>response_5d4f2f541dcbae61aaeebde92e4ade6d'] = 'Dear customer, your payment has been approved, thank you for your purchase.';
 $_MODULE['<{placetopaypayment}prestashop>response_08fc2add263dba5610ca59b67ec43346'] = 'Failed payment';
