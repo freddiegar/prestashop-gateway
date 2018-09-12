@@ -184,7 +184,10 @@ class PlacetoPayPayment extends PaymentModule
 
         $this->displayName = $this->ll('PlacetoPay');
         $this->description = $this->ll('Accept payments by credit cards and debits account.');
-        $this->description .= '<br><span style="font-style: italic;" class="text-info">' . $this->getCompliancyMessage() . '</span>';
+        $this->description .= '<br>'
+            . '<span style="font-style: italic;" class="text-info">'
+            . $this->getCompliancyMessage()
+            . '</span>';
 
         $this->confirmUninstall = $this->ll('Are you sure you want to uninstall?');
 
@@ -197,7 +200,8 @@ class PlacetoPayPayment extends PaymentModule
         }
 
         if (!$this->isSetCredentials()) {
-            $this->warning .= '<br> - ' . $this->ll('You need to configure your PlacetoPay account before using this module.');
+            $this->warning .= '<br> - '
+                . $this->ll('You need to configure your PlacetoPay account before using this module.');
         }
 
         @date_default_timezone_set(Configuration::get('PS_TIMEZONE'));
@@ -1607,7 +1611,10 @@ class PlacetoPayPayment extends PaymentModule
      */
     final private function getCompliancyMessage()
     {
-        return sprintf($this->ll('This plugin don\'t has been tested with your PrestaShop version [%s].'), _PS_VERSION_);
+        return sprintf(
+            $this->ll('This plugin don\'t has been tested with your PrestaShop version [%s].'),
+            _PS_VERSION_
+        );
     }
 
     /**
