@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+- Add `download` command in Makefile
+
+### Updated
+- Update prestashop version support: 1.7.4.3
+- Update dependecies squizlabs/php_codesniffer from 3.3.1 => 3.3.2
+
 ## [3.4.3] - 2018-09-12
 
 ### Added
