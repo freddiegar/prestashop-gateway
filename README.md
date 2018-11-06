@@ -212,6 +212,18 @@ Or adding version number in filename use
 make compile PLUGIN_VERSION=_X.Y.Z
 ```
 
+## Test Version
+
+In terminal run
+
+```bash
+make download PRESTASHOP_VR=X.Y.Z
+```
+
+> Previous versions [available](https://www.prestashop.com/en/previous-versions)
+
+And go: [install/X.Y.Z](http://localhost:8787/X.Y.Z/install)
+
 ## Quality
 
 During package development I try as best as possible to embrace good design and development practices, to help ensure that this package is as good as it can

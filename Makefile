@@ -155,3 +155,11 @@ compile:
         && sudo chmod 644 $(MODULE_NAME_VR).zip \
         && sudo rm -Rf ~/Downloads/placetopaypayment
 	@echo "Compile file complete: ~/Downloads/$(MODULE_NAME_VR).zip"
+
+.PHONY: download
+download:
+	sudo mkdir -p /var/www/prestashop/$(PRESTASHOP_VERSION)
+	sudo chown www-data:www-data -Rf /var/www/prestashop/$(PRESTASHOP_VERSION)
+	wget https://download.prestashop.com/download/releases/prestashop_$(PRESTASHOP_VERSION).zip -O ~/Downloads/$(PRESTASHOP_VERSION).zip \
+        && sudo unzip ~/Downloads/$(PRESTASHOP_VERSION).zip -d /var/www/prestashop/$(PRESTASHOP_VERSION)
+	@echo "Go to: http://localhost:8787/$(PRESTASHOP_VERSION)/install"
