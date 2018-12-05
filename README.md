@@ -17,7 +17,7 @@
 |------------|----------|------------------------|
 | 1.5.x      | ~2.6.4   | `@deprecated`          |
 | 1.6.x      | >=2.6.4  | From  1.6.0.5          |
-| 1.7.x      | 3.*      | Until 1.7.4.3 (tested) |
+| 1.7.x      | 3.*      | Until 1.7.4.4 (tested) |
 
 View releases [here][link-releases]
 

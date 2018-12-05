@@ -162,4 +162,4 @@ download:
 	sudo chown www-data:www-data -Rf /var/www/prestashop/$(PRESTASHOP_VERSION)
 	wget https://download.prestashop.com/download/releases/prestashop_$(PRESTASHOP_VERSION).zip -O ~/Downloads/$(PRESTASHOP_VERSION).zip \
         && sudo unzip ~/Downloads/$(PRESTASHOP_VERSION).zip -d /var/www/prestashop/$(PRESTASHOP_VERSION)
-	@echo "Go to: http://localhost:8787/$(PRESTASHOP_VERSION)/install"
+	@echo "Go to: http://localhost:8787/$(PRESTASHOP_VERSION)/"
