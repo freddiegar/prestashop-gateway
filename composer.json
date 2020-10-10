@@ -9,7 +9,7 @@
     "ext-json": "*",
     "ext-mbstring": "*",
     "guzzlehttp/guzzle": "~5.3",
-    "dnetix/redirection": "^0.4"
+    "dnetix/redirection": "^1.0"
   },
   "license": "MIT",
   "authors": [

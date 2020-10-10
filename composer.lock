@@ -4,30 +4,32 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0c8a9e177b1645086b675ef5559cb4cf",
+    "content-hash": "4e56efabfe442a41bf2efc4f5a643e20",
     "packages": [
         {
             "name": "dnetix/redirection",
-            "version": "0.4.5",
+            "version": "1.0.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/dnetix/redirection.git",
-                "reference": "3533817d95b0173b4247d6c70df710af40288c7d"
+                "reference": "93fce47930a8ae50a6d353f9bc5f0eb19cc6e85e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/dnetix/redirection/zipball/3533817d95b0173b4247d6c70df710af40288c7d",
-                "reference": "3533817d95b0173b4247d6c70df710af40288c7d",
+                "url": "https://api.github.com/repos/dnetix/redirection/zipball/93fce47930a8ae50a6d353f9bc5f0eb19cc6e85e",
+                "reference": "93fce47930a8ae50a6d353f9bc5f0eb19cc6e85e",
                 "shasum": ""
             },
             "require": {
+                "ext-json": "*",
                 "ext-soap": "*",
                 "guzzlehttp/guzzle": ">=5.3",
-                "php": ">=5.4"
+                "php": ">=7.0"
             },
             "require-dev": {
-                "illuminate/support": "^5.4",
-                "phpunit/phpunit": "^4.8"
+                "phpunit/phpunit": "^7.4",
+                "squizlabs/php_codesniffer": "3.*",
+                "symfony/var-dumper": "^4.3"
             },
             "type": "library",
             "autoload": {
@@ -46,7 +48,7 @@
                 }
             ],
             "description": "Library to connect with PlacetoPay Redirection service",
-            "time": "2018-05-28T20:35:42+00:00"
+            "time": "2020-03-04T21:58:06+00:00"
         },
         {
             "name": "guzzlehttp/guzzle",

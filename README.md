@@ -96,8 +96,10 @@ __MySQL Access__
 
 See details in `docker-compose.yml` file or run `make config` command
 
-> IMPORTANT: Using self-certificates you must be add certificates:
+> IMPORTANT: Using self-certificates you must be add certificates.
+
 > docker cp ca.cert.pem plugin_ps_prestashop:/usr/local/share/ca-certificates/development.local.ca-cert.crt && update-ca-certificates
+
 ### Customize docker installation
 
 Default versions

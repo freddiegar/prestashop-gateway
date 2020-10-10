@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
     - prestashop version (1.6 => 1.7)
     - database port binding (33060  => 3306)
 - Updated dependencies
+    - dnetix/redirection (0.4.5 => 1.0.6)
     - react/promise (v2.7.0 => v2.8.0)
     - guzzlehttp/guzzle (5.3.3 => 5.3.4)
     - squizlabs/php_codesniffer (3.3.2 => 3.5.6)
