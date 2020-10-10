@@ -18,9 +18,12 @@ services:
       # DB_PASSWD: Override default MySQL password (default value: admin)
       # DB_PREFIX: Override default tables prefix (default value: ps_)
       # Another vars in: https://store.docker.com/community/images/prestashop/prestashop
+    # Extra hostnames to use
+    extra_hosts:
+     - "development.local:172...."
     networks:
       development:
-        ipv4_address: db
+        ipv4_address: 172....
 
 # If is necessary add another network in container
 networks:

@@ -8,13 +8,11 @@ services:
       MYSQL_ROOT_PASSWORD: admin
       MYSQL_DATABASE: prestashop
     ports:
-    - ${MYSQL_PORT:-33060}:3306
+    - ${MYSQL_PORT:-3306}:3306
 
   prestashop:
     container_name: plugin_ps_prestashop
-    image: prestashop/prestashop:${PS_VERSION:-1.6}
-    links:
-    - database
+    image: prestashop/prestashop:${PS_VERSION:-1.7}
     ports:
     - ${WEB_PORT:-8787}:80
     volumes:
@@ -31,5 +29,3 @@ services:
       PS_HANDLE_DYNAMIC_DOMAIN: 1
       ADMIN_MAIL: demo@prestashop.com
       ADMIN_PASSWD: prestashop_demo
-    depends_on:
-    - database

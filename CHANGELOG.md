@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## Updated
+- Updated docker installation
+    - prestashop version (1.6 => 1.7)
+    - database port binding (33060  => 3306)
+- Updated dependencies
+    - react/promise (v2.7.0 => v2.8.0)
+    - guzzlehttp/guzzle (5.3.3 => 5.3.4)
+    - squizlabs/php_codesniffer (3.3.2 => 3.5.6)
+
 ## [3.4.4] - 2018-12-03
 
 ### Added

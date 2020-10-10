@@ -26,7 +26,7 @@ View releases [here][link-releases]
 Create `placetopaypayment` folder (this is required, with this name)
 
 ```bash
-mkdir /var/www/html/modules/placetopaypayment
+mkdir -p /var/www/html/modules/placetopaypayment
 ```
 
 Clone Project in modules
@@ -34,6 +34,8 @@ Clone Project in modules
 ```bash
 git clone https://github.com/freddiegar/prestashop-gateway.git /var/www/html/modules/placetopaypayment
 ```
+
+### Permissions
 
 Set permissions and install dependencies with composer
 
@@ -44,13 +46,30 @@ cd /var/www/html/modules/placetopaypayment \
     && composer install
 ```
 
+### Database
+
+If you dont have prestashop installed, create a database and user to use
+
+```bash
+CREATE DATABASE dbname CHARSET=utf8;
+GRANT ALL PRIVILEGES ON dbname.* TO 'dbuser'@'%' IDENTIFIED BY 'dbpassword';
+FLUSH PRIVILEGES;
+```
+
+> IMPORTANT: Add host name in /etc/hosts file
+
 ## Docker Installation
 
-Install PrestaShop 1.6 (latest in 1.6 branch) with PHP 5.6 (and MySQL 5.7). In folder of project;
+Install PrestaShop 1.7 (latest in 1.6 branch) with PHP 5.6 (and MySQL 5.7). In folder of project;
  
 ```bash
 cd /var/www/html/modules/placetopaypayment
+
+# Start db and webserver container
 make install
+
+# Start only webserver container
+docker-compose up -d prestashop
 ```
 
 Then... (Please wait few minutes, while install ALL and load Apache :D to continue), you can go to
@@ -77,11 +96,13 @@ __MySQL Access__
 
 See details in `docker-compose.yml` file or run `make config` command
 
+> IMPORTANT: Using self-certificates you must be add certificates:
+> docker cp ca.cert.pem plugin_ps_prestashop:/usr/local/share/ca-certificates/development.local.ca-cert.crt && update-ca-certificates
 ### Customize docker installation
 
 Default versions
 
-- PrestaShop: 1.6
+- PrestaShop: 1.7
 - PHP: 5.6
 - MySQL: 5.7
 
@@ -104,7 +125,7 @@ MYSQL_VERSION=5.5
 Ports by default in this installation are
 
 - Web Server (`WEB_PORT`): 8787 => 80
-- Database (`MYSQL_PORT`): 33060 => 3306
+- Database (`MYSQL_PORT`): 3306 => 3306
 
 > You can change versions in `.env` file
 
@@ -171,7 +192,7 @@ UPDATE ps_configuration SET value='2525' where name = 'PS_MAIL_SMTP_PORT';
 | 15   | Get payment in payment table is failed         |
 | 16   | Command not available in this context          |
 | 17   | Access not allowed                             |
-| 18   | Cart empty or already used                      |
+| 18   | Cart empty or already used                     |
 | 99   | Un-known error, module not installed?          |
 | 100  | Install process is failed                      |
 | 201  | Order id is not found                          |
